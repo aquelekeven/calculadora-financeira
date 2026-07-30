@@ -331,6 +331,12 @@ function handleClick(event) {
     return;
   }
 
+  const editFixedBtn = target.closest('[data-edit-rule]');
+  if (editFixedBtn) {
+    openFixedModal(editFixedBtn.dataset.editRule);
+    return;
+  }
+
   if (target.closest('#addFixedBtn')) {
     openFixedModal();
     return;
@@ -408,6 +414,7 @@ function setScreen(name, options = {}) {
   });
 
   document.body.classList.toggle('contacts-screen', name === 'contacts');
+  document.body.classList.toggle('fixed-screen', name === 'fixed');
   if (name === 'contacts' && !activeContactId) showContactsList();
 
   state.currentScreen = name;
@@ -770,7 +777,10 @@ function renderFixed() {
         <span>${catLabel(rule.category)} • ${rule.type === 'income' ? 'Entrada' : 'Saída'}</span>
         <small>${rule.startMonth || 'sem início'} até ${rule.endMonth || 'sem fim'}</small>
       </div>
-      <strong>${money(rule.amount)}</strong>
+      <div class="rule-item-actions">
+        <strong>${money(rule.amount)}</strong>
+        <button class="rule-edit-btn" type="button" data-edit-rule="${rule.id}">Editar</button>
+      </div>
     `;
     list.appendChild(item);
   });
@@ -929,14 +939,40 @@ function saveCommitment(event) {
   render();
 }
 
-function openFixedModal() {
+function openFixedModal(id = '') {
   document.getElementById('fixedForm').reset();
-  document.getElementById('fixedStart').value = state.baseMonth;
-  document.getElementById('fixedEnd').value = '';
-  updateFixedMonthLabels();
-  closeFixedMonthPicker();
+  document.getElementById('fixedId').value = '';
   document.getElementById('fixedCustomCategoryWrap')?.classList.add('is-hidden');
   document.getElementById('fixedCustomCategory').value = '';
+  document.querySelector('#fixedModal .modal-head h2').textContent = id ? 'Editar fixo' : 'Adicionar fixo';
+
+  if (id) {
+    const rule = state.rules.find(item => item.id === id);
+    if (!rule) return;
+
+    document.getElementById('fixedId').value = rule.id;
+    document.getElementById('fixedDescription').value = rule.description || '';
+    document.getElementById('fixedAmount').value = rule.amount ?? '';
+    document.getElementById('fixedDay').value = rule.day || '';
+    document.getElementById('fixedStart').value = rule.startMonth || state.baseMonth;
+    document.getElementById('fixedEnd').value = rule.endMonth || '';
+
+    const categorySelect = document.getElementById('fixedCategory');
+    const known = [...categorySelect.options].some(option => option.value === rule.category);
+    if (known) {
+      categorySelect.value = rule.category;
+    } else {
+      categorySelect.value = 'outros';
+      document.getElementById('fixedCustomCategoryWrap')?.classList.remove('is-hidden');
+      document.getElementById('fixedCustomCategory').value = rule.category || '';
+    }
+  } else {
+    document.getElementById('fixedStart').value = state.baseMonth;
+    document.getElementById('fixedEnd').value = '';
+  }
+
+  updateFixedMonthLabels();
+  closeFixedMonthPicker();
   openModal('fixedModal');
 }
 
@@ -1002,8 +1038,9 @@ function toggleFixedCustomCategory() {
 function saveFixedRule(event) {
   event.preventDefault();
 
-  state.rules.push({
-    id: uid(),
+  const id = document.getElementById('fixedId').value;
+  const data = {
+    id: id || uid(),
     type: 'expense',
     category: document.getElementById('fixedCustomCategory').value.trim() || document.getElementById('fixedCategory').value,
     description: document.getElementById('fixedDescription').value.trim(),
@@ -1012,7 +1049,14 @@ function saveFixedRule(event) {
     startMonth: document.getElementById('fixedStart').value || state.baseMonth,
     endMonth: document.getElementById('fixedEnd').value,
     active: true
-  });
+  };
+
+  if (id) {
+    const index = state.rules.findIndex(rule => rule.id === id);
+    if (index >= 0) state.rules[index] = data;
+  } else {
+    state.rules.push(data);
+  }
 
   saveState();
   closeModal('fixedModal');

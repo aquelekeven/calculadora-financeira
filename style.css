@@ -1460,3 +1460,34 @@ body.contacts-screen .month-selector-card {
 .modern-date-box input[type="month"] {
   display: none;
 }
+
+
+/* Fixos sem seletor global de mês */
+body.fixed-screen .month-selector-card {
+  display: none;
+}
+
+/* Cards de fixos editáveis */
+.rule-item {
+  align-items: center;
+}
+
+.rule-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rule-edit-btn {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.rule-edit-btn:active {
+  transform: scale(.97);
+}
