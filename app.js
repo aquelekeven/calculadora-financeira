@@ -167,7 +167,6 @@ function bindEvents() {
   $('#prevMonthBtn').addEventListener('click', () => changeMonth(-1));
   $('#nextMonthBtn').addEventListener('click', () => changeMonth(1));
   $('#monthSelectorTrigger').addEventListener('click', toggleMonthSelector);
-  $('#collapseMonthsBtn').addEventListener('click', closeMonthSelector);
 
   $('#closeModalBtn').addEventListener('click', closeCommitmentModal);
   $('#commitmentModal').addEventListener('click', e => {
@@ -247,9 +246,8 @@ function closeDrawer() {
 }
 
 function changeMonth(offset) {
-  state.baseMonth = addMonths(state.baseMonth, offset);
-  saveState();
-  render();
+  const month = addMonths(state.baseMonth, offset);
+  selectMonth(month);
 }
 
 function render() {
@@ -286,23 +284,41 @@ function renderMonthRail() {
     button.innerHTML = `
       <div class="month-pill-top">
         <strong>${monthNum}</strong>
-        <small>${yearShort}</small>
+        <small>${date.getFullYear()}</small>
       </div>
       <div class="month-pill-bottom">
-        <strong>${monthShort}</strong>
-        <small>${monthLong}</small>
+        <strong>${monthLong}</strong>
       </div>
     `;
-    button.addEventListener('click', () => {
-      state.baseMonth = month;
-      saveState();
-      render();
-      requestAnimationFrame(centerActiveMonth);
-    });
+    button.addEventListener('click', () => selectMonth(month, button));
     pills.appendChild(button);
   }
 
   requestAnimationFrame(centerActiveMonth);
+}
+
+
+function selectMonth(month, button) {
+  if (month === state.baseMonth) {
+    centerActiveMonth();
+    return;
+  }
+
+  button?.classList.add('selecting');
+
+  setTimeout(() => {
+    state.baseMonth = month;
+    saveState();
+    render();
+
+    document.querySelectorAll('.screen.active, .month-selector-card').forEach(el => {
+      el.classList.remove('month-fade');
+      void el.offsetWidth;
+      el.classList.add('month-fade');
+    });
+
+    requestAnimationFrame(centerActiveMonth);
+  }, 120);
 }
 
 function toggleMonthSelector() {

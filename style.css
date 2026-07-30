@@ -337,3 +337,174 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); }
   .status-dot { width: 38px; height: 38px; border-radius: 14px; }
   .commitment-value { min-width: 86px; }
 }
+
+
+/* Ajuste fino do seletor global de mês */
+.month-selector-card {
+  background: var(--surface);
+  border-radius: 26px;
+  box-shadow: var(--shadow);
+}
+
+.month-selector-trigger {
+  min-height: 68px;
+  padding: 14px 16px;
+}
+
+.month-selector-trigger span {
+  font-size: .78rem;
+  text-transform: lowercase;
+}
+
+.month-selector-trigger strong {
+  font-size: 1.42rem;
+}
+
+.month-selector-trigger .month-chevron {
+  background: var(--surface-soft);
+  color: var(--muted);
+}
+
+.month-selector-card.open .month-selector-trigger .month-chevron {
+  transform: rotate(180deg);
+}
+
+.month-selector-panel {
+  padding: 0 12px 14px;
+  animation: monthPanelIn .22s ease both;
+}
+
+@keyframes monthPanelIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.month-selector-head {
+  padding: 4px 0 12px;
+}
+
+.month-selector-head button {
+  background: var(--surface-soft);
+  box-shadow: none;
+}
+
+.month-selector-head span {
+  color: var(--muted);
+  font-size: .88rem;
+}
+
+.month-pills {
+  gap: 8px;
+  padding-top: 4px;
+  padding-bottom: 10px;
+}
+
+.month-pill {
+  flex-basis: 74px;
+  min-height: 104px;
+  border-radius: 22px;
+  padding: 10px 8px;
+  background: var(--surface-soft);
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+
+.month-pill.active {
+  background: #151515;
+  color: #ffffff;
+  box-shadow: 0 12px 28px rgba(0,0,0,.16);
+  transform: translateY(-2px);
+}
+
+[data-theme="dark"] .month-pill.active {
+  background: #ffffff;
+  color: #151515;
+}
+
+.month-pill-top {
+  width: 100%;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: none;
+  border-radius: 16px;
+  padding: 10px 0 8px;
+}
+
+.month-pill.active .month-pill-top {
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  color: #151515;
+}
+
+[data-theme="dark"] .month-pill.active .month-pill-top {
+  background: #151515;
+  color: #ffffff;
+}
+
+.month-pill-top strong {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.month-pill-top small {
+  margin-top: 4px;
+  font-size: .72rem;
+  color: var(--muted);
+  font-weight: 300;
+  letter-spacing: .02em;
+  text-transform: none;
+}
+
+.month-pill.active .month-pill-top small {
+  color: #6f6f6f;
+}
+
+[data-theme="dark"] .month-pill.active .month-pill-top small {
+  color: #b8b8b8;
+}
+
+.month-pill-bottom {
+  margin-top: auto;
+  padding-top: 9px;
+}
+
+.month-pill-bottom strong {
+  font-size: .92rem;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.month-pill-bottom small {
+  display: none;
+}
+
+.collapse-months-btn {
+  display: none !important;
+}
+
+.month-pill.selecting {
+  animation: monthSelectPulse .26s ease both;
+}
+
+@keyframes monthSelectPulse {
+  0% { transform: translateY(-2px) scale(.98); }
+  55% { transform: translateY(-4px) scale(1.04); }
+  100% { transform: translateY(-2px) scale(1); }
+}
+
+.month-fade {
+  animation: monthFade .24s ease both;
+}
+
+@keyframes monthFade {
+  from { opacity: .35; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 420px) {
+  .month-pill {
+    flex-basis: 70px;
+    min-height: 100px;
+  }
+}
