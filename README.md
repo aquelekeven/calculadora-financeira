@@ -1,13 +1,18 @@
-# Financeiro Keven — v1.5
+# Agenda Financeira Keven
 
-Versão local/offline do app financeiro pessoal.
+Nova estrutura: o app não é um extrato bancário. Ele é uma agenda de compromissos financeiros.
+
+## Telas
+
+- Hoje: mostra saldo, pendências e resultado se pagar tudo.
+- Agenda: mostra apenas o mês selecionado e permite validar status.
+- Fixos: regras recorrentes.
+- Apartamento: MR, SR, Caixa/evolução e itens do apê.
+- Cenários: simula freela, PLR e entradas extras.
+- Ajustes: saldo e backup JSON.
 
 ## Como usar
-- Abra `index.html` no navegador.
-- Os dados ficam salvos localmente no navegador (`localStorage`).
-- Use a tela de Ajustes para exportar/importar backup JSON.
 
-## Próximos passos
-- refinar layout e microinterações
-- editar lançamentos direto pela interface
-- Supabase + login Google + sincronização
+Abra o `index.html`.
+
+Os dados ficam no navegador via `localStorage`.

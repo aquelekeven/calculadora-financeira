@@ -1,57 +1,59 @@
-
-const STORAGE_KEY = 'financeiro-keven-revisado';
+const STORAGE_KEY = 'financeiro-keven-agenda-v1';
 const THEME_KEY = 'financeiro-keven-theme';
-const todayBaseMonth = '2026-07';
+const TODAY = new Date('2026-07-30T14:02:00-03:00');
+const TODAY_MONTH = '2026-07';
 
-const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+const uid = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 const initialState = {
   currentBalance: 186.48,
   baseMonth: '2026-07',
-  entries: [
-    { id: makeId(), month: '2026-07', type: 'saida', category: 'apartamento', description: 'Apartamento — Abril/2026', value: 1425.57, dueDate: '2026-04-25', status: 'pago' },
-    { id: makeId(), month: '2026-07', type: 'saida', category: 'apartamento', description: 'Apartamento — Maio/2026 — Encargos CEF', value: 1639.40, dueDate: '2026-05-20', status: 'pago' },
-    { id: makeId(), month: '2026-07', type: 'saida', category: 'apartamento', description: 'Apartamento — Maio/2026 — MR/Correção', value: 1517.31, dueDate: '2026-05-25', status: 'pago' },
-    { id: makeId(), month: '2026-07', type: 'saida', category: 'apartamento', description: 'Apartamento — Junho/2026', value: 1398.85, dueDate: '2026-06-25', status: 'pago' },
-    { id: makeId(), month: '2026-07', type: 'saida', category: 'apartamento', description: 'Apartamento — DB Encargos CEF', value: 1593.35, dueDate: '2026-07-06', status: 'pago' },
-    { id: makeId(), month: '2026-07', type: 'saida', category: 'emprestimo', description: 'Cheque especial CAIXA', value: 1498.48, status: 'pago' },
-    { id: makeId(), month: '2026-07', type: 'saida', category: 'cartao', description: 'Julia', value: 1500, status: 'pago' },
-    { id: makeId(), month: '2026-07', type: 'saida', category: 'outros', description: 'Sarah — aniversário Ygor', value: 50, status: 'pago' },
-    { id: makeId(), month: '2026-07', type: 'saida', category: 'fixo', description: 'Claro — internet/celular', value: 160, status: 'pendente' },
-    { id: makeId(), month: '2026-07', type: 'saida', category: 'outros', description: 'Pacheco — almoço jogo do Brasil', value: 75, status: 'pendente' },
-    { id: makeId(), month: '2026-07', type: 'saida', category: 'cartao', description: 'Nubank — cartão/assinaturas', value: 219.56, status: 'pago' },
+  filter: 'all',
+  commitments: [
+    { id: uid(), month: '2026-07', type: 'expense', category: 'apartamento', description: 'Apartamento — Abril/2026', amount: 1425.57, dueDate: '2026-04-25', status: 'paid' },
+    { id: uid(), month: '2026-07', type: 'expense', category: 'apartamento', description: 'Apartamento — Maio/2026 — Encargos CEF', amount: 1639.40, dueDate: '2026-05-20', status: 'paid' },
+    { id: uid(), month: '2026-07', type: 'expense', category: 'apartamento', description: 'Apartamento — Maio/2026 — MR/Correção', amount: 1517.31, dueDate: '2026-05-25', status: 'paid' },
+    { id: uid(), month: '2026-07', type: 'expense', category: 'apartamento', description: 'Apartamento — Junho/2026', amount: 1398.85, dueDate: '2026-06-25', status: 'paid' },
+    { id: uid(), month: '2026-07', type: 'expense', category: 'apartamento', description: 'Apartamento — DB Encargos CEF', amount: 1593.35, dueDate: '2026-07-06', status: 'paid' },
+    { id: uid(), month: '2026-07', type: 'expense', category: 'emprestimo', description: 'Cheque especial CAIXA', amount: 1498.48, status: 'paid' },
+    { id: uid(), month: '2026-07', type: 'expense', category: 'cartao', description: 'Julia', amount: 1500, status: 'paid' },
+    { id: uid(), month: '2026-07', type: 'expense', category: 'outros', description: 'Sarah — aniversário Ygor', amount: 50, status: 'paid' },
+    { id: uid(), month: '2026-07', type: 'expense', category: 'fixo', description: 'Claro — internet/celular', amount: 160, status: 'waiting' },
+    { id: uid(), month: '2026-07', type: 'expense', category: 'outros', description: 'Pacheco — almoço jogo do Brasil', amount: 75, status: 'waiting' },
+    { id: uid(), month: '2026-07', type: 'expense', category: 'cartao', description: 'Nubank — cartão/assinaturas', amount: 219.56, status: 'paid' },
 
-    { id: makeId(), month: '2026-08', type: 'entrada', category: 'renda', description: 'Salário', value: 4000, status: 'previsto' },
-    { id: makeId(), month: '2026-08', type: 'saida', category: 'pessoas', description: 'Sarah — parcelas 2/3 + 2/10', value: 463.20, status: 'previsto' },
-    { id: makeId(), month: '2026-08', type: 'saida', category: 'cartao', description: 'Cartão com a Julia', value: 1200, status: 'previsto' },
-    { id: makeId(), month: '2026-08', type: 'saida', category: 'apartamento', description: 'Taxa R', value: 221.16, dueDate: '2026-08-08', status: 'previsto' },
-    { id: makeId(), month: '2026-08', type: 'saida', category: 'apartamento', description: 'MR — mensalidade', value: 1095.64, dueDate: '2026-08-25', status: 'previsto' },
+    { id: uid(), month: '2026-08', type: 'income', category: 'renda', description: 'Salário', amount: 4000, status: 'estimated' },
+    { id: uid(), month: '2026-08', type: 'expense', category: 'pessoas', description: 'Sarah — parcelas 2/3 + 2/10', amount: 463.20, status: 'waiting' },
+    { id: uid(), month: '2026-08', type: 'expense', category: 'cartao', description: 'Cartão com a Julia', amount: 1200, status: 'waiting' },
+    { id: uid(), month: '2026-08', type: 'expense', category: 'apartamento', description: 'Taxa R', amount: 221.16, dueDate: '2026-08-08', status: 'waiting' },
+    { id: uid(), month: '2026-08', type: 'expense', category: 'apartamento', description: 'MR — mensalidade', amount: 1095.64, dueDate: '2026-08-25', status: 'waiting' },
 
-    { id: makeId(), month: '2026-09', type: 'entrada', category: 'renda', description: 'Salário', value: 4000, status: 'previsto' },
-    { id: makeId(), month: '2026-09', type: 'saida', category: 'pessoas', description: 'Sarah — parcelas 3/3 + 3/10', value: 463.20, status: 'previsto' },
-    { id: makeId(), month: '2026-09', type: 'saida', category: 'apartamento', description: 'MR — mensalidade', value: 1095.64, dueDate: '2026-09-25', status: 'previsto' },
-    { id: makeId(), month: '2026-09', type: 'saida', category: 'apartamento', description: 'SR — anual', value: 5600, dueDate: '2026-09-30', status: 'especial' },
+    { id: uid(), month: '2026-09', type: 'income', category: 'renda', description: 'Salário', amount: 4000, status: 'estimated' },
+    { id: uid(), month: '2026-09', type: 'expense', category: 'pessoas', description: 'Sarah — parcelas 3/3 + 3/10', amount: 463.20, status: 'waiting' },
+    { id: uid(), month: '2026-09', type: 'expense', category: 'apartamento', description: 'MR — mensalidade', amount: 1095.64, dueDate: '2026-09-25', status: 'waiting' },
+    { id: uid(), month: '2026-09', type: 'expense', category: 'apartamento', description: 'SR — anual', amount: 5600, dueDate: '2026-09-30', status: 'special', note: 'Época de PLR' },
 
-    { id: makeId(), month: '2026-10', type: 'entrada', category: 'renda', description: 'Salário', value: 4000, status: 'previsto' },
-    { id: makeId(), month: '2026-10', type: 'saida', category: 'pessoas', description: 'Sarah — parcela 4/10', value: 223.21, status: 'previsto' },
-    { id: makeId(), month: '2026-10', type: 'saida', category: 'cartao', description: 'Cartão com a Julia', value: 650, status: 'previsto' },
-    { id: makeId(), month: '2026-10', type: 'saida', category: 'apartamento', description: 'MR — mensalidade', value: 1095.64, dueDate: '2026-10-25', status: 'previsto' },
-    { id: makeId(), month: '2026-10', type: 'saida', category: 'emprestimo', description: 'Empréstimo Nubank consignado — 1/24', value: 799.55, status: 'previsto' }
+    { id: uid(), month: '2026-10', type: 'income', category: 'renda', description: 'Salário', amount: 4000, status: 'estimated' },
+    { id: uid(), month: '2026-10', type: 'expense', category: 'pessoas', description: 'Sarah — parcela 4/10', amount: 223.21, status: 'waiting' },
+    { id: uid(), month: '2026-10', type: 'expense', category: 'cartao', description: 'Cartão com a Julia', amount: 650, status: 'waiting' },
+    { id: uid(), month: '2026-10', type: 'expense', category: 'apartamento', description: 'MR — mensalidade', amount: 1095.64, dueDate: '2026-10-25', status: 'waiting' },
+    { id: uid(), month: '2026-10', type: 'expense', category: 'emprestimo', description: 'Empréstimo Nubank consignado — 1/24', amount: 799.55, status: 'waiting' }
   ],
-  fixedMonthly: [
-    { id: makeId(), type: 'saida', category: 'fixo', description: 'Claro — internet/celular', value: 160, day: null, active: true },
-    { id: makeId(), type: 'saida', category: 'fixo', description: 'Save Car — seguro Escort', value: 115, day: null, active: true },
-    { id: makeId(), type: 'saida', category: 'fixo', description: 'YouTube Premium com Pacheco', value: 50, day: null, active: true }
+  rules: [
+    { id: uid(), type: 'income', category: 'renda', description: 'Salário', amount: 4000, startMonth: '2026-08', endMonth: '', day: null, active: true },
+    { id: uid(), type: 'expense', category: 'fixo', description: 'Claro — internet/celular', amount: 160, startMonth: '2026-08', endMonth: '', day: null, active: true },
+    { id: uid(), type: 'expense', category: 'fixo', description: 'Save Car — seguro Escort', amount: 115, startMonth: '2026-08', endMonth: '', day: null, active: true },
+    { id: uid(), type: 'expense', category: 'fixo', description: 'YouTube Premium com Pacheco', amount: 50, startMonth: '2026-08', endMonth: '', day: null, active: true },
+    { id: uid(), type: 'expense', category: 'emprestimo', description: 'Empréstimo Nubank consignado', amount: 799.55, startMonth: '2026-10', endMonth: '2028-09', day: null, active: true }
   ]
 };
 
-let selectedEntryType = 'saida';
 let state = loadState();
-let pendingDelete = null;
-let pendingDeleteTimer = null;
-
-const $ = (selector) => document.querySelector(selector);
-const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+let modalType = 'expense';
+let pendingUndo = null;
+let undoTimer = null;
 
 init();
 
@@ -62,12 +64,10 @@ function init() {
 }
 
 function loadState() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) return structuredClone(initialState);
-
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return structuredClone(initialState);
   try {
-    const parsed = JSON.parse(saved);
-    return { ...structuredClone(initialState), ...parsed };
+    return { ...structuredClone(initialState), ...JSON.parse(raw) };
   } catch {
     return structuredClone(initialState);
   }
@@ -78,25 +78,21 @@ function saveState() {
 }
 
 function parseMoney(value) {
+  if (value === null || value === undefined || value === '') return null;
   if (typeof value === 'number') return value;
-  const normalized = String(value || '').replace(/\./g, '').replace(',', '.').replace(/[^0-9.-]/g, '');
-  return Number(normalized) || 0;
+  const normalized = String(value).replace(/\./g, '').replace(',', '.').replace(/[^0-9.-]/g, '');
+  const number = Number(normalized);
+  return Number.isFinite(number) ? number : null;
 }
 
-function formatBRL(value) {
-  return Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+function money(value) {
+  if (value === null || value === undefined) return 'sem valor';
+  return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 function monthName(monthKey, long = true) {
   const [year, month] = monthKey.split('-').map(Number);
-  const opts = long ? { month: 'long', year: 'numeric' } : { month: 'short', year: '2-digit' };
-  return new Date(year, month - 1, 1).toLocaleDateString('pt-BR', opts);
-}
-
-function formatDate(dateString) {
-  if (!dateString) return 'sem venc.';
-  const [y, m, d] = dateString.split('-');
-  return `${d}/${m}`;
+  return new Date(year, month - 1, 1).toLocaleDateString('pt-BR', long ? { month: 'long', year: 'numeric' } : { month: 'short', year: '2-digit' });
 }
 
 function addMonths(monthKey, offset) {
@@ -105,396 +101,502 @@ function addMonths(monthKey, offset) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
-function getVisibleMonths() {
-  return [0, 1, 2].map(offset => addMonths(state.baseMonth || todayBaseMonth, offset));
-}
-
-function fixedForMonth(monthKey) {
-  const julyExclusions = ['Save Car — seguro Escort', 'YouTube Premium com Pacheco'];
-
-  return state.fixedMonthly
-    .filter(item => item.active)
-    .filter(item => !(monthKey === '2026-07' && julyExclusions.includes(item.description)))
-    .filter(item => !state.entries.some(e => e.month === monthKey && e.description === item.description))
-    .map(item => ({
-      ...item,
-      id: `${item.id}-${monthKey}`,
-      month: monthKey,
-      dueDate: item.day ? `${monthKey}-${String(item.day).padStart(2, '0')}` : '',
-      status: 'previsto',
-      source: 'fixed'
-    }));
-}
-
-function entriesForMonth(monthKey) {
-  return [...state.entries.filter(e => e.month === monthKey), ...fixedForMonth(monthKey)]
-    .sort((a, b) => (a.dueDate || `${a.month}-99`).localeCompare(b.dueDate || `${b.month}-99`));
-}
-
-function calculateMonth(monthKey) {
-  const entries = entriesForMonth(monthKey);
-  const entradas = entries.filter(e => e.type === 'entrada').reduce((sum, e) => sum + Number(e.value), 0);
-  const saidas = entries.filter(e => e.type === 'saida').reduce((sum, e) => sum + Number(e.value), 0);
-  const pendente = entries.filter(e => e.type === 'saida' && e.status !== 'pago').reduce((sum, e) => sum + Number(e.value), 0);
-  return { entries, entradas, saidas, pendente, result: entradas - saidas };
-}
-
-function calculateCurrentMonth() {
-  const month = state.baseMonth || todayBaseMonth;
-  const pending = entriesForMonth(month)
-    .filter(e => e.type === 'saida' && e.status !== 'pago')
-    .reduce((sum, e) => sum + Number(e.value), 0);
-  return { pending, result: Number(state.currentBalance) - pending };
-}
-
-function categoryLabel(category) {
-  return ({ apartamento: 'Apartamento', fixo: 'Fixo', cartao: 'Cartão', pessoas: 'Pessoas', emprestimo: 'Empréstimo', renda: 'Renda', outros: 'Outros' })[category] || category;
+function dateLabel(date) {
+  if (!date) return 'sem vencimento';
+  const [y, m, d] = date.split('-');
+  return `${d}/${m}/${y}`;
 }
 
 function statusLabel(status) {
-  return ({ pago: 'Pago', pendente: 'Pendente', previsto: 'Previsto', especial: 'Especial' })[status] || status;
+  return { waiting: 'Aguardando', paid: 'Pago', unpaid: 'Não pago', estimated: 'Previsto', special: 'Especial', waiting_value: 'Aguardando valor' }[status] || status;
 }
 
-function categoryIcon(category) {
-  return ({ apartamento: 'AP', fixo: 'FX', cartao: 'CT', pessoas: 'PS', emprestimo: 'EM', renda: 'RD', outros: '•' })[category] || '•';
+function statusIcon(status) {
+  return { waiting: '•', paid: '✓', unpaid: '!', estimated: '~', special: '*', waiting_value: '?' }[status] || '•';
 }
 
-function categoryColor(category) {
-  return ({ apartamento: '#0f766e', fixo: '#4b5563', cartao: '#111827', pessoas: '#7c3aed', emprestimo: '#b45309', renda: '#1f7a45', outros: '#64748b' })[category] || '#64748b';
+function catLabel(cat) {
+  return { apartamento: 'Apartamento', fixo: 'Fixo', pessoas: 'Pessoas', cartao: 'Cartão', emprestimo: 'Empréstimo', renda: 'Renda', outros: 'Outros' }[cat] || cat;
+}
+
+function commitmentsForMonth(month) {
+  return state.commitments
+    .filter(item => item.month === month)
+    .sort((a, b) => (a.dueDate || `${a.month}-99`).localeCompare(b.dueDate || `${b.month}-99`));
+}
+
+function calcMonth(month) {
+  const items = commitmentsForMonth(month);
+  const income = items.filter(i => i.type === 'income').reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  const expenses = items.filter(i => i.type === 'expense').reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  const pending = items.filter(i => i.type === 'expense' && !['paid'].includes(i.status)).reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  const paid = items.filter(i => i.status === 'paid').reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  return { items, income, expenses, pending, paid, result: income - expenses };
+}
+
+function currentProjection() {
+  const { pending } = calcMonth(state.baseMonth);
+  return Number(state.currentBalance || 0) - pending;
+}
+
+function isLate(item) {
+  if (!item.dueDate || item.status === 'paid' || item.type === 'income') return false;
+  const due = new Date(`${item.dueDate}T23:59:59-03:00`);
+  return due < TODAY;
 }
 
 function bindEvents() {
-  $$('[data-nav]').forEach(button => {
-    button.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-
-      const tab = button.dataset.nav;
-      const kind = button.dataset.kind;
-
-      if (kind) setEntryType(kind);
-      setTab(tab);
-    });
+  $$('[data-nav]').forEach(btn => {
+    btn.addEventListener('click', () => setScreen(btn.dataset.nav));
   });
 
-  $$('[data-entry-type]').forEach(button => {
-    button.addEventListener('click', event => {
-      event.preventDefault();
-      setEntryType(button.dataset.entryType);
-    });
+  $$('[data-open-create]').forEach(btn => {
+    btn.addEventListener('click', () => openCommitmentModal(btn.dataset.openCreate));
   });
 
-  $$('[data-preset]').forEach(button => {
-    button.addEventListener('click', event => {
-      event.preventDefault();
-      $('#entryValue').value = button.dataset.preset;
-    });
+  $('[data-open-fixed]')?.addEventListener('click', openFixedModal);
+
+  $('#menuBtn').addEventListener('click', openDrawer);
+  $('#closeDrawerBtn').addEventListener('click', closeDrawer);
+  $('#drawerBackdrop').addEventListener('click', closeDrawer);
+
+  $('#themeBtn').addEventListener('click', () => {
+    applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
   });
 
-  $('#themeBtn')?.addEventListener('click', () => {
-    const current = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
-    applyTheme(current === 'dark' ? 'light' : 'dark');
-  });
-
-  $('#menuBtn')?.addEventListener('click', openDrawer);
-  $('#closeDrawerBtn')?.addEventListener('click', closeDrawer);
-
-  $('#sideDrawer')?.addEventListener('click', event => {
-    if (event.target.id === 'sideDrawer') closeDrawer();
-  });
-
-  $('#fabTrigger')?.addEventListener('click', event => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (document.body.classList.contains('fab-open')) {
-      setEntryType('saida');
-      setTab('add');
-      closeFab();
-      return;
-    }
-
-    openFab();
-  });
-
-  $('#fabBackdrop')?.addEventListener('click', closeFab);
-  $('#globalOverlay')?.addEventListener('click', closeFab);
-
-  $('#baseMonthSelect')?.addEventListener('change', event => {
-    state.baseMonth = event.target.value;
+  $('#prevMonthBtn').addEventListener('click', () => changeMonth(-1));
+  $('#nextMonthBtn').addEventListener('click', () => changeMonth(1));
+  $('#baseMonthSelect').addEventListener('change', e => {
+    state.baseMonth = e.target.value;
     saveState();
     render();
   });
 
-  $('#entryForm')?.addEventListener('submit', event => {
-    event.preventDefault();
-
-    const entry = {
-      id: makeId(),
-      month: $('#entryMonth').value,
-      type: selectedEntryType,
-      category: $('#entryCategory').value,
-      description: $('#entryDescription').value.trim(),
-      value: parseMoney($('#entryValue').value),
-      dueDate: $('#entryDueDate').value,
-      status: $('#entryStatus').value
-    };
-
-    state.entries.push(entry);
-    saveState();
-
-    event.target.reset();
-    $('#entryMonth').value = state.baseMonth || todayBaseMonth;
-    setEntryType('saida');
-    render();
-    setTab('home');
+  $('#closeModalBtn').addEventListener('click', closeCommitmentModal);
+  $('#commitmentModal').addEventListener('click', e => {
+    if (e.target.id === 'commitmentModal') closeCommitmentModal();
   });
 
-  $('#saveBalanceBtn')?.addEventListener('click', () => {
-    state.currentBalance = parseMoney($('#balanceInput').value);
-    saveState();
-    render();
-    setTab('home');
+  $$('[data-modal-type]').forEach(btn => {
+    btn.addEventListener('click', () => setModalType(btn.dataset.modalType));
   });
 
-  $('#exportBtn')?.addEventListener('click', exportBackup);
+  $('#commitmentForm').addEventListener('submit', saveCommitment);
 
-  $('#importInput')?.addEventListener('change', event => {
-    const file = event.target.files?.[0];
+  $('#closeFixedModalBtn').addEventListener('click', closeFixedModal);
+  $('#fixedModal').addEventListener('click', e => {
+    if (e.target.id === 'fixedModal') closeFixedModal();
+  });
+  $('#fixedForm').addEventListener('submit', saveFixedRule);
+
+  $$('#statusTabs [data-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.filter = btn.dataset.filter;
+      renderAgenda();
+      $$('#statusTabs [data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === state.filter));
+    });
+  });
+
+  $$('[data-scenario-preset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      $('#scenarioValue').value = btn.dataset.scenarioPreset;
+      renderScenario();
+    });
+  });
+  $('#scenarioValue').addEventListener('input', renderScenario);
+
+  $('#saveBalanceBtn').addEventListener('click', () => {
+    state.currentBalance = parseMoney($('#balanceInput').value) || 0;
+    saveState();
+    render();
+    setScreen('home');
+  });
+
+  $('#exportBtn').addEventListener('click', exportBackup);
+  $('#importInput').addEventListener('change', e => {
+    const file = e.target.files?.[0];
     if (file) importBackup(file);
-    event.target.value = '';
+    e.target.value = '';
   });
-
-  $('#resetBtn')?.addEventListener('click', () => {
-    if (!confirm('Resetar os dados locais e voltar pra base?')) return;
+  $('#resetBtn').addEventListener('click', () => {
+    if (!confirm('Resetar todos os dados locais?')) return;
     localStorage.removeItem(STORAGE_KEY);
     state = structuredClone(initialState);
     saveState();
     render();
-    setTab('home');
   });
 
-  $('#undoBtn')?.addEventListener('click', undoDeleteEntry);
+  $('#undoBtn').addEventListener('click', undoLastAction);
 }
 
-function generateMonthOptions() {
-  const select = $('#baseMonthSelect');
-  if (!select) return;
+function setScreen(name) {
+  $$('.screen').forEach(s => s.classList.remove('active'));
+  $(`#screen-${name}`)?.classList.add('active');
+  $$('.bottom-nav [data-nav]').forEach(btn => btn.classList.toggle('active', btn.dataset.nav === name));
+  closeDrawer();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-  select.innerHTML = '';
-  for (let i = -1; i <= 8; i++) {
-    const value = addMonths(todayBaseMonth, i);
-    const option = document.createElement('option');
-    option.value = value;
-    option.textContent = monthName(value, false);
-    select.appendChild(option);
-  }
-  select.value = state.baseMonth || todayBaseMonth;
+function openDrawer() {
+  $('#sideDrawer').classList.add('open');
+  $('#sideDrawer').setAttribute('aria-hidden', 'false');
+  $('#drawerBackdrop').classList.add('show');
+}
+
+function closeDrawer() {
+  $('#sideDrawer').classList.remove('open');
+  $('#sideDrawer').setAttribute('aria-hidden', 'true');
+  $('#drawerBackdrop').classList.remove('show');
+}
+
+function changeMonth(offset) {
+  state.baseMonth = addMonths(state.baseMonth, offset);
+  saveState();
+  render();
 }
 
 function render() {
-  generateMonthOptions();
+  ensureMonthOptions();
+  $('#baseMonthSelect').value = state.baseMonth;
+  $('#topMonthLabel').textContent = monthName(state.baseMonth, false);
+  $('#currentBalance').textContent = money(state.currentBalance);
+  $('#balanceInput').value = String(state.currentBalance).replace('.', ',');
 
-  if ($('#currentBalance')) $('#currentBalance').textContent = formatBRL(state.currentBalance);
-  if ($('#currentMonthLabel')) $('#currentMonthLabel').textContent = monthName(state.baseMonth || todayBaseMonth);
-  if ($('#balanceInput')) $('#balanceInput').value = String(state.currentBalance).replace('.', ',');
-  if ($('#entryMonth') && !$('#entryMonth').value) $('#entryMonth').value = state.baseMonth || todayBaseMonth;
-
-  renderHealth();
-  renderSummaryCards();
-  renderUpcoming();
-  renderMonths();
-  renderChart();
+  renderHome();
+  renderAgenda();
+  renderFixed();
+  renderApartment();
+  renderScenario();
 }
 
-function renderHealth() {
-  const current = calculateCurrentMonth();
-  const pill = $('#healthPill');
-  const flowTotal = $('#monthFlowTotal');
-  const flowCaption = $('#monthFlowCaption');
-
-  if (pill) {
-    pill.textContent = current.result >= 0
-      ? `Sobra projetada: ${formatBRL(current.result)}`
-      : `Falta projetada: ${formatBRL(Math.abs(current.result))}`;
+function ensureMonthOptions() {
+  const select = $('#baseMonthSelect');
+  select.innerHTML = '';
+  for (let i = -1; i <= 10; i++) {
+    const month = addMonths(TODAY_MONTH, i);
+    const option = document.createElement('option');
+    option.value = month;
+    option.textContent = monthName(month, false);
+    select.appendChild(option);
   }
-
-  if (flowTotal) flowTotal.textContent = formatBRL(current.result);
-  if (flowCaption) flowCaption.textContent = current.result >= 0 ? 'saldo previsto' : 'falta prevista';
 }
 
-function renderSummaryCards() {
-  const container = $('#summaryCards');
-  if (!container) return;
+function renderHome() {
+  const calc = calcMonth(state.baseMonth);
+  const projection = currentProjection();
 
-  container.innerHTML = '';
-  getVisibleMonths().forEach((month, index) => {
-    const calc = calculateMonth(month);
-    const result = index === 0 ? calculateCurrentMonth().result : calc.result;
-    const card = document.createElement('div');
-    card.className = `month-pill ${result >= 0 ? 'positive' : 'negative'}`;
+  $('#pendingTotal').textContent = money(calc.pending);
+  $('#projectedResult').textContent = money(projection);
+  $('#resultCard').classList.toggle('positive', projection >= 0);
+  $('#resultCard').classList.toggle('negative', projection < 0);
+
+  const late = calc.items.filter(isLate);
+  $('#lateCount').textContent = late.length;
+  renderList($('#lateList'), late);
+
+  const current = calc.items.filter(i => i.type === 'expense' && i.status !== 'paid' && !isLate(i));
+  renderList($('#currentList'), current);
+
+  const future = $('#futureMonths');
+  future.innerHTML = '';
+  [1, 2].map(i => addMonths(state.baseMonth, i)).forEach(month => {
+    const c = calcMonth(month);
+    const card = document.createElement('article');
+    card.className = 'future-card';
     card.innerHTML = `
-      <span>${monthName(month, false)}</span>
-      <strong>${result >= 0 ? '🟩' : '🟥'} ${formatBRL(result)}</strong>
-      <small>${index === 0 ? 'saldo atual - pendências' : `${formatBRL(calc.entradas)} entra • ${formatBRL(calc.saidas)} sai`}</small>
+      <div>
+        <span>${monthName(month)}</span>
+        <strong>${money(c.pending)} pendente</strong>
+        <small>${money(c.income)} entra • ${money(c.expenses)} sai</small>
+      </div>
+      <div>
+        <span>resultado</span>
+        <strong>${money(c.result)}</strong>
+      </div>
     `;
-    container.appendChild(card);
+    future.appendChild(card);
   });
 }
 
-function renderUpcoming() {
-  const list = $('#upcomingList');
-  if (!list) return;
+function renderAgenda() {
+  const calc = calcMonth(state.baseMonth);
+  $('#agendaSummary').innerHTML = `
+    <div><span>Entradas</span><strong>${money(calc.income)}</strong></div>
+    <div><span>Saídas</span><strong>${money(calc.expenses)}</strong></div>
+    <div><span>Pendente</span><strong>${money(calc.pending)}</strong></div>
+  `;
 
+  let items = [...calc.items];
+  if (state.filter !== 'all') items = items.filter(i => i.status === state.filter);
+
+  renderList($('#agendaList'), items);
+  $$('#statusTabs [data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === state.filter));
+}
+
+function renderFixed() {
+  const list = $('#fixedList');
   list.innerHTML = '';
-  const entries = getVisibleMonths()
-    .flatMap(month => entriesForMonth(month))
-    .filter(e => e.type === 'saida' && e.status !== 'pago')
-    .sort((a, b) => (a.dueDate || `${a.month}-99`).localeCompare(b.dueDate || `${b.month}-99`))
-    .slice(0, 5);
 
-  if (!entries.length) {
-    list.innerHTML = '<div class="empty-state">Sem pendências nos meses visíveis. Aproveita essa raridade kkkk</div>';
+  if (!state.rules.length) {
+    list.innerHTML = '<div class="empty-state">Nenhum fixo cadastrado ainda.</div>';
     return;
   }
 
-  entries.forEach(entry => list.appendChild(renderTransaction(entry, false)));
+  state.rules.forEach(rule => {
+    const item = document.createElement('article');
+    item.className = 'rule-item';
+    item.innerHTML = `
+      <div>
+        <strong>${rule.description}</strong>
+        <span>${catLabel(rule.category)} • ${rule.type === 'income' ? 'Entrada' : 'Saída'}</span>
+        <small>${rule.startMonth || 'sem início'} até ${rule.endMonth || 'sem fim'}</small>
+      </div>
+      <strong>${money(rule.amount)}</strong>
+    `;
+    list.appendChild(item);
+  });
 }
 
-function renderMonths() {
-  const container = $('#monthsContainer');
-  const template = $('#monthTemplate');
-  if (!container || !template) return;
+function renderApartment() {
+  const items = commitmentsForMonth(state.baseMonth).filter(i => i.category === 'apartamento');
+  const mr = items.find(i => i.description.toLowerCase().includes('mr'));
+  const sr = items.find(i => i.description.toLowerCase().includes('sr'));
+  const caixa = items.find(i => i.description.toLowerCase().includes('caixa') || i.description.toLowerCase().includes('evolução'));
 
-  container.innerHTML = '';
+  $('#aptMR').textContent = mr ? money(mr.amount) : 'não lançado';
+  $('#aptSR').textContent = sr ? money(sr.amount) : 'não lançado';
+  $('#aptCaixa').textContent = caixa ? money(caixa.amount) : 'aguardando';
 
-  const month = state.baseMonth || todayBaseMonth;
-  const calc = calculateMonth(month);
-  const isCurrentBase = month === todayBaseMonth;
-  const current = isCurrentBase ? calculateCurrentMonth() : null;
-  const resultValue = current ? current.result : calc.result;
+  renderList($('#apartmentList'), items);
+}
 
-  const node = template.content.cloneNode(true);
-  node.querySelector('h3').textContent = monthName(month);
-  node.querySelector('p').textContent = current
-    ? `saldo ${formatBRL(state.currentBalance)} • pendente ${formatBRL(current.pending)}`
-    : `entradas ${formatBRL(calc.entradas)} • saídas ${formatBRL(calc.saidas)}`;
-
-  const result = node.querySelector('.month-result');
-  result.textContent = `${resultValue >= 0 ? '🟩' : '🟥'} ${formatBRL(resultValue)}`;
-  result.classList.add(resultValue >= 0 ? 'positive' : 'negative');
-
-  node.querySelector('.month-metrics').innerHTML = `
-    <div class="metric-box"><span>Entradas</span><strong>${formatBRL(calc.entradas)}</strong></div>
-    <div class="metric-box"><span>Saídas</span><strong>${formatBRL(calc.saidas)}</strong></div>
-    <div class="metric-box"><span>Pendente</span><strong>${formatBRL(calc.pendente)}</strong></div>
+function renderScenario() {
+  const extra = parseMoney($('#scenarioValue').value) || 0;
+  const base = currentProjection();
+  const simulated = base + extra;
+  $('#scenarioResult').innerHTML = `
+    <span>Resultado atual do mês</span>
+    <strong>${money(base)}</strong>
+    <span>Com entrada extra de ${money(extra)}</span>
+    <strong>${simulated >= 0 ? '🟩' : '🟥'} ${money(simulated)}</strong>
   `;
-
-  const list = node.querySelector('.transaction-list');
-  if (!calc.entries.length) {
-    list.innerHTML = '<div class="empty-state">Nenhum lançamento nesse mês.</div>';
-  } else {
-    calc.entries.forEach(entry => list.appendChild(renderTransaction(entry, true)));
-  }
-
-  container.appendChild(node);
 }
 
-function renderTransaction(entry, allowDelete) {
-  const template = $('#transactionTemplate');
-  const node = template.content.cloneNode(true);
-
-  const item = node.querySelector('.transaction-item');
-  const avatar = node.querySelector('.transaction-avatar');
-  const title = node.querySelector('.transaction-main strong');
-  const sub = node.querySelector('.transaction-main span');
-  const value = node.querySelector('.transaction-side strong');
-  const side = node.querySelector('.transaction-side span');
-  const deleteBtn = node.querySelector('.delete-chip');
-
-  avatar.textContent = categoryIcon(entry.category);
-  avatar.style.background = categoryColor(entry.category);
-  title.textContent = entry.description;
-  sub.textContent = `${categoryLabel(entry.category)} • ${statusLabel(entry.status)} • ${formatDate(entry.dueDate)}`;
-  value.textContent = `${entry.type === 'entrada' ? '+' : '-'}${formatBRL(entry.value).replace('R$', 'R$ ')}`;
-  value.classList.add(entry.type);
-  side.textContent = monthName(entry.month, false);
-
-  const canDelete = allowDelete && !entry.source && state.entries.some(e => e.id === entry.id);
-  if (canDelete) {
-    deleteBtn.dataset.id = entry.id;
-    deleteBtn.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      requestDeleteEntry(entry.id);
-    });
-  } else {
-    deleteBtn.hidden = true;
+function renderList(container, items) {
+  container.innerHTML = '';
+  if (!items.length) {
+    container.innerHTML = '<div class="empty-state">Nada por aqui.</div>';
+    return;
   }
+  items.forEach(item => container.appendChild(renderCommitment(item)));
+}
 
-  if (entry.status === 'pago') item.style.opacity = '.72';
+function renderCommitment(item) {
+  const node = $('#commitmentTemplate').content.cloneNode(true);
+  const article = node.querySelector('.commitment-item');
+  const dot = node.querySelector('.status-dot');
+  const title = node.querySelector('.commitment-main strong');
+  const sub = node.querySelector('.commitment-main span');
+  const value = node.querySelector('.commitment-value strong');
+  const status = node.querySelector('.commitment-value span');
+
+  article.classList.add(`status-${item.status}`);
+  dot.textContent = statusIcon(item.status);
+  dot.title = 'Clique para alternar status';
+  title.textContent = item.description;
+  sub.textContent = `${catLabel(item.category)} • ${dateLabel(item.dueDate)}`;
+  value.textContent = item.type === 'income' ? `+${money(item.amount)}` : money(item.amount);
+  status.textContent = statusLabel(item.status);
+
+  dot.addEventListener('click', (e) => {
+    e.stopPropagation();
+    cycleStatus(item.id);
+  });
+
+  article.addEventListener('click', () => article.classList.toggle('open'));
+
+  article.querySelector('[data-action="edit"]').addEventListener('click', (e) => {
+    e.stopPropagation();
+    openCommitmentModal('edit', item.id);
+  });
+
+  article.querySelector('[data-action="delete"]').addEventListener('click', (e) => {
+    e.stopPropagation();
+    deleteCommitment(item.id);
+  });
+
   return node;
 }
 
-function renderChart() {
-  const chart = $('#trendChart');
-  if (!chart) return;
+function cycleStatus(id) {
+  const item = state.commitments.find(i => i.id === id);
+  if (!item) return;
 
-  const months = getVisibleMonths();
-  const values = months.map((month, index) => index === 0 ? calculateCurrentMonth().result : calculateMonth(month).result);
-  const width = 320;
-  const height = 140;
-  const padding = 16;
-  const min = Math.min(...values, 0);
-  const max = Math.max(...values, 0);
-  const range = Math.max(max - min, 1);
-  const points = values.map((value, index) => {
-    const x = padding + ((width - padding * 2) / Math.max(values.length - 1, 1)) * index;
-    const y = height - padding - ((value - min) / range) * (height - padding * 2);
-    return { x, y, value };
-  });
+  const previous = { ...item };
+  const cycle = ['waiting', 'paid', 'unpaid'];
+  const currentIndex = cycle.indexOf(item.status);
+  item.status = cycle[(currentIndex + 1) % cycle.length] || 'waiting';
 
-  const linePath = points.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ');
-  const areaPath = `${linePath} L ${points.at(-1).x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
-  const gridLines = [0.25, 0.5, 0.75].map(r => {
-    const y = padding + (height - padding * 2) * r;
-    return `<line x1="${padding}" x2="${width - padding}" y1="${y}" y2="${y}" stroke="currentColor" stroke-opacity="0.08"/>`;
-  }).join('');
-
-  const dots = points.map(point => `<circle cx="${point.x}" cy="${point.y}" r="4.5" fill="var(--accent)" stroke="var(--surface-2)" stroke-width="3"></circle>`).join('');
-  const labels = points.map((p, index) => `<text x="${p.x}" y="${height - 2}" font-size="11" text-anchor="middle" fill="currentColor" fill-opacity="0.55">${monthName(months[index], false).split('/')[0]}</text>`).join('');
-
-  chart.innerHTML = `
-    <defs>
-      <linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1">
-        <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.28"></stop>
-        <stop offset="100%" stop-color="var(--accent)" stop-opacity="0.02"></stop>
-      </linearGradient>
-    </defs>
-    ${gridLines}
-    <path d="${areaPath}" fill="url(#chartFill)"></path>
-    <path d="${linePath}" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-    ${dots}
-    ${labels}
-  `;
-}
-
-function setEntryType(type) {
-  selectedEntryType = type;
-  $$('[data-entry-type]').forEach(button => {
-    button.classList.toggle('selected', button.dataset.entryType === type);
+  saveState();
+  render();
+  showUndo(`Status alterado: ${item.description}`, () => {
+    Object.assign(item, previous);
+    saveState();
+    render();
   });
 }
 
-function setTab(tab) {
-  const target = $(`#screen-${tab}`);
-  if (!target) return;
+function openCommitmentModal(mode = 'bill', id = '') {
+  $('#commitmentForm').reset();
+  $('#commitmentId').value = '';
 
-  $$('.screen').forEach(screen => screen.classList.remove('active'));
-  target.classList.add('active');
+  let type = 'expense';
+  let title = 'Adicionar conta';
 
-  closeDrawer();
-  closeFab();
+  if (mode === 'income') {
+    type = 'income';
+    title = 'Adicionar entrada';
+    $('#commitmentCategory').value = 'renda';
+  } else if (mode === 'apartment') {
+    type = 'expense';
+    title = 'Adicionar item do apartamento';
+    $('#commitmentCategory').value = 'apartamento';
+  }
+
+  if (mode === 'edit') {
+    const item = state.commitments.find(i => i.id === id);
+    if (!item) return;
+    title = 'Editar compromisso';
+    type = item.type;
+    $('#commitmentId').value = item.id;
+    $('#commitmentDescription').value = item.description;
+    $('#commitmentAmount').value = item.amount ?? '';
+    $('#commitmentMonth').value = item.month;
+    $('#commitmentDue').value = item.dueDate || '';
+    $('#commitmentCategory').value = item.category;
+    $('#commitmentStatus').value = item.status;
+    $('#commitmentNote').value = item.note || '';
+  } else {
+    $('#commitmentMonth').value = state.baseMonth;
+    $('#commitmentStatus').value = type === 'income' ? 'estimated' : 'waiting';
+  }
+
+  setModalType(type);
+  $('#modalTitle').textContent = title;
+  $('#commitmentModal').classList.add('open');
+  $('#commitmentModal').setAttribute('aria-hidden', 'false');
+}
+
+function closeCommitmentModal() {
+  $('#commitmentModal').classList.remove('open');
+  $('#commitmentModal').setAttribute('aria-hidden', 'true');
+}
+
+function setModalType(type) {
+  modalType = type;
+  $$('[data-modal-type]').forEach(btn => btn.classList.toggle('selected', btn.dataset.modalType === type));
+}
+
+function saveCommitment(event) {
+  event.preventDefault();
+
+  const id = $('#commitmentId').value;
+  const data = {
+    id: id || uid(),
+    month: $('#commitmentMonth').value,
+    type: modalType,
+    category: $('#commitmentCategory').value,
+    description: $('#commitmentDescription').value.trim(),
+    amount: parseMoney($('#commitmentAmount').value),
+    dueDate: $('#commitmentDue').value,
+    status: $('#commitmentStatus').value,
+    note: $('#commitmentNote').value.trim()
+  };
+
+  if (id) {
+    const index = state.commitments.findIndex(i => i.id === id);
+    if (index >= 0) state.commitments[index] = data;
+  } else {
+    state.commitments.push(data);
+  }
+
+  saveState();
+  closeCommitmentModal();
+  render();
+}
+
+function deleteCommitment(id) {
+  const item = state.commitments.find(i => i.id === id);
+  if (!item) return;
+  if (!confirm(`Excluir "${item.description}"?`)) return;
+
+  state.commitments = state.commitments.filter(i => i.id !== id);
+  saveState();
+  render();
+
+  showUndo(`Excluído: ${item.description}`, () => {
+    state.commitments.push(item);
+    saveState();
+    render();
+  });
+}
+
+function openFixedModal() {
+  $('#fixedForm').reset();
+  $('#fixedStart').value = state.baseMonth;
+  $('#fixedModal').classList.add('open');
+  $('#fixedModal').setAttribute('aria-hidden', 'false');
+}
+
+function closeFixedModal() {
+  $('#fixedModal').classList.remove('open');
+  $('#fixedModal').setAttribute('aria-hidden', 'true');
+}
+
+function saveFixedRule(event) {
+  event.preventDefault();
+
+  state.rules.push({
+    id: uid(),
+    type: 'expense',
+    category: $('#fixedCategory').value,
+    description: $('#fixedDescription').value.trim(),
+    amount: parseMoney($('#fixedAmount').value) || 0,
+    day: Number($('#fixedDay').value) || null,
+    startMonth: $('#fixedStart').value || state.baseMonth,
+    endMonth: $('#fixedEnd').value,
+    active: true
+  });
+
+  saveState();
+  closeFixedModal();
+  render();
+}
+
+function showUndo(text, action) {
+  if (undoTimer) clearTimeout(undoTimer);
+  pendingUndo = action;
+
+  $('#undoText').textContent = text;
+  $('#undoToast').hidden = false;
+  requestAnimationFrame(() => $('#undoToast').classList.add('show'));
+
+  undoTimer = setTimeout(() => {
+    $('#undoToast').classList.remove('show');
+    pendingUndo = null;
+    setTimeout(() => {
+      if (!$('#undoToast').classList.contains('show')) $('#undoToast').hidden = true;
+    }, 220);
+  }, 10000);
+}
+
+function undoLastAction() {
+  if (!pendingUndo) return;
+  pendingUndo();
+  pendingUndo = null;
+  if (undoTimer) clearTimeout(undoTimer);
+  $('#undoToast').classList.remove('show');
+  setTimeout(() => $('#undoToast').hidden = true, 220);
 }
 
 function applyTheme(theme) {
@@ -502,87 +604,13 @@ function applyTheme(theme) {
   localStorage.setItem(THEME_KEY, theme === 'dark' ? 'dark' : 'light');
 }
 
-function openDrawer() {
-  $('#sideDrawer')?.classList.add('open');
-  $('#sideDrawer')?.setAttribute('aria-hidden', 'false');
-}
-
-function closeDrawer() {
-  $('#sideDrawer')?.classList.remove('open');
-  $('#sideDrawer')?.setAttribute('aria-hidden', 'true');
-}
-
-function openFab() {
-  document.body.classList.add('fab-open');
-  $('#fabTrigger')?.setAttribute('aria-expanded', 'true');
-}
-
-function closeFab() {
-  document.body.classList.remove('fab-open');
-  $('#fabTrigger')?.setAttribute('aria-expanded', 'false');
-}
-
-function requestDeleteEntry(entryId) {
-  const entry = state.entries.find(item => item.id === entryId);
-  if (!entry) return;
-
-  const ok = confirm(`Excluir "${entry.description}"?`);
-  if (!ok) return;
-
-  state.entries = state.entries.filter(item => item.id !== entryId);
-  saveState();
-  render();
-  showUndoDelete(entry);
-}
-
-function showUndoDelete(entry) {
-  const toast = $('#undoToast');
-  const text = $('#undoText');
-  if (!toast || !text) return;
-
-  if (pendingDeleteTimer) clearTimeout(pendingDeleteTimer);
-
-  pendingDelete = entry;
-  text.textContent = `Registro excluído: ${entry.description}`;
-  toast.hidden = false;
-
-  requestAnimationFrame(() => toast.classList.add('show'));
-
-  pendingDeleteTimer = setTimeout(() => {
-    toast.classList.remove('show');
-    pendingDelete = null;
-    setTimeout(() => {
-      if (!toast.classList.contains('show')) toast.hidden = true;
-    }, 240);
-  }, 10000);
-}
-
-function undoDeleteEntry() {
-  if (!pendingDelete) return;
-
-  state.entries.push(pendingDelete);
-  state.entries.sort((a, b) => (a.month || '').localeCompare(b.month || '') || (a.dueDate || '9999-99-99').localeCompare(b.dueDate || '9999-99-99'));
-  saveState();
-
-  pendingDelete = null;
-  if (pendingDeleteTimer) clearTimeout(pendingDeleteTimer);
-
-  const toast = $('#undoToast');
-  toast?.classList.remove('show');
-  setTimeout(() => {
-    if (toast) toast.hidden = true;
-  }, 240);
-
-  render();
-}
-
 function exportBackup() {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `financeiro-keven-backup-${new Date().toISOString().slice(0,10)}.json`;
-  link.click();
-  URL.revokeObjectURL(link.href);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `agenda-financeira-keven-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 function importBackup(file) {
@@ -590,14 +618,13 @@ function importBackup(file) {
   reader.onload = () => {
     try {
       const data = JSON.parse(reader.result);
-      if (!Array.isArray(data.entries)) throw new Error('Arquivo inválido');
-
+      if (!Array.isArray(data.commitments)) throw new Error('JSON inválido');
       state = { ...structuredClone(initialState), ...data };
       saveState();
       render();
       alert('Backup importado com sucesso.');
     } catch {
-      alert('Não consegui importar esse JSON.');
+      alert('Não consegui importar esse arquivo.');
     }
   };
   reader.readAsText(file);

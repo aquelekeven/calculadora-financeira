@@ -3,275 +3,205 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#efefec" />
-  <title>Financeiro Keven</title>
+  <meta name="theme-color" content="#f4f2ee" />
+  <title>Agenda Financeira Keven</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app-shell">
     <aside class="side-drawer" id="sideDrawer" aria-hidden="true">
-      <div class="drawer-panel" role="dialog" aria-label="Menu lateral">
+      <div class="drawer-panel">
         <div class="drawer-head">
-          <div>
-            <span>financeiro</span>
-            <strong>Keven</strong>
-          </div>
-          <button class="circle-btn ghost" id="closeDrawerBtn" type="button" aria-label="Fechar menu">×</button>
+          <div><span>agenda financeira</span><strong>Keven</strong></div>
+          <button class="icon-btn" id="closeDrawerBtn" type="button" aria-label="Fechar menu">×</button>
         </div>
-
         <nav class="drawer-menu">
-          <button type="button" data-nav="home"><span>⌂</span><div><strong>Início</strong><small>Resumo e atividade</small></div></button>
-          <button type="button" data-nav="months"><span>▤</span><div><strong>Meses</strong><small>Mês atual + próximos 2</small></div></button>
-          <button type="button" data-nav="add"><span>＋</span><div><strong>Lançar</strong><small>Nova entrada ou saída</small></div></button>
+          <button type="button" data-nav="home"><span>⌂</span><div><strong>Hoje</strong><small>O que falta pagar</small></div></button>
+          <button type="button" data-nav="agenda"><span>▤</span><div><strong>Agenda</strong><small>Mês selecionado</small></div></button>
+          <button type="button" data-nav="fixed"><span>↻</span><div><strong>Fixos</strong><small>Recorrentes e parcelas</small></div></button>
+          <button type="button" data-nav="apartment"><span>⌑</span><div><strong>Apartamento</strong><small>MR, SR e Caixa</small></div></button>
+          <button type="button" data-nav="scenario"><span>◇</span><div><strong>Cenários</strong><small>Freela, PLR e simulações</small></div></button>
           <button type="button" data-nav="settings"><span>◌</span><div><strong>Ajustes</strong><small>Saldo e backup</small></div></button>
         </nav>
-
-        <div class="drawer-note">Local/offline por enquanto. Depois a gente pluga Supabase e login sem refazer a interface.</div>
       </div>
     </aside>
+    <div class="drawer-backdrop" id="drawerBackdrop"></div>
 
-    <div class="overlay-blur" id="globalOverlay" aria-hidden="true"></div>
+    <header class="top-bar">
+      <button class="icon-btn" id="menuBtn" type="button" aria-label="Abrir menu">☰</button>
+      <div><span>Agenda Financeira</span><strong id="topMonthLabel">Julho 2026</strong></div>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Alternar tema">◐</button>
+    </header>
 
     <main class="screen active" id="screen-home">
       <section class="hero-card reveal reveal-1">
-        <div class="hero-top">
-          <div>
-            <p class="eyebrow">Oi Keven</p>
-            <h1>Seu financeiro</h1>
-          </div>
-          <div class="hero-actions">
-            <button class="circle-btn" id="themeBtn" type="button" aria-label="Alternar tema">◐</button>
-            <button class="circle-btn" id="menuBtn" type="button" aria-label="Abrir menu lateral">⋯</button>
-          </div>
+        <div class="hero-title"><p>Hoje</p><h1>O que falta pagar?</h1></div>
+        <div class="month-switch">
+          <button type="button" id="prevMonthBtn">‹</button>
+          <select id="baseMonthSelect"></select>
+          <button type="button" id="nextMonthBtn">›</button>
         </div>
-
-        <div class="money-chip reveal reveal-2">
-          <span class="chip-dot"></span>
-          <span>Saldo local</span>
+        <div class="main-numbers">
+          <div><span>Saldo atual</span><strong id="currentBalance">R$ 0,00</strong></div>
+          <div><span>Falta pagar</span><strong id="pendingTotal">R$ 0,00</strong></div>
         </div>
-
-        <div class="balance-block reveal reveal-3">
-          <strong id="currentBalance">R$ 0,00</strong>
-          <span id="currentMonthLabel">Julho de 2026</span>
+        <div class="result-card" id="resultCard">
+          <span>Depois de pagar tudo</span><strong id="projectedResult">R$ 0,00</strong>
         </div>
-
-        <button class="trend-pill reveal reveal-4" id="healthPill" type="button">Carregando...</button>
       </section>
 
-      <section class="action-band reveal reveal-5">
-        <button class="action-tile" type="button" data-nav="add" data-kind="entrada">
-          <span>↙</span>
-          <small>Entrada</small>
-        </button>
-        <button class="action-tile center-tile" type="button" data-nav="months" aria-label="Histórico">
-          <span>▤</span>
-        </button>
-        <button class="action-tile" type="button" data-nav="add" data-kind="saida">
-          <span>↗</span>
-          <small>Saída</small>
-        </button>
+      <section class="quick-grid reveal reveal-2">
+        <button type="button" data-open-create="bill"><span>＋</span><strong>Conta</strong><small>adicionar gasto</small></button>
+        <button type="button" data-open-create="income"><span>↙</span><strong>Entrada</strong><small>salário/freela</small></button>
+        <button type="button" data-nav="agenda"><span>▤</span><strong>Agenda</strong><small>ver mês</small></button>
       </section>
 
-      <section class="dashboard-grid reveal reveal-6">
-        <article class="glass-card months-mini-card">
-          <div class="card-head">
-            <h2>Próximos meses</h2>
-            <button class="mini-link" type="button" data-nav="months">Ver</button>
-          </div>
-          <div class="mini-months" id="summaryCards"></div>
-        </article>
-
-        <article class="glass-card chart-card">
-          <div class="card-head">
-            <h2>Fluxo do mês</h2>
-            <span class="muted">projeção</span>
-          </div>
-          <div class="chart-wrap">
-            <svg id="trendChart" viewBox="0 0 320 140" preserveAspectRatio="none" aria-hidden="true"></svg>
-            <div class="chart-footer">
-              <strong id="monthFlowTotal">R$ 0,00</strong>
-              <span id="monthFlowCaption">saldo previsto</span>
-            </div>
-          </div>
-        </article>
+      <section class="section-card reveal reveal-3">
+        <div class="section-head"><div><p>atenção</p><h2>Atrasados</h2></div><span class="count-pill" id="lateCount">0</span></div>
+        <div class="commitment-list" id="lateList"></div>
       </section>
 
-      <section class="activity-card reveal reveal-7">
-        <div class="card-head">
-          <h2>Atividade recente</h2>
-          <button class="mini-link" type="button" data-nav="months">Tudo</button>
-        </div>
-        <div class="activity-list" id="upcomingList"></div>
+      <section class="section-card reveal reveal-4">
+        <div class="section-head"><div><p>próximos</p><h2>Até o fim do mês</h2></div><button class="text-btn" type="button" data-nav="agenda">ver tudo</button></div>
+        <div class="commitment-list" id="currentList"></div>
+      </section>
+
+      <section class="section-card reveal reveal-5">
+        <div class="section-head"><div><p>visão rápida</p><h2>Próximos 2 meses</h2></div></div>
+        <div class="future-months" id="futureMonths"></div>
       </section>
     </main>
 
-    <main class="screen" id="screen-months">
-      <section class="panel-page reveal reveal-1">
-        <div class="page-head">
-          <div>
-            <p class="eyebrow">mês atual + próximos 2</p>
-            <h2>Visão mensal</h2>
-          </div>
-          <select id="baseMonthSelect" class="month-select" title="Mês base"></select>
+    <main class="screen" id="screen-agenda">
+      <section class="page-card">
+        <div class="page-head"><div><p>agenda</p><h2>Mês selecionado</h2></div><button class="small-btn" type="button" data-open-create="bill">＋ conta</button></div>
+        <div class="status-tabs" id="statusTabs">
+          <button type="button" data-filter="all" class="active">Todos</button>
+          <button type="button" data-filter="waiting">Aguardando</button>
+          <button type="button" data-filter="paid">Pagos</button>
+          <button type="button" data-filter="unpaid">Não pagos</button>
         </div>
-        <div id="monthsContainer" class="month-panels"></div>
+        <div class="agenda-summary" id="agendaSummary"></div>
+        <div class="commitment-list spacious" id="agendaList"></div>
       </section>
     </main>
 
-    <main class="screen" id="screen-add">
-      <section class="panel-page reveal reveal-1">
-        <div class="page-head simple">
-          <div>
-            <p class="eyebrow">novo lançamento</p>
-            <h2>Adicionar movimentação</h2>
-          </div>
+    <main class="screen" id="screen-fixed">
+      <section class="page-card">
+        <div class="page-head"><div><p>configuração</p><h2>Fixos e parcelas</h2></div><button class="small-btn" type="button" data-open-fixed>＋ fixo</button></div>
+        <div class="info-box">Aqui ficam as regras que se repetem. Elas aparecem automaticamente nos meses, sem lançar tudo de novo.</div>
+        <div class="rules-list" id="fixedList"></div>
+      </section>
+    </main>
+
+    <main class="screen" id="screen-apartment">
+      <section class="page-card">
+        <div class="page-head"><div><p>controle separado</p><h2>Apartamento</h2></div><button class="small-btn" type="button" data-open-create="apartment">＋ apê</button></div>
+        <div class="apartment-grid">
+          <article><span>MR do mês</span><strong id="aptMR">R$ 0,00</strong></article>
+          <article><span>Caixa / evolução</span><strong id="aptCaixa">aguardando</strong></article>
+          <article><span>SR anual</span><strong id="aptSR">R$ 0,00</strong></article>
         </div>
+        <div class="commitment-list spacious" id="apartmentList"></div>
+      </section>
+    </main>
 
-        <form id="entryForm" class="entry-card">
-          <div class="type-toggle" role="tablist" aria-label="Tipo do lançamento">
-            <button type="button" data-entry-type="entrada">Entrada</button>
-            <button type="button" data-entry-type="saida" class="selected">Saída</button>
-          </div>
-
-          <label class="field amount-field">
-            <span>Valor</span>
-            <input id="entryValue" inputmode="decimal" placeholder="0,00" required />
-          </label>
-
+    <main class="screen" id="screen-scenario">
+      <section class="page-card">
+        <div class="page-head"><div><p>simulação</p><h2>E se entrar mais grana?</h2></div></div>
+        <div class="scenario-card">
+          <label><span>Entrada extra simulada</span><input id="scenarioValue" inputmode="decimal" placeholder="Ex: 500,00" /></label>
           <div class="preset-row">
-            <button type="button" data-preset="50">50</button>
-            <button type="button" data-preset="100">100</button>
-            <button type="button" data-preset="500">500</button>
-            <button type="button" data-preset="1000">1000</button>
-            <button type="button" data-preset="1500">1500</button>
+            <button type="button" data-scenario-preset="300">300</button>
+            <button type="button" data-scenario-preset="500">500</button>
+            <button type="button" data-scenario-preset="800">800</button>
+            <button type="button" data-scenario-preset="1500">1500</button>
+            <button type="button" data-scenario-preset="4000">PLR 4000</button>
           </div>
-
-          <label class="field">
-            <span>Descrição</span>
-            <input id="entryDescription" type="text" placeholder="Ex: Claro" required />
-          </label>
-
-          <div class="two-col">
-            <label class="field">
-              <span>Mês</span>
-              <input id="entryMonth" type="month" required />
-            </label>
-            <label class="field">
-              <span>Vencimento</span>
-              <input id="entryDueDate" type="date" />
-            </label>
-          </div>
-
-          <div class="two-col">
-            <label class="field">
-              <span>Categoria</span>
-              <select id="entryCategory">
-                <option value="apartamento">Apartamento</option>
-                <option value="fixo">Fixo</option>
-                <option value="cartao">Cartão</option>
-                <option value="pessoas">Pessoas</option>
-                <option value="emprestimo">Empréstimo</option>
-                <option value="renda">Renda</option>
-                <option value="outros">Outros</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>Status</span>
-              <select id="entryStatus">
-                <option value="pendente">Pendente</option>
-                <option value="pago">Pago</option>
-                <option value="previsto">Previsto</option>
-                <option value="especial">Especial</option>
-              </select>
-            </label>
-          </div>
-
-          <button class="primary-btn" type="submit">Salvar lançamento</button>
-        </form>
+          <div class="scenario-result" id="scenarioResult"></div>
+        </div>
       </section>
     </main>
 
     <main class="screen" id="screen-settings">
-      <section class="panel-page reveal reveal-1">
-        <div class="page-head simple">
-          <div>
-            <p class="eyebrow">configurações</p>
-            <h2>Ajustes locais</h2>
-          </div>
-        </div>
-
-        <div class="settings-card">
-          <label class="field">
-            <span>Saldo atual</span>
-            <input id="balanceInput" inputmode="decimal" />
-          </label>
-          <div class="settings-actions">
-            <button id="saveBalanceBtn" class="primary-btn" type="button">Salvar saldo</button>
-            <button id="exportBtn" class="secondary-btn" type="button">Exportar JSON</button>
-            <label class="secondary-btn file-label">Importar JSON<input id="importInput" type="file" accept="application/json" /></label>
-            <button id="resetBtn" class="danger-btn" type="button">Resetar base</button>
-          </div>
+      <section class="page-card">
+        <div class="page-head"><div><p>ajustes</p><h2>Saldo e backup</h2></div></div>
+        <div class="settings-block">
+          <label><span>Saldo atual</span><input id="balanceInput" inputmode="decimal" /></label>
+          <button class="primary-btn" id="saveBalanceBtn" type="button">Salvar saldo</button>
+          <button class="secondary-btn" id="exportBtn" type="button">Exportar backup JSON</button>
+          <label class="secondary-btn file-label">Importar backup JSON<input id="importInput" type="file" accept="application/json" /></label>
+          <button class="danger-btn" id="resetBtn" type="button">Resetar base</button>
         </div>
       </section>
     </main>
 
-    <div class="undo-toast" id="undoToast" hidden>
-      <span id="undoText">Registro excluído.</span>
-      <button id="undoBtn" type="button">Desfazer</button>
+    <div class="bottom-nav">
+      <button type="button" data-nav="home" class="active"><span>⌂</span><small>Hoje</small></button>
+      <button type="button" data-nav="agenda"><span>▤</span><small>Agenda</small></button>
+      <button type="button" data-open-create="bill" class="add-main"><span>＋</span></button>
+      <button type="button" data-nav="apartment"><span>⌑</span><small>Apê</small></button>
+      <button type="button" data-nav="scenario"><span>◇</span><small>Cenários</small></button>
     </div>
 
-    <div class="fab-backdrop" id="fabBackdrop" aria-hidden="true"></div>
-    <div class="floating-menu" id="floatingMenu" aria-label="Ações rápidas">
-      <button class="fab-option option-home" data-nav="home" type="button" aria-label="Início">
-        <span class="fab-icon">⌂</span>
-        <span class="fab-label">Início</span>
-      </button>
-      <button class="fab-option option-months" data-nav="months" type="button" aria-label="Meses">
-        <span class="fab-icon">▤</span>
-        <span class="fab-label">Meses</span>
-      </button>
-      <button class="fab-option option-entry" data-nav="add" data-kind="entrada" type="button" aria-label="Entrada">
-        <span class="fab-icon">↙</span>
-        <span class="fab-label">Entrada</span>
-      </button>
-      <button class="fab-option option-settings" data-nav="settings" type="button" aria-label="Ajustes">
-        <span class="fab-icon">◌</span>
-        <span class="fab-label">Ajustes</span>
-      </button>
-      <button class="fab-trigger" id="fabTrigger" type="button" aria-expanded="false" aria-label="Abrir ações rápidas">
-        <span class="fab-trigger-closed">＋</span>
-        <span class="fab-trigger-open">↗</span>
-      </button>
+    <div class="modal" id="commitmentModal" aria-hidden="true">
+      <div class="modal-panel">
+        <div class="modal-head"><div><p>novo compromisso</p><h2 id="modalTitle">Adicionar conta</h2></div><button type="button" class="icon-btn" id="closeModalBtn">×</button></div>
+        <form id="commitmentForm">
+          <input type="hidden" id="commitmentId" />
+          <div class="type-toggle">
+            <button type="button" data-modal-type="expense" class="selected">Conta a pagar</button>
+            <button type="button" data-modal-type="income">Entrada</button>
+          </div>
+          <label><span>Descrição</span><input id="commitmentDescription" placeholder="Ex: Claro" required /></label>
+          <label><span>Valor</span><input id="commitmentAmount" inputmode="decimal" placeholder="160,00" /></label>
+          <div class="two-col">
+            <label><span>Mês</span><input id="commitmentMonth" type="month" required /></label>
+            <label><span>Vencimento</span><input id="commitmentDue" type="date" /></label>
+          </div>
+          <div class="two-col">
+            <label><span>Categoria</span><select id="commitmentCategory">
+              <option value="apartamento">Apartamento</option><option value="fixo">Fixo</option><option value="pessoas">Pessoas</option><option value="cartao">Cartão</option><option value="emprestimo">Empréstimo</option><option value="renda">Renda</option><option value="outros">Outros</option>
+            </select></label>
+            <label><span>Status</span><select id="commitmentStatus">
+              <option value="waiting">Aguardando</option><option value="paid">Pago</option><option value="unpaid">Não pago</option><option value="estimated">Previsto</option><option value="special">Especial</option><option value="waiting_value">Aguardando valor</option>
+            </select></label>
+          </div>
+          <label><span>Observação</span><textarea id="commitmentNote" rows="3" placeholder="Opcional"></textarea></label>
+          <button class="primary-btn" type="submit">Salvar</button>
+        </form>
+      </div>
     </div>
+
+    <div class="modal" id="fixedModal" aria-hidden="true">
+      <div class="modal-panel">
+        <div class="modal-head"><div><p>recorrente</p><h2>Adicionar fixo</h2></div><button type="button" class="icon-btn" id="closeFixedModalBtn">×</button></div>
+        <form id="fixedForm">
+          <label><span>Descrição</span><input id="fixedDescription" placeholder="Ex: Claro" required /></label>
+          <label><span>Valor</span><input id="fixedAmount" inputmode="decimal" placeholder="160,00" required /></label>
+          <div class="two-col">
+            <label><span>Categoria</span><select id="fixedCategory"><option value="fixo">Fixo</option><option value="apartamento">Apartamento</option><option value="emprestimo">Empréstimo</option><option value="pessoas">Pessoas</option><option value="cartao">Cartão</option></select></label>
+            <label><span>Dia venc.</span><input id="fixedDay" type="number" min="1" max="31" placeholder="10" /></label>
+          </div>
+          <div class="two-col">
+            <label><span>Início</span><input id="fixedStart" type="month" /></label>
+            <label><span>Fim</span><input id="fixedEnd" type="month" /></label>
+          </div>
+          <button class="primary-btn" type="submit">Salvar fixo</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="undo-toast" id="undoToast" hidden><span id="undoText">Item alterado.</span><button id="undoBtn" type="button">Desfazer</button></div>
   </div>
 
-  <template id="monthTemplate">
-    <article class="month-card">
-      <div class="month-header">
-        <div>
-          <h3></h3>
-          <p></p>
-        </div>
-        <strong class="month-result"></strong>
-      </div>
-      <div class="month-metrics"></div>
-      <div class="transaction-list"></div>
+  <template id="commitmentTemplate">
+    <article class="commitment-item">
+      <button class="status-dot" type="button"></button>
+      <div class="commitment-main"><strong></strong><span></span></div>
+      <div class="commitment-value"><strong></strong><span></span></div>
+      <div class="item-actions"><button type="button" data-action="edit">Editar</button><button type="button" data-action="delete">Excluir</button></div>
     </article>
-  </template>
-
-  <template id="transactionTemplate">
-    <div class="transaction-item">
-      <div class="transaction-avatar"></div>
-      <div class="transaction-main">
-        <strong></strong>
-        <span></span>
-      </div>
-      <div class="transaction-side">
-        <strong></strong>
-        <span></span>
-      </div>
-      <button class="delete-chip" type="button">×</button>
-    </div>
   </template>
 
   <script src="app.js"></script>
