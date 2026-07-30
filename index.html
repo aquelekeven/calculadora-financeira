@@ -29,19 +29,29 @@
 
     <header class="top-bar">
       <button class="icon-btn" id="menuBtn" type="button" aria-label="Abrir menu">☰</button>
-      <div><span>Agenda Financeira</span><strong id="topMonthLabel">Julho 2026</strong></div>
+      <div><span>agenda financeira</span><strong>Keven</strong></div>
       <button class="icon-btn" id="themeBtn" type="button" aria-label="Alternar tema">◐</button>
     </header>
 
-    <main class="screen active" id="screen-home">
-      <section class="hero-card reveal reveal-1">
-        <div class="hero-title"><p>Hoje</p><h1>O que falta pagar?</h1></div>
-        <div class="month-switch">
-          <button type="button" id="prevMonthBtn">‹</button>
-          <select id="baseMonthSelect"></select>
-          <button type="button" id="nextMonthBtn">›</button>
+    <section class="month-rail-card reveal reveal-1">
+      <div class="month-rail-head">
+        <div>
+          <p>Mês global</p>
+          <h2 id="monthRailCurrent">Julho 2026</h2>
         </div>
-        <div class="main-numbers">
+        <div class="month-rail-nav">
+          <button type="button" id="prevMonthBtn" aria-label="Mês anterior">‹</button>
+          <span id="monthRailLabel">Selecione o mês</span>
+          <button type="button" id="nextMonthBtn" aria-label="Próximo mês">›</button>
+        </div>
+      </div>
+      <div class="month-pills" id="monthPills"></div>
+    </section>
+
+    <main class="screen active" id="screen-home">
+      <section class="hero-card reveal reveal-2">
+        <div class="hero-title"><p>Hoje</p><h1>O que falta pagar?</h1></div>
+<div class="main-numbers">
           <div><span>Saldo atual</span><strong id="currentBalance">R$ 0,00</strong></div>
           <div><span>Falta pagar</span><strong id="pendingTotal">R$ 0,00</strong></div>
         </div>
@@ -50,23 +60,23 @@
         </div>
       </section>
 
-      <section class="quick-grid reveal reveal-2">
+      <section class="quick-grid reveal reveal-3">
         <button type="button" data-open-create="bill"><span>＋</span><strong>Conta</strong><small>adicionar gasto</small></button>
         <button type="button" data-open-create="income"><span>↙</span><strong>Entrada</strong><small>salário/freela</small></button>
         <button type="button" data-nav="agenda"><span>▤</span><strong>Agenda</strong><small>ver mês</small></button>
       </section>
 
-      <section class="section-card reveal reveal-3">
+      <section class="section-card reveal reveal-6">
         <div class="section-head"><div><p>atenção</p><h2>Atrasados</h2></div><span class="count-pill" id="lateCount">0</span></div>
         <div class="commitment-list" id="lateList"></div>
       </section>
 
-      <section class="section-card reveal reveal-4">
+      <section class="section-card reveal reveal-6">
         <div class="section-head"><div><p>próximos</p><h2>Até o fim do mês</h2></div><button class="text-btn" type="button" data-nav="agenda">ver tudo</button></div>
         <div class="commitment-list" id="currentList"></div>
       </section>
 
-      <section class="section-card reveal reveal-5">
+      <section class="section-card reveal reveal-6">
         <div class="section-head"><div><p>visão rápida</p><h2>Próximos 2 meses</h2></div></div>
         <div class="future-months" id="futureMonths"></div>
       </section>

@@ -166,11 +166,6 @@ function bindEvents() {
 
   $('#prevMonthBtn').addEventListener('click', () => changeMonth(-1));
   $('#nextMonthBtn').addEventListener('click', () => changeMonth(1));
-  $('#baseMonthSelect').addEventListener('change', e => {
-    state.baseMonth = e.target.value;
-    saveState();
-    render();
-  });
 
   $('#closeModalBtn').addEventListener('click', closeCommitmentModal);
   $('#commitmentModal').addEventListener('click', e => {
@@ -256,9 +251,7 @@ function changeMonth(offset) {
 }
 
 function render() {
-  ensureMonthOptions();
-  $('#baseMonthSelect').value = state.baseMonth;
-  $('#topMonthLabel').textContent = monthName(state.baseMonth, false);
+  renderMonthRail();
   $('#currentBalance').textContent = money(state.currentBalance);
   $('#balanceInput').value = String(state.currentBalance).replace('.', ',');
 
@@ -269,15 +262,40 @@ function render() {
   renderScenario();
 }
 
-function ensureMonthOptions() {
-  const select = $('#baseMonthSelect');
-  select.innerHTML = '';
-  for (let i = -1; i <= 10; i++) {
-    const month = addMonths(TODAY_MONTH, i);
-    const option = document.createElement('option');
-    option.value = month;
-    option.textContent = monthName(month, false);
-    select.appendChild(option);
+function renderMonthRail() {
+  $('#monthRailCurrent').textContent = monthName(state.baseMonth);
+  $('#monthRailLabel').textContent = monthName(state.baseMonth, false);
+
+  const pills = $('#monthPills');
+  pills.innerHTML = '';
+
+  for (let i = -3; i <= 3; i++) {
+    const month = addMonths(state.baseMonth, i);
+    const date = new Date(month + '-01T00:00:00');
+    const monthNum = String(date.getMonth() + 1).padStart(2, '0');
+    const yearShort = String(date.getFullYear()).slice(-2);
+    const monthShort = date.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+    const weekdayLike = date.toLocaleDateString('pt-BR', { month: 'long' });
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `month-pill${month === state.baseMonth ? ' active' : ''}`;
+    button.innerHTML = `
+      <div class="month-pill-top">
+        <strong>${monthNum}</strong>
+        <small>${yearShort}</small>
+      </div>
+      <div class="month-pill-bottom">
+        <strong>${monthShort}</strong>
+        <small>${weekdayLike}</small>
+      </div>
+    `;
+    button.addEventListener('click', () => {
+      state.baseMonth = month;
+      saveState();
+      render();
+    });
+    pills.appendChild(button);
   }
 }
 
