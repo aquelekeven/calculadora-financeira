@@ -76,6 +76,21 @@ const baseRules = [
   { id: uid(), type: 'expense', category: 'emprestimo', description: 'Empréstimo Nubank consignado', amount: 799.55, startMonth: '2026-10', endMonth: '2028-09', day: null, active: true }
 ];
 
+const baseCategories = [
+  { id: 'apartamento', name: 'Apartamento', system: true },
+  { id: 'fixo', name: 'Fixo', system: true },
+  { id: 'casa', name: 'Casa', system: true },
+  { id: 'internet', name: 'Internet/celular', system: true },
+  { id: 'seguro', name: 'Seguro', system: true },
+  { id: 'assinatura', name: 'Assinatura', system: true },
+  { id: 'transporte', name: 'Transporte', system: true },
+  { id: 'pessoas', name: 'Pessoas', system: true },
+  { id: 'cartao', name: 'Cartão', system: true },
+  { id: 'emprestimo', name: 'Empréstimo', system: true },
+  { id: 'renda', name: 'Renda', system: true },
+  { id: 'outros', name: 'Outros', system: true }
+];
+
 const initialState = {
   currentBalance: 186.48,
   baseMonth: '2026-07',
@@ -83,6 +98,8 @@ const initialState = {
   filter: 'all',
   selectedContactId: '',
   contacts: baseContacts,
+  categories: baseCategories,
+  deletedCategoryLabels: {},
   commitments: baseCommitments,
   rules: baseRules
 };
@@ -98,6 +115,7 @@ let activeAccountGroup = null;
 let activeContactFilter = 'all';
 let activeFixedMonthField = '';
 let fixedPickerYear = 2026;
+let pendingDeleteCategoryId = '';
 
 init();
 
@@ -147,6 +165,23 @@ function mergeById(base, existing) {
   return [...map.values()];
 }
 
+function mergeCategories(existing, loaded = {}) {
+  const map = new Map();
+  baseCategories.forEach(category => map.set(category.id, { ...category }));
+
+  existing.forEach(category => {
+    if (!category?.id) return;
+    map.set(category.id, { ...map.get(category.id), ...category });
+  });
+
+  [...(loaded.commitments || []), ...(loaded.rules || [])].forEach(item => {
+    if (!item?.category || map.has(item.category)) return;
+    map.set(item.category, { id: item.category, name: titleFromSlug(item.category), system: false });
+  });
+
+  return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
 function normalizeAndMergeCommitments(existing) {
   const normalizedExisting = existing
     .filter(Boolean)
@@ -183,6 +218,7 @@ function bindEvents() {
   document.getElementById('commitmentForm').addEventListener('submit', saveCommitment);
   document.getElementById('fixedForm').addEventListener('submit', saveFixedRule);
   document.getElementById('contactForm').addEventListener('submit', saveContact);
+  document.getElementById('categoryForm').addEventListener('submit', saveCategory);
   document.getElementById('scenarioValue').addEventListener('input', renderScenario);
   document.getElementById('contactColor')?.addEventListener('input', () => syncColorPicker(false));
   document.getElementById('contactColor')?.addEventListener('change', () => syncColorPicker(true));
@@ -331,6 +367,28 @@ function handleClick(event) {
     return;
   }
 
+  const editCategoryBtn = target.closest('[data-edit-category]');
+  if (editCategoryBtn) {
+    openCategoryModal(editCategoryBtn.dataset.editCategory);
+    return;
+  }
+
+  const deleteCategoryBtn = target.closest('[data-delete-category]');
+  if (deleteCategoryBtn) {
+    openDeleteCategoryModal(deleteCategoryBtn.dataset.deleteCategory);
+    return;
+  }
+
+  if (target.closest('#addCategoryBtn')) {
+    openCategoryModal();
+    return;
+  }
+
+  if (target.closest('#confirmDeleteCategoryBtn')) {
+    confirmDeleteCategory();
+    return;
+  }
+
   const editFixedBtn = target.closest('[data-edit-rule]');
   if (editFixedBtn) {
     openFixedModal(editFixedBtn.dataset.editRule);
@@ -423,6 +481,7 @@ function setScreen(name, options = {}) {
 
   document.body.classList.toggle('contacts-screen', name === 'contacts');
   document.body.classList.toggle('fixed-screen', name === 'fixed');
+  document.body.classList.toggle('categories-screen', name === 'categories');
   if (name === 'contacts' && !activeContactId) showContactsList();
 
   state.currentScreen = name;
@@ -488,6 +547,7 @@ function render() {
   renderAgenda();
   renderContacts();
   renderFixed();
+  renderCategories();
   renderApartment();
   renderScenario();
   populateContactSelect();
@@ -794,6 +854,31 @@ function renderFixed() {
   });
 }
 
+function renderCategories() {
+  const list = document.getElementById('categoriesList');
+  if (!list) return;
+
+  list.innerHTML = '';
+
+  state.categories.forEach(category => {
+    const usage = categoryUsage(category.id);
+    const item = document.createElement('article');
+    item.className = 'category-item';
+    item.innerHTML = `
+      <div class="category-icon">${icon('tag')}</div>
+      <div>
+        <strong>${escapeHtml(category.name)}</strong>
+        <span>${usage.total} uso(s) • ${usage.commitments.length} conta(s), ${usage.rules.length} fixo(s)</span>
+      </div>
+      <div class="category-actions">
+        <button type="button" data-edit-category="${category.id}" aria-label="Editar ${escapeHtml(category.name)}">${icon('edit')}</button>
+        <button class="danger" type="button" data-delete-category="${category.id}" aria-label="Apagar ${escapeHtml(category.name)}">${icon('trash')}</button>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
 function renderApartment() {
   const apartmentItems = state.commitments
     .filter(item => item.category === 'apartamento')
@@ -1044,6 +1129,7 @@ function openCommitmentModal(mode = 'bill', id = '') {
   document.getElementById('commitmentInstallmentCurrent').value = '';
   document.getElementById('commitmentInstallmentTotal').value = '';
   populateContactSelect();
+  populateCategorySelects();
 
   let type = 'expense';
   let title = 'Adicionar conta';
@@ -1126,9 +1212,116 @@ function saveCommitment(event) {
   render();
 }
 
+function openCategoryModal(id = '') {
+  const form = document.getElementById('categoryForm');
+  form.reset();
+  document.getElementById('categoryId').value = '';
+  document.getElementById('categoryModalTitle').textContent = id ? 'Editar categoria' : 'Nova categoria';
+
+  if (id) {
+    const category = categoryById(id);
+    if (!category) return;
+    document.getElementById('categoryId').value = category.id;
+    document.getElementById('categoryName').value = category.name;
+  }
+
+  openModal('categoryModal');
+}
+
+function saveCategory(event) {
+  event.preventDefault();
+
+  const id = document.getElementById('categoryId').value;
+  const name = document.getElementById('categoryName').value.trim();
+  if (!name) return;
+
+  if (id) {
+    const category = categoryById(id);
+    if (!category) return;
+    category.name = name;
+  } else {
+    const baseId = slugify(name) || uid();
+    const newId = state.categories.some(category => category.id === baseId) ? `${baseId}-${Date.now()}` : baseId;
+    state.categories.push({ id: newId, name, system: false });
+  }
+
+  state.categories.sort((a, b) => a.name.localeCompare(b.name));
+  saveState();
+  closeModal('categoryModal');
+  render();
+}
+
+function openDeleteCategoryModal(id) {
+  const category = categoryById(id);
+  if (!category) return;
+
+  pendingDeleteCategoryId = id;
+  const usage = categoryUsage(id);
+
+  document.getElementById('deleteCategoryTitle').textContent = `Apagar “${category.name}”?`;
+  const usageList = document.getElementById('deleteCategoryUsage');
+
+  const items = [
+    ...usage.commitments.map(item => ({ title: item.description, meta: `${money(item.amount)} • ${monthName(item.month, false)} • conta` })),
+    ...usage.rules.map(item => ({ title: item.description, meta: `${money(item.amount)} • fixo/recorrente` }))
+  ];
+
+  if (!items.length) {
+    usageList.innerHTML = '<div class="empty-state">Nenhuma conta ou fixo usando essa categoria.</div>';
+  } else {
+    usageList.innerHTML = `
+      <div class="info-box">${items.length} item(ns) usando essa categoria:</div>
+      ${items.map(item => `
+        <article class="category-usage-item">
+          <strong>${escapeHtml(item.title)}</strong>
+          <span>${escapeHtml(item.meta)}</span>
+        </article>
+      `).join('')}
+    `;
+  }
+
+  openModal('deleteCategoryModal');
+}
+
+function confirmDeleteCategory() {
+  const id = pendingDeleteCategoryId;
+  const category = categoryById(id);
+  if (!category) return;
+
+  const snapshot = { ...category };
+  const previousDeletedLabels = { ...(state.deletedCategoryLabels || {}) };
+
+  state.categories = state.categories.filter(item => item.id !== id);
+  state.deletedCategoryLabels = { ...(state.deletedCategoryLabels || {}), [id]: category.name };
+
+  pendingDeleteCategoryId = '';
+  saveState();
+  closeModal('deleteCategoryModal');
+  render();
+
+  showUndo(`Categoria apagada: ${category.name}`, () => {
+    state.categories.push(snapshot);
+    state.categories.sort((a, b) => a.name.localeCompare(b.name));
+    state.deletedCategoryLabels = previousDeletedLabels;
+    saveState();
+    render();
+  });
+}
+
+function categoryUsage(id) {
+  const commitments = state.commitments.filter(item => item.category === id);
+  const rules = state.rules.filter(item => item.category === id);
+  return { commitments, rules, total: commitments.length + rules.length };
+}
+
+function categoryById(id) {
+  return state.categories.find(category => category.id === id) || null;
+}
+
 function openFixedModal(id = '') {
   document.getElementById('fixedForm').reset();
   populateContactSelect();
+  populateCategorySelects();
   document.getElementById('fixedId').value = '';
   document.getElementById('fixedCustomCategoryWrap')?.classList.add('is-hidden');
   document.getElementById('fixedCustomCategory').value = '';
@@ -1228,10 +1421,13 @@ function saveFixedRule(event) {
   event.preventDefault();
 
   const id = document.getElementById('fixedId').value;
+  const customCategoryName = document.getElementById('fixedCustomCategory').value.trim();
+  const fixedCategoryId = customCategoryName ? ensureCategory(customCategoryName) : document.getElementById('fixedCategory').value;
+
   const data = {
     id: id || uid(),
     type: 'expense',
-    category: document.getElementById('fixedCustomCategory').value.trim() || document.getElementById('fixedCategory').value,
+    category: fixedCategoryId,
     description: document.getElementById('fixedDescription').value.trim(),
     amount: parseMoney(document.getElementById('fixedAmount').value) || 0,
     day: Number(document.getElementById('fixedDay').value) || null,
@@ -1587,21 +1783,30 @@ function statusIcon(status) {
   }[status] || '•';
 }
 
+function ensureCategory(name) {
+  const existing = state.categories.find(category => category.name.toLowerCase() === name.toLowerCase());
+  if (existing) return existing.id;
+
+  const baseId = slugify(name) || uid();
+  const id = state.categories.some(category => category.id === baseId) ? `${baseId}-${Date.now()}` : baseId;
+  state.categories.push({ id, name, system: false });
+  state.categories.sort((a, b) => a.name.localeCompare(b.name));
+  return id;
+}
+
+function titleFromSlug(value) {
+  return String(value || '')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, letter => letter.toUpperCase()) || 'Categoria';
+}
+
 function catLabel(category) {
-  return {
-    apartamento: 'Apartamento',
-    fixo: 'Fixo',
-    casa: 'Casa',
-    internet: 'Internet/celular',
-    seguro: 'Seguro',
-    assinatura: 'Assinatura',
-    transporte: 'Transporte',
-    pessoas: 'Pessoas',
-    cartao: 'Cartão',
-    emprestimo: 'Empréstimo',
-    renda: 'Renda',
-    outros: 'Outros'
-  }[category] || category;
+  if (!category) return 'Sem categoria';
+  return categoryById(category)?.name
+    || state.deletedCategoryLabels?.[category]
+    || titleFromSlug(category);
 }
 
 function installmentLabel(item) {

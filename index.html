@@ -28,6 +28,7 @@
   <symbol id="i-note" viewBox="0 0 24 24"><path d="M7 4.5h10a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-4-4v-9a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 9h6M9 12.5h6M9 16h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
   <symbol id="i-edit" viewBox="0 0 24 24"><path d="m6.5 17.5 1-4 8.6-8.6a2 2 0 0 1 2.8 2.8l-8.6 8.6-3.8 1.2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m14.5 6.5 3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
   <symbol id="i-trash" viewBox="0 0 24 24"><path d="M8 7.5v10a1.5 1.5 0 0 0 1.5 1.5h5a1.5 1.5 0 0 0 1.5-1.5v-10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M6.5 7.5h11M9.5 7.5V6A1.5 1.5 0 0 1 11 4.5h2A1.5 1.5 0 0 1 14.5 6v1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M4.8 11.4 11.4 4.8h6.1a1.7 1.7 0 0 1 1.7 1.7v6.1l-6.6 6.6a2.1 2.1 0 0 1-3 0l-4.8-4.8a2.1 2.1 0 0 1 0-3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="15.7" cy="8.3" r="1.1" fill="currentColor"/></symbol>
 </svg>
 
   <div class="app-shell">
@@ -44,6 +45,7 @@
         <nav class="drawer-menu">
           <button type="button" data-screen="contacts"><span class="drawer-icon"><svg class="ui-icon " aria-hidden="true"><use href="#i-contact"></use></svg></span><div><strong>Contatos</strong><small>Histórico por pessoa</small></div></button>
           <button type="button" data-screen="fixed"><span class="drawer-icon"><svg class="ui-icon " aria-hidden="true"><use href="#i-pin"></use></svg></span><div><strong>Fixos</strong><small>Recorrentes e parcelas</small></div></button>
+          <button type="button" data-screen="categories"><span class="drawer-icon"><svg class="ui-icon " aria-hidden="true"><use href="#i-tag"></use></svg></span><div><strong>Categorias</strong><small>Organizar tipos de conta</small></div></button>
         </nav>
       </div>
     </aside>
@@ -237,6 +239,21 @@
           </div>
           <div class="info-box">Aqui ficam as regras que se repetem. Elas aparecem automaticamente nos meses depois que ligarmos a geração automática.</div>
           <div class="rules-list" id="fixedList"></div>
+        </section>
+      </section>
+
+      <section class="screen" id="screen-categories">
+        <section class="page-card categories-page">
+          <div class="page-head">
+            <div>
+              <p>organização</p>
+              <h2>Categorias</h2>
+            </div>
+            <button class="small-btn" type="button" id="addCategoryBtn"><svg class="ui-icon " aria-hidden="true"><use href="#i-tag"></use></svg><span>categoria</span></button>
+          </div>
+
+          <div class="info-box">Edite os nomes, crie novas categorias ou apague as que não usa mais. Apagar categoria não apaga as contas/fixos já cadastrados.</div>
+          <div class="categories-list" id="categoriesList"></div>
         </section>
       </section>
 
@@ -544,6 +561,49 @@
         </div>
 
         <div class="commitment-list spacious" id="accountGroupList"></div>
+      </div>
+    </div>
+
+
+    <div class="modal" id="categoryModal" aria-hidden="true">
+      <div class="modal-panel">
+        <div class="modal-head">
+          <div>
+            <p>categoria</p>
+            <h2 id="categoryModalTitle">Nova categoria</h2>
+          </div>
+          <button type="button" class="icon-btn" data-close-modal="categoryModal"><svg class="ui-icon " aria-hidden="true"><use href="#i-close"></use></svg></button>
+        </div>
+
+        <form id="categoryForm">
+          <input type="hidden" id="categoryId" />
+          <label><span>Nome da categoria</span><input id="categoryName" placeholder="Ex: Faculdade" required /></label>
+          <button class="primary-btn" type="submit">Salvar categoria</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="deleteCategoryModal" aria-hidden="true">
+      <div class="modal-panel delete-category-panel">
+        <div class="modal-head">
+          <div>
+            <p>apagar categoria</p>
+            <h2 id="deleteCategoryTitle">Tem certeza?</h2>
+          </div>
+          <button type="button" class="icon-btn" data-close-modal="deleteCategoryModal"><svg class="ui-icon " aria-hidden="true"><use href="#i-close"></use></svg></button>
+        </div>
+
+        <div class="delete-warning-card">
+          <strong>Isso não apaga nenhuma conta nem fixo.</strong>
+          <span>Os lançamentos abaixo só vão continuar com a categoria antiga salva neles.</span>
+        </div>
+
+        <div class="category-usage-list" id="deleteCategoryUsage"></div>
+
+        <div class="detail-actions">
+          <button class="secondary-btn" type="button" data-close-modal="deleteCategoryModal">Cancelar</button>
+          <button class="danger-btn" type="button" id="confirmDeleteCategoryBtn"><svg class="ui-icon " aria-hidden="true"><use href="#i-trash"></use></svg><span>Apagar categoria</span></button>
+        </div>
       </div>
     </div>
 
