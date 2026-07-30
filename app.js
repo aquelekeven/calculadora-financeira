@@ -1879,10 +1879,18 @@ function randomContactColor() {
 function syncThemeButton(theme) {
   const btn = document.getElementById('themeBtn');
   if (!btn) return;
+
   const resolved = theme === 'dark' ? 'dark' : 'light';
   const iconName = resolved === 'dark' ? 'sun' : 'moon';
-  btn.innerHTML = icon(iconName);
+  const knob = btn.querySelector('.theme-switch-knob');
+
+  btn.dataset.theme = resolved;
+  btn.setAttribute('aria-pressed', String(resolved === 'dark'));
   btn.setAttribute('aria-label', resolved === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro');
+
+  if (knob) {
+    knob.innerHTML = icon(iconName);
+  }
 }
 
 function applyTheme(theme) {
