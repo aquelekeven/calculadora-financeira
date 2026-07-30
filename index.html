@@ -219,14 +219,18 @@
       </div>
     </aside>
 
-    <nav class="floating-nav" id="floatingNav" aria-label="Navegação principal">
+    <div class="fab-backdrop" id="fabBackdrop" aria-hidden="true"></div>
+    <nav class="floating-nav" id="floatingNav" aria-label="Ações rápidas">
       <div class="nav-actions" id="navActions">
-        <button class="dock-action active" data-tab="home" type="button" aria-label="Início"><span>⌂</span><small>Início</small></button>
-        <button class="dock-action" data-tab="months" type="button" aria-label="Meses"><span>▤</span><small>Meses</small></button>
-        <button class="dock-action" data-tab="settings" type="button" aria-label="Ajustes"><span>◌</span><small>Ajustes</small></button>
+        <button class="fab-action action-home active" data-tab="home" type="button" aria-label="Início"><span>⌂</span><small>Início</small></button>
+        <button class="fab-action action-months" data-tab="months" type="button" aria-label="Meses"><span>▤</span><small>Meses</small></button>
+        <button class="fab-action action-saida" data-tab="add" data-kind="saida" type="button" aria-label="Adicionar saída"><span>−</span><small>Saída</small></button>
+        <button class="fab-action action-settings" data-tab="settings" type="button" aria-label="Ajustes"><span>◌</span><small>Ajustes</small></button>
       </div>
-      <button class="nav-trigger" id="navTrigger" type="button" aria-expanded="false" aria-label="Abrir navegação"><span>＋</span></button>
-      <button class="nav-add" data-tab="add" type="button" aria-label="Adicionar lançamento"><span>↗</span></button>
+      <button class="nav-trigger" id="navTrigger" type="button" aria-expanded="false" aria-label="Abrir ações rápidas">
+        <span class="fab-closed">＋</span>
+        <span class="fab-open">＋ Entrada</span>
+      </button>
     </nav>
   </div>
 

@@ -309,7 +309,7 @@ function renderTransaction(entry, allowDelete) {
 function setTab(tab) {
   document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
   document.getElementById(`screen-${tab}`).classList.add('active');
-  document.querySelectorAll('.dock-action').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+  document.querySelectorAll('.fab-action').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab && !btn.dataset.kind));
   closeDrawer();
   closeFloatingNav();
   if (tab === 'add') document.getElementById('entryDescription').focus({ preventScroll: true });
@@ -361,6 +361,7 @@ document.addEventListener('click', event => {
     const tab = navTarget.dataset.tab;
     if (navTarget.dataset.kind) setEntryType(navTarget.dataset.kind);
     setTab(tab);
+    if (navTarget.closest('#floatingNav')) closeFloatingNav();
   }
 
   const deleteBtn = event.target.closest('.delete-chip');
@@ -401,8 +402,9 @@ function closeDrawer() {
 function toggleFloatingNav() {
   const nav = document.getElementById('floatingNav');
   const trigger = document.getElementById('navTrigger');
-  nav.classList.toggle('open');
-  trigger.setAttribute('aria-expanded', nav.classList.contains('open') ? 'true' : 'false');
+  const isOpen = nav.classList.toggle('open');
+  document.body.classList.toggle('fab-open', isOpen);
+  trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
 }
 
 function closeFloatingNav() {
@@ -410,6 +412,7 @@ function closeFloatingNav() {
   const trigger = document.getElementById('navTrigger');
   if (!nav || !trigger) return;
   nav.classList.remove('open');
+  document.body.classList.remove('fab-open');
   trigger.setAttribute('aria-expanded', 'false');
 }
 
@@ -420,8 +423,17 @@ document.getElementById('sideDrawer').addEventListener('click', event => {
 });
 document.getElementById('navTrigger').addEventListener('click', event => {
   event.stopPropagation();
+  const nav = document.getElementById('floatingNav');
+  if (nav.classList.contains('open')) {
+    setEntryType('entrada');
+    setTab('add');
+    closeFloatingNav();
+    return;
+  }
   toggleFloatingNav();
 });
+
+document.getElementById('fabBackdrop').addEventListener('click', closeFloatingNav);
 
 document.getElementById('baseMonthSelect').addEventListener('change', event => {
   state.baseMonth = event.target.value;

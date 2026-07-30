@@ -1,4 +1,4 @@
-# Financeiro Keven — v1.2
+# Financeiro Keven — v1.3
 
 App financeiro local, mobile first, com dados salvos no navegador via `localStorage`.
 
@@ -6,14 +6,13 @@ App financeiro local, mobile first, com dados salvos no navegador via `localStor
 
 Abra o arquivo `index.html` no navegador.
 
-## O que entrou na v1.2
+## O que entrou na v1.3
 
-- Visual mais clean, estilo Notion / preto e branco.
-- Removido o texto “Pra não deixar virar bola de neve”.
-- Menu hambúrguer agora abre um menu lateral.
-- Navegação inferior virou botão flutuante expansível.
-- Modo claro/escuro mantido.
-- Estrutura continua local/offline, pronta para futura integração com Supabase.
+- Menu flutuante refeito no estilo floating button.
+- Ao abrir o botão, o fundo fica desfocado e os atalhos aparecem ao redor.
+- O botão principal aberto vira “+ Entrada”, em verde, por ser a ação mais usada.
+- Para fechar o menu, basta tocar fora dele.
+- Mantidos visual clean, modo claro/escuro e menu lateral.
 
 ## Privacidade
 
