@@ -844,7 +844,7 @@ function renderCommitment(item) {
 
   const isPaid = item.status === 'paid';
   const actionStatus = isPaid ? 'waiting' : 'paid';
-  const actionText = isPaid ? '↩ Pendente' : '✓ Pago';
+  const actionText = isPaid ? 'Pendente' : 'Pago';
   const actionClass = isPaid ? 'to-pending' : 'to-paid';
 
   const action = document.createElement('button');
@@ -921,10 +921,37 @@ function attachSwipeToCommitment(article, content) {
   let startY = 0;
   let currentX = 0;
   let dragging = false;
+  let moved = false;
   const max = 118;
+  const revealThreshold = 34;
+  const confirmThreshold = max * 0.58;
+
+  const action = article.querySelector('.commitment-swipe-action');
+  const id = action?.dataset.statusAction;
+  const status = action?.dataset.statusValue;
 
   const setTranslate = value => {
-    content.style.transform = `translateX(${-Math.min(Math.max(value, 0), max)}px)`;
+    const clamped = Math.min(Math.max(value, 0), max);
+    content.style.transform = `translateX(${-clamped}px)`;
+    action.style.opacity = String(0.7 + (clamped / max) * 0.3);
+    currentX = clamped;
+  };
+
+  const closeOthers = () => {
+    document.querySelectorAll('.commitment-item.swipe-open').forEach(card => {
+      if (card !== article) card.classList.remove('swipe-open');
+    });
+  };
+
+  const autoConfirm = () => {
+    if (!id || !status) return;
+    closeOthers();
+    article.classList.add('swipe-open', 'auto-confirming');
+    action.classList.add('auto-confirm');
+
+    setTimeout(() => {
+      setCommitmentStatus(id, status);
+    }, 260);
   };
 
   const endSwipe = () => {
@@ -932,12 +959,15 @@ function attachSwipeToCommitment(article, content) {
     dragging = false;
     article.classList.remove('swiping');
     content.style.transform = '';
+    action.style.opacity = '';
 
-    const shouldOpen = currentX > 46;
-    document.querySelectorAll('.commitment-item.swipe-open').forEach(card => {
-      if (card !== article) card.classList.remove('swipe-open');
-    });
-    article.classList.toggle('swipe-open', shouldOpen);
+    if (currentX >= confirmThreshold) {
+      autoConfirm();
+      return;
+    }
+
+    closeOthers();
+    article.classList.toggle('swipe-open', currentX >= revealThreshold);
   };
 
   content.addEventListener('pointerdown', event => {
@@ -945,24 +975,37 @@ function attachSwipeToCommitment(article, content) {
     startY = event.clientY;
     currentX = article.classList.contains('swipe-open') ? max : 0;
     dragging = true;
+    moved = false;
     article.classList.add('swiping');
+    content.setPointerCapture?.(event.pointerId);
   });
 
   content.addEventListener('pointermove', event => {
     if (!dragging) return;
+
     const dx = startX - event.clientX;
     const dy = Math.abs(startY - event.clientY);
 
     if (dy > 18 && Math.abs(dx) < 24) return;
+    if (Math.abs(dx) > 6) moved = true;
 
     event.preventDefault();
-    currentX = article.classList.contains('swipe-open') ? max + dx : dx;
-    setTranslate(currentX);
+
+    const base = article.classList.contains('swipe-open') ? max : 0;
+    setTranslate(base + dx);
   });
 
   content.addEventListener('pointerup', endSwipe);
   content.addEventListener('pointercancel', endSwipe);
-  content.addEventListener('pointerleave', endSwipe);
+  content.addEventListener('lostpointercapture', endSwipe);
+
+  content.addEventListener('click', event => {
+    if (moved) {
+      event.stopPropagation();
+      event.preventDefault();
+      moved = false;
+    }
+  }, true);
 }
 
 function openCommitmentModal(mode = 'bill', id = '') {
@@ -1387,18 +1430,34 @@ function showUndo(text, action) {
   if (undoTimer) clearTimeout(undoTimer);
   pendingUndo = action;
 
+  const duration = 10000;
   const toast = document.getElementById('undoToast');
   document.getElementById('undoText').textContent = text;
+  toast.style.setProperty('--undo-duration', `${duration}ms`);
   toast.hidden = false;
+  toast.classList.remove('hiding', 'show');
+
+  // força reiniciar a animação da barrinha
+  void toast.offsetWidth;
+
   requestAnimationFrame(() => toast.classList.add('show'));
 
   undoTimer = setTimeout(() => {
-    toast.classList.remove('show');
+    hideUndoToast();
     pendingUndo = null;
-    setTimeout(() => {
-      if (!toast.classList.contains('show')) toast.hidden = true;
-    }, 220);
-  }, 10000);
+  }, duration);
+}
+
+function hideUndoToast() {
+  const toast = document.getElementById('undoToast');
+  toast.classList.add('hiding');
+  toast.classList.remove('show');
+  setTimeout(() => {
+    if (!toast.classList.contains('show')) {
+      toast.hidden = true;
+      toast.classList.remove('hiding');
+    }
+  }, 260);
 }
 
 function undoLastAction() {
@@ -1408,9 +1467,7 @@ function undoLastAction() {
   pendingUndo = null;
 
   if (undoTimer) clearTimeout(undoTimer);
-  const toast = document.getElementById('undoToast');
-  toast.classList.remove('show');
-  setTimeout(() => toast.hidden = true, 220);
+  hideUndoToast();
 }
 
 function calcMonth(month) {

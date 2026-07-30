@@ -1594,3 +1594,99 @@ body.fixed-screen .month-selector-card {
     grid-template-columns: 38px minmax(0, 1fr) auto;
   }
 }
+
+
+/* Swipe mais fluido */
+.commitment-swipe-content {
+  transition: transform .22s cubic-bezier(.2,.8,.2,1);
+  will-change: transform;
+}
+
+.commitment-swipe-action {
+  transition: transform .22s cubic-bezier(.2,.8,.2,1), opacity .18s ease, filter .18s ease;
+  opacity: .96;
+}
+
+.commitment-swipe-action.to-pending {
+  background: color-mix(in srgb, var(--orange) 84%, #fff 16%);
+  color: #fff;
+}
+
+.commitment-swipe-action.auto-confirm {
+  animation: swipeConfirm .34s ease both;
+}
+
+.commitment-item.auto-confirming .commitment-swipe-content {
+  animation: swipeContentConfirm .34s ease both;
+}
+
+@keyframes swipeConfirm {
+  0% { filter: brightness(1); transform: translateX(0) scale(1); }
+  50% { filter: brightness(1.08); transform: translateX(0) scale(1.03); }
+  100% { filter: brightness(1); transform: translateX(0) scale(1); }
+}
+
+@keyframes swipeContentConfirm {
+  0% { transform: translateX(-118px); }
+  55% { transform: translateX(-128px); }
+  100% { transform: translateX(-118px); }
+}
+
+/* Toast desfazer clean */
+.undo-toast {
+  overflow: hidden;
+  width: min(calc(100vw - 32px), 440px);
+  padding: 14px 14px 18px;
+  border-radius: 22px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: 0 18px 44px rgba(0,0,0,.14);
+  align-items: center;
+  opacity: 0;
+  transform: translateX(-50%) translateY(22px) scale(.98);
+}
+
+.undo-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.undo-toast.hiding {
+  opacity: 0;
+  transform: translateX(-50%) translateY(24px) scale(.98);
+}
+
+.undo-toast span {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.undo-toast button {
+  background: color-mix(in srgb, var(--green) 12%, var(--surface));
+  color: var(--green);
+  border: 1px solid color-mix(in srgb, var(--green) 28%, var(--line));
+  font-weight: 900;
+}
+
+.undo-toast::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 8px;
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--green) 72%, var(--surface));
+  transform-origin: left center;
+  animation: undoProgress var(--undo-duration, 10000ms) linear forwards;
+}
+
+.undo-toast:not(.show)::after {
+  animation: none;
+}
+
+@keyframes undoProgress {
+  from { transform: scaleX(1); opacity: 1; }
+  to { transform: scaleX(0); opacity: .7; }
+}
