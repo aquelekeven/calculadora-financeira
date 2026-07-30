@@ -12,188 +12,289 @@
     <aside class="side-drawer" id="sideDrawer" aria-hidden="true">
       <div class="drawer-panel">
         <div class="drawer-head">
-          <div><span>agenda financeira</span><strong>Keven</strong></div>
-          <button class="icon-btn" id="closeDrawerBtn" type="button" aria-label="Fechar menu">×</button>
+          <div>
+            <span>agenda financeira</span>
+            <strong>Keven</strong>
+          </div>
+          <button class="icon-btn js-close-drawer" type="button" aria-label="Fechar menu">×</button>
         </div>
+
         <nav class="drawer-menu">
-          <button type="button" data-nav="home"><span>⌂</span><div><strong>Hoje</strong><small>O que falta pagar</small></div></button>
-          <button type="button" data-nav="agenda"><span>▤</span><div><strong>Agenda</strong><small>Mês selecionado</small></div></button>
-          <button type="button" data-nav="contacts"><span>☻</span><div><strong>Contatos</strong><small>Histórico por pessoa</small></div></button>
-          <button type="button" data-nav="fixed"><span>↻</span><div><strong>Fixos</strong><small>Recorrentes e parcelas</small></div></button>
-          <button type="button" data-nav="apartment"><span>⌑</span><div><strong>Apartamento</strong><small>MR, SR e Caixa</small></div></button>
-          <button type="button" data-nav="scenario"><span>◇</span><div><strong>Cenários</strong><small>Freela, PLR e simulações</small></div></button>
+          <button type="button" data-screen="home"><span>⌂</span><div><strong>Hoje</strong><small>O que falta pagar</small></div></button>
+          <button type="button" data-screen="agenda"><span>▤</span><div><strong>Agenda</strong><small>Mês selecionado</small></div></button>
+          <button type="button" data-screen="contacts"><span>☻</span><div><strong>Contatos</strong><small>Histórico por pessoa</small></div></button>
+          <button type="button" data-screen="fixed"><span>↻</span><div><strong>Fixos</strong><small>Recorrentes e parcelas</small></div></button>
+          <button type="button" data-screen="apartment"><span>⌑</span><div><strong>Apartamento</strong><small>MR, SR e Caixa</small></div></button>
+          <button type="button" data-screen="scenario"><span>◇</span><div><strong>Cenários</strong><small>Freela, PLR e simulações</small></div></button>
         </nav>
       </div>
     </aside>
-    <div class="drawer-backdrop" id="drawerBackdrop"></div>
+
+    <div class="drawer-backdrop js-close-drawer" id="drawerBackdrop"></div>
 
     <header class="top-bar">
       <button class="icon-btn" id="menuBtn" type="button" aria-label="Abrir menu">☰</button>
-      <div><span>agenda financeira</span><strong>Keven</strong></div>
+      <div>
+        <span>agenda financeira</span>
+        <strong>Keven</strong>
+      </div>
       <button class="icon-btn" id="themeBtn" type="button" aria-label="Alternar tema">◐</button>
     </header>
 
-    <section class="month-selector-card reveal reveal-1" id="monthSelectorCard">
+    <section class="month-selector-card" id="monthSelectorCard">
       <button class="month-selector-trigger" id="monthSelectorTrigger" type="button" aria-expanded="false">
         <span>Mês selecionado</span>
-        <strong id="monthRailCurrent">Julho 2026</strong>
-        <small class="month-chevron" aria-hidden="true">⌄</small>
+        <strong id="monthTitle">Julho de 2026</strong>
+        <small class="month-chevron">⌄</small>
       </button>
 
       <div class="month-selector-panel" id="monthSelectorPanel" aria-hidden="true">
         <div class="month-selector-head">
           <button type="button" id="prevMonthBtn" aria-label="Mês anterior">‹</button>
-          <button class="current-month-btn inline" type="button" id="currentMonthBtn">Voltar para o mês atual</button>
+          <button type="button" class="current-month-btn" id="currentMonthBtn">Voltar para o mês atual</button>
           <button type="button" id="nextMonthBtn" aria-label="Próximo mês">›</button>
         </div>
-
         <div class="month-pills" id="monthPills"></div>
       </div>
     </section>
-<main class="screen active" id="screen-home">
-      <section class="hero-card reveal reveal-2">
-        <div class="hero-title"><p>Hoje</p><h1>O que falta pagar?</h1></div>
-<div class="main-numbers">
-          <div><span>Saldo atual</span><strong id="currentBalance">R$ 0,00</strong></div>
-          <div><span>Falta pagar</span><strong id="pendingTotal">R$ 0,00</strong></div>
-        </div>
-        <div class="result-card" id="resultCard">
-          <span>Depois de pagar tudo</span><strong id="projectedResult">R$ 0,00</strong>
-        </div>
-      </section>
 
-      <section class="quick-grid reveal reveal-3">
-        <button type="button" data-open-create="bill"><span>＋</span><strong>Conta</strong></button>
-        <button type="button" data-open-create="income"><span>↙</span><strong>Entrada</strong></button>
-        <button type="button" data-nav="agenda"><span>▤</span><strong>Agenda</strong></button>
-      </section>
+    <main class="content-area" id="contentArea">
+      <section class="screen active" id="screen-home">
+        <section class="hero-card">
+          <div class="hero-title">
+            <p>Hoje</p>
+            <h1>O que falta pagar?</h1>
+          </div>
 
-      <section class="section-card reveal reveal-6">
-        <div class="section-head"><div><p>atenção</p><h2>Atrasados</h2></div><span class="count-pill" id="lateCount">0</span></div>
-        <div class="commitment-list" id="lateList"></div>
-      </section>
-
-      <section class="section-card reveal reveal-6">
-        <div class="section-head"><div><p>próximos</p><h2>Até o fim do mês</h2><span class="section-total" id="currentListTotal">Total: R$ 0,00</span></div><button class="text-btn" type="button" data-nav="agenda">ver tudo</button></div>
-        <div class="commitment-list" id="currentList"></div>
-      </section>
-
-      <section class="section-card reveal reveal-6">
-        <div class="section-head"><div><p>visão rápida</p><h2>Próximos 2 meses</h2></div></div>
-        <div class="future-months" id="futureMonths"></div>
-      </section>
-    </main>
-
-    <main class="screen" id="screen-agenda">
-      <section class="page-card">
-        <div class="page-head"><div><p>agenda</p><h2>Mês selecionado</h2></div><button class="small-btn" type="button" data-open-create="bill">＋ conta</button></div>
-        <div class="status-tabs" id="statusTabs">
-          <button type="button" data-filter="all" class="active">Todos</button>
-          <button type="button" data-filter="waiting">Aguardando</button>
-          <button type="button" data-filter="paid">Pagos</button>
-          <button type="button" data-filter="unpaid">Não pagos</button>
-        </div>
-        <div class="agenda-summary" id="agendaSummary"></div>
-        <div class="commitment-list spacious" id="agendaList"></div>
-      </section>
-    </main>
-
-
-    <main class="screen" id="screen-contacts">
-      <section class="page-card">
-        <div class="page-head">
-          <div><p>contatos</p><h2>Histórico por pessoa</h2></div>
-          <button class="small-btn" type="button" id="addContactBtn">＋ contato</button>
-        </div>
-
-        <div class="contacts-grid" id="contactsGrid"></div>
-
-        <div class="contact-history-card" id="contactHistoryCard">
-          <div class="section-head">
+          <div class="main-numbers">
             <div>
-              <p>histórico do contato</p>
-              <h2 id="contactHistoryTitle">Escolha alguém acima</h2>
+              <span>Saldo atual</span>
+              <strong id="currentBalance">R$ 0,00</strong>
+            </div>
+            <div>
+              <span>Falta pagar</span>
+              <strong id="pendingTotal">R$ 0,00</strong>
             </div>
           </div>
-          <div class="commitment-list spacious" id="contactHistoryList"></div>
-        </div>
-      </section>
-    </main>
 
-    <main class="screen" id="screen-fixed">
-      <section class="page-card">
-        <div class="page-head"><div><p>configuração</p><h2>Fixos e parcelas</h2></div><button class="small-btn" type="button" data-open-fixed>＋ fixo</button></div>
-        <div class="info-box">Aqui ficam as regras que se repetem. Elas aparecem automaticamente nos meses, sem lançar tudo de novo.</div>
-        <div class="rules-list" id="fixedList"></div>
-      </section>
-    </main>
-
-    <main class="screen" id="screen-apartment">
-      <section class="page-card">
-        <div class="page-head"><div><p>controle separado</p><h2>Apartamento</h2></div><button class="small-btn" type="button" data-open-create="apartment">＋ apê</button></div>
-        <div class="apartment-grid">
-          <article><span>MR do mês</span><strong id="aptMR">R$ 0,00</strong></article>
-          <article><span>Caixa / evolução</span><strong id="aptCaixa">aguardando</strong></article>
-          <article><span>SR anual</span><strong id="aptSR">R$ 0,00</strong></article>
-        </div>
-        <div class="commitment-list spacious" id="apartmentList"></div>
-      </section>
-    </main>
-
-    <main class="screen" id="screen-scenario">
-      <section class="page-card">
-        <div class="page-head"><div><p>simulação</p><h2>E se entrar mais grana?</h2></div></div>
-        <div class="scenario-card">
-          <label><span>Entrada extra simulada</span><input id="scenarioValue" inputmode="decimal" placeholder="Ex: 500,00" /></label>
-          <div class="preset-row">
-            <button type="button" data-scenario-preset="300">300</button>
-            <button type="button" data-scenario-preset="500">500</button>
-            <button type="button" data-scenario-preset="800">800</button>
-            <button type="button" data-scenario-preset="1500">1500</button>
-            <button type="button" data-scenario-preset="4000">PLR 4000</button>
+          <div class="result-card" id="resultCard">
+            <span>Depois de pagar tudo</span>
+            <strong id="projectedResult">R$ 0,00</strong>
           </div>
-          <div class="scenario-result" id="scenarioResult"></div>
-        </div>
+        </section>
+
+        <section class="quick-grid">
+          <button type="button" data-open-create="bill"><span>＋</span><strong>Conta</strong></button>
+          <button type="button" data-open-create="income"><span>↙</span><strong>Entrada</strong></button>
+          <button type="button" data-screen="agenda"><span>▤</span><strong>Agenda</strong></button>
+        </section>
+
+        <section class="section-card">
+          <div class="section-head">
+            <div>
+              <p>atenção</p>
+              <h2>Atrasados</h2>
+            </div>
+            <span class="count-pill" id="lateCount">0</span>
+          </div>
+          <div class="commitment-list" id="lateList"></div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-head">
+            <div>
+              <p>próximos</p>
+              <h2>Até o fim do mês</h2>
+              <span class="section-total" id="currentListTotal">Total: R$ 0,00</span>
+            </div>
+            <button class="text-btn" type="button" data-screen="agenda">ver tudo</button>
+          </div>
+          <div class="commitment-list" id="currentList"></div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-head">
+            <div>
+              <p>visão rápida</p>
+              <h2>Próximos 2 meses</h2>
+            </div>
+          </div>
+          <div class="future-months" id="futureMonths"></div>
+        </section>
+      </section>
+
+      <section class="screen" id="screen-agenda">
+        <section class="page-card">
+          <div class="page-head">
+            <div>
+              <p>agenda</p>
+              <h2>Mês selecionado</h2>
+            </div>
+            <button class="small-btn" type="button" data-open-create="bill">＋ conta</button>
+          </div>
+
+          <div class="status-tabs" id="statusTabs">
+            <button type="button" data-filter="all" class="active">Todos</button>
+            <button type="button" data-filter="waiting">Aguardando</button>
+            <button type="button" data-filter="paid">Pagos</button>
+            <button type="button" data-filter="unpaid">Não pagos</button>
+          </div>
+
+          <div class="agenda-summary" id="agendaSummary"></div>
+          <div class="commitment-list spacious" id="agendaList"></div>
+        </section>
+      </section>
+
+      <section class="screen" id="screen-contacts">
+        <section class="page-card">
+          <div class="page-head">
+            <div>
+              <p>contatos</p>
+              <h2>Histórico por pessoa</h2>
+            </div>
+            <button class="small-btn" type="button" id="addContactBtn">＋ contato</button>
+          </div>
+
+          <div class="contacts-grid" id="contactsGrid"></div>
+
+          <div class="contact-history-card is-hidden" id="contactHistoryCard">
+            <div class="section-head">
+              <div>
+                <p>histórico do contato</p>
+                <h2 id="contactHistoryTitle">Escolha alguém acima</h2>
+              </div>
+            </div>
+            <div class="commitment-list spacious" id="contactHistoryList"></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="screen" id="screen-fixed">
+        <section class="page-card">
+          <div class="page-head">
+            <div>
+              <p>configuração</p>
+              <h2>Fixos e parcelas</h2>
+            </div>
+            <button class="small-btn" type="button" id="addFixedBtn">＋ fixo</button>
+          </div>
+          <div class="info-box">Aqui ficam as regras que se repetem. Elas aparecem automaticamente nos meses depois que ligarmos a geração automática.</div>
+          <div class="rules-list" id="fixedList"></div>
+        </section>
+      </section>
+
+      <section class="screen" id="screen-apartment">
+        <section class="page-card">
+          <div class="page-head">
+            <div>
+              <p>controle separado</p>
+              <h2>Apartamento</h2>
+            </div>
+            <button class="small-btn" type="button" data-open-create="apartment">＋ apê</button>
+          </div>
+
+          <div class="apartment-grid">
+            <article><span>MR do mês</span><strong id="aptMR">não lançado</strong></article>
+            <article><span>Caixa / evolução</span><strong id="aptCaixa">aguardando</strong></article>
+            <article><span>SR anual</span><strong id="aptSR">não lançado</strong></article>
+          </div>
+
+          <div class="commitment-list spacious" id="apartmentList"></div>
+        </section>
+      </section>
+
+      <section class="screen" id="screen-scenario">
+        <section class="page-card">
+          <div class="page-head">
+            <div>
+              <p>simulação</p>
+              <h2>E se entrar mais grana?</h2>
+            </div>
+          </div>
+
+          <div class="scenario-card">
+            <label>
+              <span>Entrada extra simulada</span>
+              <input id="scenarioValue" inputmode="decimal" placeholder="Ex: 500,00" />
+            </label>
+
+            <div class="preset-row">
+              <button type="button" data-scenario-preset="300">300</button>
+              <button type="button" data-scenario-preset="500">500</button>
+              <button type="button" data-scenario-preset="800">800</button>
+              <button type="button" data-scenario-preset="1500">1500</button>
+              <button type="button" data-scenario-preset="4000">PLR 4000</button>
+            </div>
+
+            <div class="scenario-result" id="scenarioResult"></div>
+          </div>
+        </section>
       </section>
     </main>
 
-    <div class="bottom-nav">
-      <button type="button" data-nav="home" class="active"><span>⌂</span><small>Hoje</small></button>
-      <button type="button" data-nav="agenda"><span>▤</span><small>Agenda</small></button>
+    <nav class="bottom-nav">
+      <button type="button" data-screen="home" class="active"><span>⌂</span><small>Hoje</small></button>
+      <button type="button" data-screen="agenda"><span>▤</span><small>Agenda</small></button>
       <button type="button" data-open-create="bill" class="add-main"><span>＋</span></button>
-      <button type="button" data-nav="apartment"><span>⌑</span><small>Apê</small></button>
-      <button type="button" data-nav="scenario"><span>◇</span><small>Cenários</small></button>
-    </div>
+      <button type="button" data-screen="apartment"><span>⌑</span><small>Apê</small></button>
+      <button type="button" data-screen="scenario"><span>◇</span><small>Cenários</small></button>
+    </nav>
 
     <div class="modal" id="commitmentModal" aria-hidden="true">
       <div class="modal-panel">
-        <div class="modal-head"><div><p>novo compromisso</p><h2 id="modalTitle">Adicionar conta</h2></div><button type="button" class="icon-btn" id="closeModalBtn">×</button></div>
+        <div class="modal-head">
+          <div>
+            <p>novo compromisso</p>
+            <h2 id="modalTitle">Adicionar conta</h2>
+          </div>
+          <button type="button" class="icon-btn" data-close-modal="commitmentModal">×</button>
+        </div>
+
         <form id="commitmentForm">
           <input type="hidden" id="commitmentId" />
+
           <div class="type-toggle">
             <button type="button" data-modal-type="expense" class="selected">Conta a pagar</button>
             <button type="button" data-modal-type="income">Entrada</button>
           </div>
+
           <label><span>Nome da conta</span><input id="commitmentDescription" placeholder="Ex: Claro" required /></label>
           <label><span>Valor atual</span><input id="commitmentAmount" inputmode="decimal" placeholder="160,00" /></label>
+
           <div class="two-col">
             <label><span>Mês</span><input id="commitmentMonth" type="month" required /></label>
             <label><span>Vencimento</span><input id="commitmentDue" type="date" /></label>
           </div>
+
           <div class="two-col">
             <label><span>Parcela atual (opcional)</span><input id="commitmentInstallmentCurrent" type="number" min="1" placeholder="Ex: 2" /></label>
             <label><span>Total de parcelas (opcional)</span><input id="commitmentInstallmentTotal" type="number" min="1" placeholder="Ex: 10" /></label>
           </div>
+
           <div class="two-col">
             <label><span>Categoria</span><select id="commitmentCategory">
-              <option value="apartamento">Apartamento</option><option value="fixo">Fixo</option><option value="pessoas">Pessoas</option><option value="cartao">Cartão</option><option value="emprestimo">Empréstimo</option><option value="renda">Renda</option><option value="outros">Outros</option>
+              <option value="apartamento">Apartamento</option>
+              <option value="fixo">Fixo</option>
+              <option value="pessoas">Pessoas</option>
+              <option value="cartao">Cartão</option>
+              <option value="emprestimo">Empréstimo</option>
+              <option value="renda">Renda</option>
+              <option value="outros">Outros</option>
             </select></label>
+
             <label><span>Status</span><select id="commitmentStatus">
-              <option value="waiting">Aguardando</option><option value="paid">Pago</option><option value="unpaid">Não pago</option><option value="estimated">Previsto</option><option value="special">Especial</option><option value="waiting_value">Aguardando valor</option>
+              <option value="waiting">Aguardando</option>
+              <option value="paid">Pago</option>
+              <option value="unpaid">Não pago</option>
+              <option value="estimated">Previsto</option>
+              <option value="special">Especial</option>
+              <option value="waiting_value">Aguardando valor</option>
             </select></label>
           </div>
+
           <label><span>Pagar para / contato (opcional)</span><select id="commitmentContact"></select></label>
           <label><span>Descrição detalhada (opcional)</span><textarea id="commitmentNote" rows="3" placeholder="Mais detalhes sobre essa conta"></textarea></label>
+
           <button class="primary-btn" type="submit">Salvar</button>
         </form>
       </div>
@@ -201,30 +302,47 @@
 
     <div class="modal" id="fixedModal" aria-hidden="true">
       <div class="modal-panel">
-        <div class="modal-head"><div><p>recorrente</p><h2>Adicionar fixo</h2></div><button type="button" class="icon-btn" id="closeFixedModalBtn">×</button></div>
+        <div class="modal-head">
+          <div>
+            <p>recorrente</p>
+            <h2>Adicionar fixo</h2>
+          </div>
+          <button type="button" class="icon-btn" data-close-modal="fixedModal">×</button>
+        </div>
+
         <form id="fixedForm">
           <label><span>Descrição</span><input id="fixedDescription" placeholder="Ex: Claro" required /></label>
           <label><span>Valor</span><input id="fixedAmount" inputmode="decimal" placeholder="160,00" required /></label>
+
           <div class="two-col">
-            <label><span>Categoria</span><select id="fixedCategory"><option value="fixo">Fixo</option><option value="apartamento">Apartamento</option><option value="emprestimo">Empréstimo</option><option value="pessoas">Pessoas</option><option value="cartao">Cartão</option></select></label>
+            <label><span>Categoria</span><select id="fixedCategory">
+              <option value="fixo">Fixo</option>
+              <option value="apartamento">Apartamento</option>
+              <option value="emprestimo">Empréstimo</option>
+              <option value="pessoas">Pessoas</option>
+              <option value="cartao">Cartão</option>
+            </select></label>
             <label><span>Dia venc.</span><input id="fixedDay" type="number" min="1" max="31" placeholder="10" /></label>
           </div>
+
           <div class="two-col">
             <label><span>Início</span><input id="fixedStart" type="month" /></label>
             <label><span>Fim</span><input id="fixedEnd" type="month" /></label>
           </div>
+
           <button class="primary-btn" type="submit">Salvar fixo</button>
         </form>
       </div>
     </div>
 
-
-
     <div class="modal" id="contactModal" aria-hidden="true">
       <div class="modal-panel">
         <div class="modal-head">
-          <div><p>novo contato</p><h2>Adicionar contato</h2></div>
-          <button type="button" class="icon-btn" id="closeContactModalBtn">×</button>
+          <div>
+            <p>novo contato</p>
+            <h2>Adicionar contato</h2>
+          </div>
+          <button type="button" class="icon-btn" data-close-modal="contactModal">×</button>
         </div>
 
         <form id="contactForm">
@@ -235,8 +353,6 @@
       </div>
     </div>
 
-    <div class="undo-toast" id="undoToast" hidden><span id="undoText">Item alterado.</span><button id="undoBtn" type="button">Desfazer</button></div>
-
     <div class="modal" id="detailModal" aria-hidden="true">
       <div class="modal-panel detail-panel">
         <div class="modal-head detail-head">
@@ -244,7 +360,7 @@
             <p>compromisso financeiro</p>
             <h2 id="detailTitle">Conta</h2>
           </div>
-          <button type="button" class="icon-btn" id="detailCloseBtn">×</button>
+          <button type="button" class="icon-btn" data-close-modal="detailModal">×</button>
         </div>
 
         <div class="detail-hero">
@@ -275,6 +391,10 @@
       </div>
     </div>
 
+    <div class="undo-toast" id="undoToast" hidden>
+      <span id="undoText">Item alterado.</span>
+      <button id="undoBtn" type="button">Desfazer</button>
+    </div>
   </div>
 
   <template id="commitmentTemplate">
@@ -282,7 +402,6 @@
       <button class="status-dot" type="button"></button>
       <div class="commitment-main"><strong></strong><span></span></div>
       <div class="commitment-value"><strong></strong><span></span></div>
-      <div class="item-actions"><button type="button" data-action="edit">Editar</button><button type="button" data-action="delete">Excluir</button></div>
     </article>
   </template>
 
