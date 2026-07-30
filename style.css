@@ -1491,3 +1491,33 @@ body.fixed-screen .month-selector-card {
 .rule-edit-btn:active {
   transform: scale(.97);
 }
+
+
+/* Resumo da agenda por cor */
+.agenda-summary div:nth-child(1) strong {
+  color: var(--green);
+}
+
+.agenda-summary div:nth-child(2) strong {
+  color: var(--red);
+}
+
+.agenda-summary div:nth-child(3) strong {
+  color: var(--orange);
+}
+
+/* Botão Pago nos cards aguardando */
+.mark-paid-btn {
+  grid-column: 1 / -1;
+  min-height: 38px;
+  margin-top: 2px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--green) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--green) 28%, var(--line));
+  color: var(--green);
+  font-weight: 900;
+}
+
+.mark-paid-btn:active {
+  transform: scale(.985);
+}

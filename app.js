@@ -389,6 +389,12 @@ function handleClick(event) {
     return;
   }
 
+  const paidBtn = target.closest('[data-mark-paid]');
+  if (paidBtn) {
+    markAsPaid(paidBtn.dataset.markPaid);
+    return;
+  }
+
   if (target.closest('#detailStatusBtn')) {
     if (!activeDetailId) return;
     cycleStatus(activeDetailId);
@@ -774,7 +780,7 @@ function renderFixed() {
     item.innerHTML = `
       <div>
         <strong>${escapeHtml(rule.description)}</strong>
-        <span>${catLabel(rule.category)} • ${rule.type === 'income' ? 'Entrada' : 'Saída'}</span>
+        <span>${catLabel(rule.category)} • ${rule.type === 'income' ? 'Entrada' : 'Saída'}${rule.contactId ? ` • ${contactName(rule.contactId)}` : ''}</span>
         <small>${rule.startMonth || 'sem início'} até ${rule.endMonth || 'sem fim'}</small>
       </div>
       <div class="rule-item-actions">
@@ -852,6 +858,19 @@ function renderCommitment(item) {
     event.stopPropagation();
     cycleStatus(item.id);
   });
+
+  if (item.type === 'expense' && item.status === 'waiting') {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'mark-paid-btn';
+    button.dataset.markPaid = item.id;
+    button.textContent = '✓ Pago';
+    button.addEventListener('click', event => {
+      event.stopPropagation();
+      markAsPaid(item.id);
+    });
+    article.appendChild(button);
+  }
 
   article.addEventListener('click', () => openDetailModal(item.id));
   return node;
@@ -941,6 +960,7 @@ function saveCommitment(event) {
 
 function openFixedModal(id = '') {
   document.getElementById('fixedForm').reset();
+  populateContactSelect();
   document.getElementById('fixedId').value = '';
   document.getElementById('fixedCustomCategoryWrap')?.classList.add('is-hidden');
   document.getElementById('fixedCustomCategory').value = '';
@@ -954,6 +974,7 @@ function openFixedModal(id = '') {
     document.getElementById('fixedDescription').value = rule.description || '';
     document.getElementById('fixedAmount').value = rule.amount ?? '';
     document.getElementById('fixedDay').value = rule.day || '';
+    document.getElementById('fixedContact').value = rule.contactId || '';
     document.getElementById('fixedStart').value = rule.startMonth || state.baseMonth;
     document.getElementById('fixedEnd').value = rule.endMonth || '';
 
@@ -1046,6 +1067,7 @@ function saveFixedRule(event) {
     description: document.getElementById('fixedDescription').value.trim(),
     amount: parseMoney(document.getElementById('fixedAmount').value) || 0,
     day: Number(document.getElementById('fixedDay').value) || null,
+    contactId: document.getElementById('fixedContact').value || '',
     startMonth: document.getElementById('fixedStart').value || state.baseMonth,
     endMonth: document.getElementById('fixedEnd').value,
     active: true
@@ -1187,6 +1209,23 @@ function deleteCommitment(id) {
   });
 }
 
+function markAsPaid(id) {
+  const item = state.commitments.find(commitment => commitment.id === id);
+  if (!item) return;
+
+  const previous = { ...item };
+  item.status = 'paid';
+
+  saveState();
+  render();
+
+  showUndo(`Pago: ${item.description}`, () => {
+    Object.assign(item, previous);
+    saveState();
+    render();
+  });
+}
+
 function cycleStatus(id) {
   const item = state.commitments.find(commitment => commitment.id === id);
   if (!item) return;
@@ -1230,9 +1269,16 @@ function setModalType(type) {
 }
 
 function populateContactSelect() {
-  const select = document.getElementById('commitmentContact');
+  populateContactSelectElement('commitmentContact', 'Sem contato');
+  populateContactSelectElement('fixedContact', 'Sem contato');
+}
+
+function populateContactSelectElement(id, emptyLabel) {
+  const select = document.getElementById(id);
+  if (!select) return;
+
   const current = select.value;
-  select.innerHTML = '<option value="">Sem contato</option>';
+  select.innerHTML = `<option value="">${emptyLabel}</option>`;
 
   state.contacts.forEach(contact => {
     const option = document.createElement('option');
