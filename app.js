@@ -54,6 +54,7 @@ let state = loadState();
 let modalType = 'expense';
 let pendingUndo = null;
 let undoTimer = null;
+let activeDetailId = null;
 
 init();
 
@@ -117,6 +118,15 @@ function statusIcon(status) {
 
 function catLabel(cat) {
   return { apartamento: 'Apartamento', fixo: 'Fixo', pessoas: 'Pessoas', cartao: 'Cartão', emprestimo: 'Empréstimo', renda: 'Renda', outros: 'Outros' }[cat] || cat;
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
 function commitmentsForMonth(month) {
@@ -217,6 +227,28 @@ function bindEvents() {
   });
 
   $('#undoBtn')?.addEventListener('click', undoLastAction);
+
+  $('#detailCloseBtn')?.addEventListener('click', closeDetailModal);
+  $('#detailModal')?.addEventListener('click', e => {
+    if (e.target.id === 'detailModal') closeDetailModal();
+  });
+  $('#detailEditBtn')?.addEventListener('click', () => {
+    if (!activeDetailId) return;
+    closeDetailModal();
+    openCommitmentModal('edit', activeDetailId);
+  });
+  $('#detailDeleteBtn')?.addEventListener('click', () => {
+    if (!activeDetailId) return;
+    const id = activeDetailId;
+    closeDetailModal();
+    deleteCommitment(id);
+  });
+  $('#detailStatusBtn')?.addEventListener('click', () => {
+    if (!activeDetailId) return;
+    cycleStatus(activeDetailId);
+    const refreshed = state.commitments.find(i => i.id === activeDetailId);
+    if (refreshed) fillDetailModal(refreshed);
+  });
 }
 
 function handleGlobalClick(event) {
@@ -296,7 +328,8 @@ function render() {
 
 function renderMonthRail() {
   $('#monthRailCurrent').textContent = monthName(state.baseMonth);
-  $('#monthRailLabel').textContent = monthName(state.baseMonth, false);
+  const currentBtn = $('#currentMonthBtn');
+  if (currentBtn) currentBtn.textContent = state.baseMonth === TODAY_MONTH ? 'Você já está no mês atual' : 'Voltar para o mês atual';
 
   const pills = $('#monthPills');
   pills.innerHTML = '';
@@ -526,6 +559,13 @@ function renderList(container, items) {
   items.forEach(item => container.appendChild(renderCommitment(item)));
 }
 
+function installmentLabel(item) {
+  const current = Number(item.installmentCurrent);
+  const total = Number(item.installmentTotal);
+  if (current && total) return `${current}/${total}`;
+  return '';
+}
+
 function renderCommitment(item) {
   const node = $('#commitmentTemplate').content.cloneNode(true);
   const article = node.querySelector('.commitment-item');
@@ -538,8 +578,10 @@ function renderCommitment(item) {
   article.classList.add(`status-${item.status}`);
   dot.textContent = statusIcon(item.status);
   dot.title = 'Clique para alternar status';
-  title.textContent = item.description;
-  sub.textContent = `${catLabel(item.category)} • ${dateLabel(item.dueDate)}`;
+
+  const parcel = installmentLabel(item);
+  title.innerHTML = `${escapeHtml(item.description)}${parcel ? ` <small>parcela ${parcel}</small>` : ''}`;
+  sub.textContent = `${catLabel(item.category)}`;
   value.textContent = item.type === 'income' ? `+${money(item.amount)}` : money(item.amount);
   status.textContent = statusLabel(item.status);
 
@@ -548,17 +590,7 @@ function renderCommitment(item) {
     cycleStatus(item.id);
   });
 
-  article.addEventListener('click', () => article.classList.toggle('open'));
-
-  article.querySelector('[data-action="edit"]').addEventListener('click', (e) => {
-    e.stopPropagation();
-    openCommitmentModal('edit', item.id);
-  });
-
-  article.querySelector('[data-action="delete"]').addEventListener('click', (e) => {
-    e.stopPropagation();
-    deleteCommitment(item.id);
-  });
+  article.addEventListener('click', () => openDetailModal(item.id));
 
   return node;
 }
@@ -574,6 +606,10 @@ function cycleStatus(id) {
 
   saveState();
   render();
+  if (activeDetailId === id) {
+    const refreshed = state.commitments.find(i => i.id === id);
+    if (refreshed) fillDetailModal(refreshed);
+  }
   showUndo(`Status alterado: ${item.description}`, () => {
     Object.assign(item, previous);
     saveState();
@@ -584,6 +620,8 @@ function cycleStatus(id) {
 function openCommitmentModal(mode = 'bill', id = '') {
   $('#commitmentForm').reset();
   $('#commitmentId').value = '';
+  $('#commitmentInstallmentCurrent').value = '';
+  $('#commitmentInstallmentTotal').value = '';
 
   let type = 'expense';
   let title = 'Adicionar conta';
@@ -611,6 +649,8 @@ function openCommitmentModal(mode = 'bill', id = '') {
     $('#commitmentCategory').value = item.category;
     $('#commitmentStatus').value = item.status;
     $('#commitmentNote').value = item.note || '';
+    $('#commitmentInstallmentCurrent').value = item.installmentCurrent || '';
+    $('#commitmentInstallmentTotal').value = item.installmentTotal || '';
   } else {
     $('#commitmentMonth').value = state.baseMonth;
     $('#commitmentStatus').value = type === 'income' ? 'estimated' : 'waiting';
@@ -636,6 +676,9 @@ function saveCommitment(event) {
   event.preventDefault();
 
   const id = $('#commitmentId').value;
+  const installmentCurrent = Number($('#commitmentInstallmentCurrent').value) || null;
+  const installmentTotal = Number($('#commitmentInstallmentTotal').value) || null;
+
   const data = {
     id: id || uid(),
     month: $('#commitmentMonth').value,
@@ -645,7 +688,9 @@ function saveCommitment(event) {
     amount: parseMoney($('#commitmentAmount').value),
     dueDate: $('#commitmentDue').value,
     status: $('#commitmentStatus').value,
-    note: $('#commitmentNote').value.trim()
+    note: $('#commitmentNote').value.trim(),
+    installmentCurrent,
+    installmentTotal
   };
 
   if (id) {
@@ -658,6 +703,41 @@ function saveCommitment(event) {
   saveState();
   closeCommitmentModal();
   render();
+  if (activeDetailId) {
+    const refreshed = state.commitments.find(i => i.id === activeDetailId);
+    if (refreshed) fillDetailModal(refreshed);
+  }
+}
+
+
+function openDetailModal(id) {
+  const item = state.commitments.find(i => i.id === id);
+  if (!item) return;
+  activeDetailId = id;
+  fillDetailModal(item);
+  $('#detailModal').classList.add('open');
+  $('#detailModal').setAttribute('aria-hidden', 'false');
+}
+
+function fillDetailModal(item) {
+  $('#detailTitle').textContent = item.description || 'Conta';
+  $('#detailAmount').textContent = item.type === 'income' ? `+${money(item.amount)}` : money(item.amount);
+  $('#detailStatusText').textContent = statusLabel(item.status);
+  $('#detailCategory').textContent = catLabel(item.category);
+  $('#detailDueDate').textContent = dateLabel(item.dueDate);
+  $('#detailInstallment').textContent = installmentLabel(item) ? `Parcela ${installmentLabel(item)}` : 'Não parcelado';
+  $('#detailMonth').textContent = monthName(item.month);
+  $('#detailDescription').textContent = item.note?.trim() ? item.note : 'Sem descrição adicional.';
+
+  const dot = $('#detailStatusBtn');
+  dot.textContent = statusIcon(item.status);
+  dot.className = `status-dot large status-${item.status}`;
+}
+
+function closeDetailModal() {
+  $('#detailModal').classList.remove('open');
+  $('#detailModal').setAttribute('aria-hidden', 'true');
+  activeDetailId = null;
 }
 
 function deleteCommitment(id) {
@@ -666,6 +746,7 @@ function deleteCommitment(id) {
   if (!confirm(`Excluir "${item.description}"?`)) return;
 
   state.commitments = state.commitments.filter(i => i.id !== id);
+  if (activeDetailId === id) closeDetailModal();
   saveState();
   render();
 

@@ -43,11 +43,9 @@
       <div class="month-selector-panel" id="monthSelectorPanel" aria-hidden="true">
         <div class="month-selector-head">
           <button type="button" id="prevMonthBtn" aria-label="Mês anterior">‹</button>
-          <span id="monthRailLabel">Julho 2026</span>
+          <button class="current-month-btn inline" type="button" id="currentMonthBtn">Voltar para o mês atual</button>
           <button type="button" id="nextMonthBtn" aria-label="Próximo mês">›</button>
         </div>
-
-        <button class="current-month-btn" type="button" id="currentMonthBtn">Voltar para o mês atual</button>
 
         <div class="month-pills" id="monthPills"></div>
       </div>
@@ -167,11 +165,15 @@
             <button type="button" data-modal-type="expense" class="selected">Conta a pagar</button>
             <button type="button" data-modal-type="income">Entrada</button>
           </div>
-          <label><span>Descrição</span><input id="commitmentDescription" placeholder="Ex: Claro" required /></label>
-          <label><span>Valor</span><input id="commitmentAmount" inputmode="decimal" placeholder="160,00" /></label>
+          <label><span>Nome da conta</span><input id="commitmentDescription" placeholder="Ex: Claro" required /></label>
+          <label><span>Valor atual</span><input id="commitmentAmount" inputmode="decimal" placeholder="160,00" /></label>
           <div class="two-col">
             <label><span>Mês</span><input id="commitmentMonth" type="month" required /></label>
             <label><span>Vencimento</span><input id="commitmentDue" type="date" /></label>
+          </div>
+          <div class="two-col">
+            <label><span>Parcela atual (opcional)</span><input id="commitmentInstallmentCurrent" type="number" min="1" placeholder="Ex: 2" /></label>
+            <label><span>Total de parcelas (opcional)</span><input id="commitmentInstallmentTotal" type="number" min="1" placeholder="Ex: 10" /></label>
           </div>
           <div class="two-col">
             <label><span>Categoria</span><select id="commitmentCategory">
@@ -181,7 +183,7 @@
               <option value="waiting">Aguardando</option><option value="paid">Pago</option><option value="unpaid">Não pago</option><option value="estimated">Previsto</option><option value="special">Especial</option><option value="waiting_value">Aguardando valor</option>
             </select></label>
           </div>
-          <label><span>Observação</span><textarea id="commitmentNote" rows="3" placeholder="Opcional"></textarea></label>
+          <label><span>Descrição detalhada (opcional)</span><textarea id="commitmentNote" rows="3" placeholder="Mais detalhes sobre essa conta"></textarea></label>
           <button class="primary-btn" type="submit">Salvar</button>
         </form>
       </div>
@@ -206,7 +208,46 @@
       </div>
     </div>
 
+
     <div class="undo-toast" id="undoToast" hidden><span id="undoText">Item alterado.</span><button id="undoBtn" type="button">Desfazer</button></div>
+
+    <div class="modal" id="detailModal" aria-hidden="true">
+      <div class="modal-panel detail-panel">
+        <div class="modal-head">
+          <div>
+            <p>detalhes da conta</p>
+            <h2 id="detailTitle">Conta</h2>
+          </div>
+          <button type="button" class="icon-btn" id="detailCloseBtn">×</button>
+        </div>
+
+        <div class="detail-status-row">
+          <button class="status-dot large" type="button" id="detailStatusBtn">•</button>
+          <div>
+            <strong id="detailAmount">R$ 0,00</strong>
+            <span id="detailStatusText">Aguardando</span>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <article><span>Categoria</span><strong id="detailCategory">—</strong></article>
+          <article><span>Vencimento</span><strong id="detailDueDate">—</strong></article>
+          <article><span>Parcela</span><strong id="detailInstallment">Não parcelado</strong></article>
+          <article><span>Mês</span><strong id="detailMonth">—</strong></article>
+        </div>
+
+        <div class="detail-description">
+          <span>Descrição</span>
+          <p id="detailDescription">Sem descrição adicional.</p>
+        </div>
+
+        <div class="detail-actions">
+          <button class="secondary-btn" type="button" id="detailEditBtn">Editar</button>
+          <button class="danger-btn" type="button" id="detailDeleteBtn">Excluir</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <template id="commitmentTemplate">
