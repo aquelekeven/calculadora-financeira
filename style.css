@@ -682,3 +682,147 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); }
 @media (max-width: 420px) {
   .detail-grid, .detail-actions { grid-template-columns: 1fr; }
 }
+
+
+/* Popup de detalhes mais clean */
+.detail-panel {
+  border-radius: 32px;
+  padding: 20px;
+}
+
+.detail-head h2 {
+  font-size: 1.45rem;
+  line-height: 1.1;
+}
+
+.detail-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, var(--surface-soft), color-mix(in srgb, var(--surface-soft) 72%, var(--surface) 28%));
+  border: 1px solid var(--line);
+}
+
+.detail-hero .status-dot.large {
+  flex: 0 0 auto;
+  width: 54px;
+  height: 54px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.detail-hero span {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.detail-hero strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 1.7rem;
+  line-height: 1;
+  letter-spacing: -.05em;
+}
+
+.detail-section-title {
+  margin: 18px 0 10px;
+  color: var(--muted);
+  font-size: .86rem;
+  font-weight: 800;
+}
+
+.detail-grid {
+  gap: 9px;
+}
+
+.detail-grid article {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: 0 8px 20px rgba(0,0,0,.035);
+}
+
+.detail-grid span {
+  font-size: .76rem;
+}
+
+.detail-grid strong {
+  font-size: .96rem;
+  line-height: 1.2;
+}
+
+.detail-description {
+  margin-top: 0;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.detail-description p {
+  color: var(--text);
+}
+
+.detail-actions {
+  margin-top: 18px;
+}
+
+.detail-actions .secondary-btn,
+.detail-actions .danger-btn {
+  margin-top: 0;
+  border-radius: 18px;
+}
+
+.detail-actions .secondary-btn {
+  background: var(--surface-soft);
+}
+
+.detail-actions .danger-btn {
+  background: color-mix(in srgb, var(--red) 12%, var(--surface));
+  color: var(--red);
+  border: 1px solid color-mix(in srgb, var(--red) 28%, transparent);
+}
+
+/* Cards de conta mais arrumados */
+.commitment-item {
+  border-radius: 20px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--surface) 92%, var(--surface-soft) 8%);
+}
+
+.commitment-main strong small {
+  font-size: .68rem;
+  padding: 3px 7px;
+  background: var(--surface-soft);
+}
+
+.commitment-value strong {
+  letter-spacing: -.025em;
+}
+
+.commitment-value span {
+  font-weight: 700;
+}
+
+.status-paid .commitment-value span { color: var(--green); }
+.status-waiting .commitment-value span { color: var(--yellow); }
+.status-unpaid .commitment-value span { color: var(--red); }
+.status-special .commitment-value span { color: var(--orange); }
+.status-estimated .commitment-value span { color: var(--blue); }
+
+@media (max-width: 420px) {
+  .detail-panel {
+    padding: 18px;
+  }
+  .detail-hero strong {
+    font-size: 1.45rem;
+  }
+}

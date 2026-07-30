@@ -129,8 +129,18 @@ function escapeHtml(value) {
     .replaceAll("'", '&#39;');
 }
 
+function normalizeCommitment(item) {
+  return {
+    installmentCurrent: null,
+    installmentTotal: null,
+    note: '',
+    ...item
+  };
+}
+
 function commitmentsForMonth(month) {
   return state.commitments
+    .map(normalizeCommitment)
     .filter(item => item.month === month)
     .sort((a, b) => (a.dueDate || `${a.month}-99`).localeCompare(b.dueDate || `${b.month}-99`));
 }
@@ -234,8 +244,9 @@ function bindEvents() {
   });
   $('#detailEditBtn')?.addEventListener('click', () => {
     if (!activeDetailId) return;
+    const id = activeDetailId;
     closeDetailModal();
-    openCommitmentModal('edit', activeDetailId);
+    openCommitmentModal('edit', id);
   });
   $('#detailDeleteBtn')?.addEventListener('click', () => {
     if (!activeDetailId) return;

@@ -213,22 +213,23 @@
 
     <div class="modal" id="detailModal" aria-hidden="true">
       <div class="modal-panel detail-panel">
-        <div class="modal-head">
+        <div class="modal-head detail-head">
           <div>
-            <p>detalhes da conta</p>
+            <p>compromisso financeiro</p>
             <h2 id="detailTitle">Conta</h2>
           </div>
           <button type="button" class="icon-btn" id="detailCloseBtn">×</button>
         </div>
 
-        <div class="detail-status-row">
+        <div class="detail-hero">
           <button class="status-dot large" type="button" id="detailStatusBtn">•</button>
           <div>
-            <strong id="detailAmount">R$ 0,00</strong>
             <span id="detailStatusText">Aguardando</span>
+            <strong id="detailAmount">R$ 0,00</strong>
           </div>
         </div>
 
+        <div class="detail-section-title">📌 Resumo</div>
         <div class="detail-grid">
           <article><span>Categoria</span><strong id="detailCategory">—</strong></article>
           <article><span>Vencimento</span><strong id="detailDueDate">—</strong></article>
@@ -236,14 +237,14 @@
           <article><span>Mês</span><strong id="detailMonth">—</strong></article>
         </div>
 
+        <div class="detail-section-title">📝 Descrição</div>
         <div class="detail-description">
-          <span>Descrição</span>
           <p id="detailDescription">Sem descrição adicional.</p>
         </div>
 
         <div class="detail-actions">
-          <button class="secondary-btn" type="button" id="detailEditBtn">Editar</button>
-          <button class="danger-btn" type="button" id="detailDeleteBtn">Excluir</button>
+          <button class="secondary-btn" type="button" id="detailEditBtn">✏️ Editar</button>
+          <button class="danger-btn" type="button" id="detailDeleteBtn">🗑️ Excluir</button>
         </div>
       </div>
     </div>
