@@ -46,6 +46,8 @@ const initialState = {
 };
 
 let state = loadState();
+let pendingDelete = null;
+let pendingDeleteTimer = null;
 applyTheme(localStorage.getItem(THEME_KEY) || 'light');
 
 function loadState() {
@@ -213,34 +215,37 @@ function renderMonths() {
   const container = document.getElementById('monthsContainer');
   const template = document.getElementById('monthTemplate');
   container.innerHTML = '';
-  getVisibleMonths().forEach((month, index) => {
-    const calc = calculateMonth(month);
-    const current = index === 0 ? calculateCurrentMonth() : null;
-    const resultValue = current ? current.result : calc.result;
-    const node = template.content.cloneNode(true);
-    node.querySelector('h3').textContent = monthName(month);
-    node.querySelector('p').textContent = index === 0
-      ? `saldo ${formatBRL(state.currentBalance)} • pendente ${formatBRL(current.pending)}`
-      : `entradas ${formatBRL(calc.entradas)} • saídas ${formatBRL(calc.saidas)}`;
-    const result = node.querySelector('.month-result');
-    result.textContent = `${resultValue >= 0 ? '🟩' : '🟥'} ${formatBRL(resultValue)}`;
-    result.classList.add(resultValue >= 0 ? 'positive' : 'negative');
 
-    const metrics = node.querySelector('.month-metrics');
-    metrics.innerHTML = `
-      <div class="metric-box"><span>Entradas</span><strong>${formatBRL(calc.entradas)}</strong></div>
-      <div class="metric-box"><span>Saídas</span><strong>${formatBRL(calc.saidas)}</strong></div>
-      <div class="metric-box"><span>Pendente</span><strong>${formatBRL(calc.pendente)}</strong></div>
-    `;
+  const month = state.baseMonth || todayBaseMonth;
+  const calc = calculateMonth(month);
+  const current = month === todayBaseMonth ? calculateCurrentMonth() : null;
+  const resultValue = current ? current.result : calc.result;
+  const node = template.content.cloneNode(true);
 
-    const list = node.querySelector('.transaction-list');
-    if (!calc.entries.length) {
-      list.innerHTML = '<div class="empty-state">Nenhum lançamento nesse mês.</div>';
-    } else {
-      calc.entries.forEach(entry => list.appendChild(renderTransaction(entry, true)));
-    }
-    container.appendChild(node);
-  });
+  node.querySelector('h3').textContent = monthName(month);
+  node.querySelector('p').textContent = current
+    ? `saldo ${formatBRL(state.currentBalance)} • pendente ${formatBRL(current.pending)}`
+    : `entradas ${formatBRL(calc.entradas)} • saídas ${formatBRL(calc.saidas)}`;
+
+  const result = node.querySelector('.month-result');
+  result.textContent = `${resultValue >= 0 ? '🟩' : '🟥'} ${formatBRL(resultValue)}`;
+  result.classList.add(resultValue >= 0 ? 'positive' : 'negative');
+
+  const metrics = node.querySelector('.month-metrics');
+  metrics.innerHTML = `
+    <div class="metric-box"><span>Entradas</span><strong>${formatBRL(calc.entradas)}</strong></div>
+    <div class="metric-box"><span>Saídas</span><strong>${formatBRL(calc.saidas)}</strong></div>
+    <div class="metric-box"><span>Pendente</span><strong>${formatBRL(calc.pendente)}</strong></div>
+  `;
+
+  const list = node.querySelector('.transaction-list');
+  if (!calc.entries.length) {
+    list.innerHTML = '<div class="empty-state">Nenhum lançamento nesse mês.</div>';
+  } else {
+    calc.entries.forEach(entry => list.appendChild(renderTransaction(entry, true)));
+  }
+
+  container.appendChild(node);
 }
 
 function renderTransaction(entry, allowDelete) {
@@ -314,7 +319,7 @@ function setTab(tab) {
   document.getElementById(`screen-${tab}`).classList.add('active');
   closeDrawer();
   closeFab();
-  if (tab === 'add') document.getElementById('entryDescription').focus({ preventScroll: true });
+  // Não focar automaticamente para evitar abrir o teclado no mobile.
 }
 function setEntryType(type) {
   selectedEntryType = type;
@@ -340,7 +345,9 @@ function importBackup(file) {
       if (!Array.isArray(data.entries)) throw new Error('Arquivo inválido');
       state = { ...structuredClone(initialState), ...data };
       saveState();
-      render();
+      document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
+
+render();
       alert('Backup importado com sucesso.');
     } catch {
       alert('Não consegui importar esse JSON.');
@@ -366,6 +373,63 @@ function closeFab() {
   document.getElementById('fabTrigger').setAttribute('aria-expanded', 'false');
 }
 
+
+function requestDeleteEntry(entryId) {
+  const entry = state.entries.find(item => item.id === entryId);
+  if (!entry) return;
+
+  const ok = confirm(`Excluir "${entry.description}"?`);
+  if (!ok) return;
+
+  state.entries = state.entries.filter(item => item.id !== entryId);
+  saveState();
+  document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
+
+render();
+
+  showUndoDelete(entry);
+}
+
+function showUndoDelete(entry) {
+  const toast = document.getElementById('undoToast');
+  const text = document.getElementById('undoText');
+
+  if (pendingDeleteTimer) clearTimeout(pendingDeleteTimer);
+
+  pendingDelete = entry;
+  text.textContent = `Registro excluído: ${entry.description}`;
+  toast.hidden = false;
+
+  requestAnimationFrame(() => toast.classList.add('show'));
+
+  pendingDeleteTimer = setTimeout(() => {
+    toast.classList.remove('show');
+    pendingDelete = null;
+    setTimeout(() => {
+      if (!toast.classList.contains('show')) toast.hidden = true;
+    }, 240);
+  }, 10000);
+}
+
+function undoDeleteEntry() {
+  if (!pendingDelete) return;
+
+  state.entries.push(pendingDelete);
+  state.entries.sort((a, b) => (a.month || '').localeCompare(b.month || '') || (a.dueDate || '9999-99-99').localeCompare(b.dueDate || '9999-99-99'));
+  saveState();
+
+  pendingDelete = null;
+  if (pendingDeleteTimer) clearTimeout(pendingDeleteTimer);
+
+  const toast = document.getElementById('undoToast');
+  toast.classList.remove('show');
+  setTimeout(() => toast.hidden = true, 240);
+
+  document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
+
+render();
+}
+
 // events
 
 document.addEventListener('click', event => {
@@ -380,9 +444,7 @@ document.addEventListener('click', event => {
 
   const deleteBtn = event.target.closest('.delete-chip');
   if (deleteBtn?.dataset.id) {
-    state.entries = state.entries.filter(entry => entry.id !== deleteBtn.dataset.id);
-    saveState();
-    render();
+    requestDeleteEntry(deleteBtn.dataset.id);
   }
 });
 
@@ -421,7 +483,9 @@ document.getElementById('globalOverlay').addEventListener('click', closeFab);
 document.getElementById('baseMonthSelect').addEventListener('change', event => {
   state.baseMonth = event.target.value;
   saveState();
-  render();
+  document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
+
+render();
 });
 
 document.getElementById('entryForm').addEventListener('submit', event => {
@@ -441,14 +505,18 @@ document.getElementById('entryForm').addEventListener('submit', event => {
   event.target.reset();
   document.getElementById('entryMonth').value = state.baseMonth || todayBaseMonth;
   setEntryType('saida');
-  render();
+  document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
+
+render();
   setTab('home');
 });
 
 document.getElementById('saveBalanceBtn').addEventListener('click', () => {
   state.currentBalance = parseMoney(document.getElementById('balanceInput').value);
   saveState();
-  render();
+  document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
+
+render();
   setTab('home');
 });
 
@@ -464,8 +532,12 @@ document.getElementById('resetBtn').addEventListener('click', () => {
   localStorage.removeItem(STORAGE_KEY);
   state = structuredClone(initialState);
   saveState();
-  render();
+  document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
+
+render();
   setTab('home');
 });
+
+document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
 
 render();

@@ -63,8 +63,8 @@
           <span>↙</span>
           <small>Entrada</small>
         </button>
-        <button class="action-tile center-tile" type="button" data-tab="months">
-          <span>◎</span>
+        <button class="action-tile center-tile" type="button" data-tab="months" aria-label="Histórico">
+          <span>▤</span>
         </button>
         <button class="action-tile" type="button" data-tab="add" data-kind="saida">
           <span>↗</span>
@@ -214,6 +214,11 @@
         </div>
       </section>
     </main>
+
+    <div class="undo-toast" id="undoToast" hidden>
+      <span id="undoText">Registro excluído.</span>
+      <button id="undoBtn" type="button">Desfazer</button>
+    </div>
 
     <div class="fab-backdrop" id="fabBackdrop" aria-hidden="true"></div>
     <div class="floating-menu" id="floatingMenu" aria-label="Ações rápidas">
