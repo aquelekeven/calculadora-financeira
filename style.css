@@ -1286,3 +1286,177 @@ body.contacts-screen .month-selector-card {
   border-radius: 999px;
   background: var(--surface-soft);
 }
+
+
+/* Visão rápida: setas discretas e sem bolinha bugada */
+.future-money-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+  font-size: .86rem;
+  font-weight: 500;
+  opacity: .78;
+}
+
+.future-money-line.income {
+  color: var(--green);
+}
+
+.future-money-line.expense {
+  color: var(--red);
+}
+
+.future-money-line .future-arrow {
+  width: auto;
+  height: auto;
+  display: inline;
+  background: transparent;
+  color: currentColor;
+  font-size: .95rem;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.future-money-line span:last-child {
+  font-weight: 500;
+}
+
+.future-money-line .arrow {
+  display: none !important;
+}
+
+
+/* Seletor próprio de mês dos fixos */
+.modern-date-box {
+  overflow: visible;
+}
+
+.fixed-period-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.month-field-btn {
+  width: 100%;
+  min-height: 74px;
+  padding: 14px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.month-field-btn small {
+  display: block;
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.month-field-btn strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.15rem;
+  letter-spacing: -.03em;
+}
+
+.month-field-btn.active {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--blue) 14%, transparent);
+}
+
+.fixed-month-picker {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 22px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 14px 34px rgba(0,0,0,.08);
+  animation: pickerIn .18s ease both;
+}
+
+@keyframes pickerIn {
+  from { opacity: 0; transform: translateY(-6px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.fixed-picker-head {
+  display: grid;
+  grid-template-columns: 42px 1fr 42px;
+  align-items: center;
+  gap: 8px;
+}
+
+.fixed-picker-head button {
+  height: 40px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  font-size: 1.15rem;
+}
+
+.fixed-picker-head strong {
+  text-align: center;
+  font-size: 1.05rem;
+}
+
+.fixed-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fixed-month-option {
+  min-height: 44px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: capitalize;
+}
+
+.fixed-month-option.selected {
+  background: var(--blue);
+  color: #fff;
+  border-color: transparent;
+}
+
+.fixed-picker-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fixed-picker-actions button {
+  min-height: 42px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  font-weight: 800;
+}
+
+.fixed-picker-actions button:last-child {
+  background: #151515;
+  color: #fff;
+}
+
+[data-theme="dark"] .fixed-picker-actions button:last-child {
+  background: #fff;
+  color: #151515;
+}
+
+/* neutraliza estilo antigo que mirava input type month */
+.modern-date-box label {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.modern-date-box input[type="month"] {
+  display: none;
+}

@@ -96,6 +96,8 @@ let activeContactId = '';
 let contactHistoryOpen = false;
 let activeAccountGroup = null;
 let activeContactFilter = 'all';
+let activeFixedMonthField = '';
+let fixedPickerYear = 2026;
 
 init();
 
@@ -228,6 +230,47 @@ function handleClick(event) {
     state.filter = filterBtn.dataset.filter;
     saveState();
     renderAgenda();
+    return;
+  }
+
+  const fixedMonthBtn = target.closest('[data-fixed-month-field]');
+  if (fixedMonthBtn) {
+    event.preventDefault();
+    openFixedMonthPicker(fixedMonthBtn.dataset.fixedMonthField);
+    return;
+  }
+
+  if (target.closest('#fixedPickerPrevYear')) {
+    event.preventDefault();
+    fixedPickerYear -= 1;
+    renderFixedMonthPicker();
+    return;
+  }
+
+  if (target.closest('#fixedPickerNextYear')) {
+    event.preventDefault();
+    fixedPickerYear += 1;
+    renderFixedMonthPicker();
+    return;
+  }
+
+  if (target.closest('[data-fixed-month-value]')) {
+    event.preventDefault();
+    setFixedMonthValue(activeFixedMonthField, target.closest('[data-fixed-month-value]').dataset.fixedMonthValue);
+    closeFixedMonthPicker();
+    return;
+  }
+
+  if (target.closest('#fixedPickerClear')) {
+    event.preventDefault();
+    setFixedMonthValue(activeFixedMonthField, '');
+    closeFixedMonthPicker();
+    return;
+  }
+
+  if (target.closest('#fixedPickerClose')) {
+    event.preventDefault();
+    closeFixedMonthPicker();
     return;
   }
 
@@ -500,8 +543,8 @@ function renderHome() {
       <div>
         <span>${monthName(month)}</span>
         <strong>${money(c.pending)} pendente</strong>
-        <div class="future-money-line income"><i class="arrow">↑</i><b>${money(c.income)}</b></div>
-        <div class="future-money-line expense"><i class="arrow">↓</i><b>${money(c.expenses)}</b></div>
+        <div class="future-money-line income"><span class="future-arrow">↗</span><span>${money(c.income)}</span></div>
+        <div class="future-money-line expense"><span class="future-arrow">↘</span><span>${money(c.expenses)}</span></div>
       </div>
       <div>
         <span>resultado</span>
@@ -889,9 +932,65 @@ function saveCommitment(event) {
 function openFixedModal() {
   document.getElementById('fixedForm').reset();
   document.getElementById('fixedStart').value = state.baseMonth;
+  document.getElementById('fixedEnd').value = '';
+  updateFixedMonthLabels();
+  closeFixedMonthPicker();
   document.getElementById('fixedCustomCategoryWrap')?.classList.add('is-hidden');
   document.getElementById('fixedCustomCategory').value = '';
   openModal('fixedModal');
+}
+
+function openFixedMonthPicker(field) {
+  activeFixedMonthField = field;
+  const current = document.getElementById(field)?.value || state.baseMonth;
+  fixedPickerYear = Number(current.split('-')[0]) || Number(state.baseMonth.split('-')[0]) || 2026;
+
+  document.querySelectorAll('[data-fixed-month-field]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.fixedMonthField === field);
+  });
+
+  document.getElementById('fixedMonthPicker').classList.remove('is-hidden');
+  renderFixedMonthPicker();
+}
+
+function closeFixedMonthPicker() {
+  document.getElementById('fixedMonthPicker')?.classList.add('is-hidden');
+  document.querySelectorAll('[data-fixed-month-field]').forEach(btn => btn.classList.remove('active'));
+}
+
+function renderFixedMonthPicker() {
+  const grid = document.getElementById('fixedPickerGrid');
+  const yearLabel = document.getElementById('fixedPickerYear');
+  if (!grid || !yearLabel) return;
+
+  yearLabel.textContent = fixedPickerYear;
+  grid.innerHTML = '';
+
+  const selected = activeFixedMonthField ? document.getElementById(activeFixedMonthField)?.value : '';
+  const months = ['jan.', 'fev.', 'mar.', 'abr.', 'mai.', 'jun.', 'jul.', 'ago.', 'set.', 'out.', 'nov.', 'dez.'];
+
+  months.forEach((label, index) => {
+    const value = `${fixedPickerYear}-${String(index + 1).padStart(2, '0')}`;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `fixed-month-option${value === selected ? ' selected' : ''}`;
+    button.dataset.fixedMonthValue = value;
+    button.textContent = label;
+    grid.appendChild(button);
+  });
+}
+
+function setFixedMonthValue(field, value) {
+  if (!field) return;
+  document.getElementById(field).value = value;
+  updateFixedMonthLabels();
+}
+
+function updateFixedMonthLabels() {
+  const start = document.getElementById('fixedStart')?.value || '';
+  const end = document.getElementById('fixedEnd')?.value || '';
+  document.getElementById('fixedStartLabel').textContent = start ? monthName(start) : 'Selecionar mês';
+  document.getElementById('fixedEndLabel').textContent = end ? monthName(end) : 'Sem fim';
 }
 
 function toggleFixedCustomCategory() {

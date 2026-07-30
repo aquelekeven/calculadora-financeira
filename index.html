@@ -368,9 +368,30 @@
 
           <div class="modern-date-box">
             <span>Período do fixo</span>
-            <div class="two-col">
-              <label><small>Começa em</small><input id="fixedStart" type="month" /></label>
-              <label><small>Termina em</small><input id="fixedEnd" type="month" /></label>
+            <input id="fixedStart" type="hidden" />
+            <input id="fixedEnd" type="hidden" />
+            <div class="fixed-period-grid">
+              <button class="month-field-btn" type="button" data-fixed-month-field="fixedStart">
+                <small>Começa em</small>
+                <strong id="fixedStartLabel">Selecionar mês</strong>
+              </button>
+              <button class="month-field-btn" type="button" data-fixed-month-field="fixedEnd">
+                <small>Termina em</small>
+                <strong id="fixedEndLabel">Sem fim</strong>
+              </button>
+            </div>
+
+            <div class="fixed-month-picker is-hidden" id="fixedMonthPicker">
+              <div class="fixed-picker-head">
+                <button type="button" id="fixedPickerPrevYear">‹</button>
+                <strong id="fixedPickerYear">2026</strong>
+                <button type="button" id="fixedPickerNextYear">›</button>
+              </div>
+              <div class="fixed-picker-grid" id="fixedPickerGrid"></div>
+              <div class="fixed-picker-actions">
+                <button type="button" id="fixedPickerClear">Limpar</button>
+                <button type="button" id="fixedPickerClose">Ok</button>
+              </div>
             </div>
           </div>
 
