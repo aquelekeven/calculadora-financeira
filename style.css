@@ -915,3 +915,50 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); }
     border-radius: 15px;
   }
 }
+
+
+/* Ajustes pedidos */
+.section-total {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: .86rem;
+  font-weight: 800;
+}
+
+.contact-history-card.is-hidden {
+  display: none;
+}
+
+.modal-panel.detail-expense .detail-hero {
+  background: color-mix(in srgb, var(--red) 10%, var(--surface-soft));
+  border-color: color-mix(in srgb, var(--red) 22%, var(--line));
+}
+
+.modal-panel.detail-expense .detail-hero .status-dot.large {
+  color: var(--red);
+}
+
+.modal-panel.detail-income .detail-hero {
+  background: color-mix(in srgb, var(--green) 10%, var(--surface-soft));
+  border-color: color-mix(in srgb, var(--green) 22%, var(--line));
+}
+
+.modal-panel.detail-income .detail-hero .status-dot.large {
+  color: var(--green);
+}
+
+.modal-panel.detail-expense .detail-hero span {
+  color: var(--red);
+}
+
+.modal-panel.detail-income .detail-hero span {
+  color: var(--green);
+}
+
+/* Garante clique nos menus mesmo com camadas visuais */
+[data-nav], [data-open-create], [data-open-fixed], #menuBtn, #closeDrawerBtn,
+#drawerBackdrop, .drawer-menu button, .bottom-nav button, .contact-card {
+  position: relative;
+  z-index: 2;
+}

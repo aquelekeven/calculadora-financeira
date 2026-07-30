@@ -22,7 +22,6 @@
           <button type="button" data-nav="fixed"><span>↻</span><div><strong>Fixos</strong><small>Recorrentes e parcelas</small></div></button>
           <button type="button" data-nav="apartment"><span>⌑</span><div><strong>Apartamento</strong><small>MR, SR e Caixa</small></div></button>
           <button type="button" data-nav="scenario"><span>◇</span><div><strong>Cenários</strong><small>Freela, PLR e simulações</small></div></button>
-          <button type="button" data-nav="settings"><span>◌</span><div><strong>Ajustes</strong><small>Saldo e backup</small></div></button>
         </nav>
       </div>
     </aside>
@@ -75,7 +74,7 @@
       </section>
 
       <section class="section-card reveal reveal-6">
-        <div class="section-head"><div><p>próximos</p><h2>Até o fim do mês</h2></div><button class="text-btn" type="button" data-nav="agenda">ver tudo</button></div>
+        <div class="section-head"><div><p>próximos</p><h2>Até o fim do mês</h2><span class="section-total" id="currentListTotal">Total: R$ 0,00</span></div><button class="text-btn" type="button" data-nav="agenda">ver tudo</button></div>
         <div class="commitment-list" id="currentList"></div>
       </section>
 
@@ -112,8 +111,8 @@
         <div class="contact-history-card" id="contactHistoryCard">
           <div class="section-head">
             <div>
-              <p>histórico</p>
-              <h2 id="contactHistoryTitle">Selecione um contato</h2>
+              <p>histórico do contato</p>
+              <h2 id="contactHistoryTitle">Escolha alguém acima</h2>
             </div>
           </div>
           <div class="commitment-list spacious" id="contactHistoryList"></div>
@@ -154,19 +153,6 @@
             <button type="button" data-scenario-preset="4000">PLR 4000</button>
           </div>
           <div class="scenario-result" id="scenarioResult"></div>
-        </div>
-      </section>
-    </main>
-
-    <main class="screen" id="screen-settings">
-      <section class="page-card">
-        <div class="page-head"><div><p>ajustes</p><h2>Saldo e backup</h2></div></div>
-        <div class="settings-block">
-          <label><span>Saldo atual</span><input id="balanceInput" inputmode="decimal" /></label>
-          <button class="primary-btn" id="saveBalanceBtn" type="button">Salvar saldo</button>
-          <button class="secondary-btn" id="exportBtn" type="button">Exportar backup JSON</button>
-          <label class="secondary-btn file-label">Importar backup JSON<input id="importInput" type="file" accept="application/json" /></label>
-          <button class="danger-btn" id="resetBtn" type="button">Resetar base</button>
         </div>
       </section>
     </main>

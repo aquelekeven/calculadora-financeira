@@ -11,7 +11,7 @@ const initialState = {
   currentBalance: 186.48,
   baseMonth: '2026-07',
   filter: 'all',
-  selectedContactId: 'sarah',
+  selectedContactId: '',
   contacts: [
     { id: 'sarah', name: 'Sarah', note: 'Contas combinadas/pagas para a Sarah' },
     { id: 'pacheco', name: 'Pacheco', note: 'Divisões e pagamentos para o Pacheco' },
@@ -100,7 +100,7 @@ function loadState() {
 
 function migrateState(loaded) {
   loaded.contacts = loaded.contacts?.length ? loaded.contacts : structuredClone(initialState.contacts);
-  loaded.selectedContactId = loaded.selectedContactId || loaded.contacts[0]?.id || 'sarah';
+  loaded.selectedContactId = loaded.selectedContactId || '';
   loaded.commitments = migrateSarahCommitments(loaded.commitments || []);
   return loaded;
 }
@@ -245,111 +245,52 @@ function isLate(item) {
 }
 
 function bindEvents() {
-  document.addEventListener('click', handleGlobalClick);
-
-  $('#menuBtn')?.addEventListener('click', openDrawer);
-  $('#closeDrawerBtn')?.addEventListener('click', closeDrawer);
-  $('#drawerBackdrop')?.addEventListener('click', closeDrawer);
-
-  $('#themeBtn')?.addEventListener('click', () => {
-    applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
-  });
-
-  $('#prevMonthBtn')?.addEventListener('click', () => changeMonth(-1));
-  $('#nextMonthBtn')?.addEventListener('click', () => changeMonth(1));
-  $('#currentMonthBtn')?.addEventListener('click', () => selectMonth(TODAY_MONTH));
-
-  $('#monthSelectorTrigger')?.addEventListener('click', toggleMonthSelector);
-
-  $('#closeModalBtn')?.addEventListener('click', closeCommitmentModal);
-  $('#commitmentModal')?.addEventListener('click', e => {
-    if (e.target.id === 'commitmentModal') closeCommitmentModal();
-  });
-
-  $$('[data-modal-type]').forEach(btn => {
-    btn.addEventListener('click', () => setModalType(btn.dataset.modalType));
-  });
+  document.addEventListener('click', handleGlobalClick, true);
 
   $('#commitmentForm')?.addEventListener('submit', saveCommitment);
-
-  $('#closeFixedModalBtn')?.addEventListener('click', closeFixedModal);
-  $('#fixedModal')?.addEventListener('click', e => {
-    if (e.target.id === 'fixedModal') closeFixedModal();
-  });
   $('#fixedForm')?.addEventListener('submit', saveFixedRule);
+  $('#contactForm')?.addEventListener('submit', saveContact);
 
   $$('#statusTabs [data-filter]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
       state.filter = btn.dataset.filter;
       renderAgenda();
       $$('#statusTabs [data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === state.filter));
     });
   });
 
+  $$('[data-modal-type]').forEach(btn => {
+    btn.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      setModalType(btn.dataset.modalType);
+    });
+  });
+
   $$('[data-scenario-preset]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
       $('#scenarioValue').value = btn.dataset.scenarioPreset;
       renderScenario();
     });
   });
+
   $('#scenarioValue')?.addEventListener('input', renderScenario);
 
-  $('#saveBalanceBtn')?.addEventListener('click', () => {
-    state.currentBalance = parseMoney($('#balanceInput').value) || 0;
-    saveState();
-    renderWithContentTransition();
-    setScreen('home');
-  });
-
-  $('#exportBtn')?.addEventListener('click', exportBackup);
   $('#importInput')?.addEventListener('change', e => {
     const file = e.target.files?.[0];
     if (file) importBackup(file);
     e.target.value = '';
   });
-  $('#resetBtn')?.addEventListener('click', () => {
-    if (!confirm('Resetar todos os dados locais?')) return;
-    localStorage.removeItem(STORAGE_KEY);
-    state = structuredClone(initialState);
-    saveState();
-    renderWithContentTransition();
-  });
-
-  $('#undoBtn')?.addEventListener('click', undoLastAction);
-
-  $('#addContactBtn')?.addEventListener('click', openContactModal);
-  $('#closeContactModalBtn')?.addEventListener('click', closeContactModal);
-  $('#contactModal')?.addEventListener('click', e => {
-    if (e.target.id === 'contactModal') closeContactModal();
-  });
-  $('#contactForm')?.addEventListener('submit', saveContact);
-
-  $('#detailCloseBtn')?.addEventListener('click', closeDetailModal);
-  $('#detailModal')?.addEventListener('click', e => {
-    if (e.target.id === 'detailModal') closeDetailModal();
-  });
-  $('#detailEditBtn')?.addEventListener('click', () => {
-    if (!activeDetailId) return;
-    const id = activeDetailId;
-    closeDetailModal();
-    openCommitmentModal('edit', id);
-  });
-  $('#detailDeleteBtn')?.addEventListener('click', () => {
-    if (!activeDetailId) return;
-    const id = activeDetailId;
-    closeDetailModal();
-    deleteCommitment(id);
-  });
-  $('#detailStatusBtn')?.addEventListener('click', () => {
-    if (!activeDetailId) return;
-    cycleStatus(activeDetailId);
-    const refreshed = state.commitments.find(i => i.id === activeDetailId);
-    if (refreshed) fillDetailModal(refreshed);
-  });
 }
 
 function handleGlobalClick(event) {
-  const navButton = event.target.closest('[data-nav]');
+  const target = event.target;
+
+  const navButton = target.closest?.('[data-nav]');
   if (navButton) {
     event.preventDefault();
     event.stopPropagation();
@@ -357,7 +298,7 @@ function handleGlobalClick(event) {
     return;
   }
 
-  const createButton = event.target.closest('[data-open-create]');
+  const createButton = target.closest?.('[data-open-create]');
   if (createButton) {
     event.preventDefault();
     event.stopPropagation();
@@ -365,11 +306,160 @@ function handleGlobalClick(event) {
     return;
   }
 
-  const fixedButton = event.target.closest('[data-open-fixed]');
+  const fixedButton = target.closest?.('[data-open-fixed]');
   if (fixedButton) {
     event.preventDefault();
     event.stopPropagation();
     openFixedModal();
+    return;
+  }
+
+  if (target.closest?.('#menuBtn')) {
+    event.preventDefault();
+    event.stopPropagation();
+    openDrawer();
+    return;
+  }
+
+  if (target.closest?.('#closeDrawerBtn') || target.id === 'drawerBackdrop') {
+    event.preventDefault();
+    event.stopPropagation();
+    closeDrawer();
+    return;
+  }
+
+  if (target.closest?.('#themeBtn')) {
+    event.preventDefault();
+    event.stopPropagation();
+    applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+    return;
+  }
+
+  if (target.closest?.('#prevMonthBtn')) {
+    event.preventDefault();
+    event.stopPropagation();
+    changeMonth(-1);
+    return;
+  }
+
+  if (target.closest?.('#nextMonthBtn')) {
+    event.preventDefault();
+    event.stopPropagation();
+    changeMonth(1);
+    return;
+  }
+
+  if (target.closest?.('#currentMonthBtn')) {
+    event.preventDefault();
+    event.stopPropagation();
+    selectMonth(TODAY_MONTH);
+    return;
+  }
+
+  if (target.closest?.('#monthSelectorTrigger')) {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleMonthSelector();
+    return;
+  }
+
+  if (target.closest?.('#closeModalBtn') || target.id === 'commitmentModal') {
+    event.preventDefault();
+    event.stopPropagation();
+    closeCommitmentModal();
+    return;
+  }
+
+  if (target.closest?.('#closeFixedModalBtn') || target.id === 'fixedModal') {
+    event.preventDefault();
+    event.stopPropagation();
+    closeFixedModal();
+    return;
+  }
+
+  if (target.closest?.('#addContactBtn')) {
+    event.preventDefault();
+    event.stopPropagation();
+    openContactModal();
+    return;
+  }
+
+  if (target.closest?.('#closeContactModalBtn') || target.id === 'contactModal') {
+    event.preventDefault();
+    event.stopPropagation();
+    closeContactModal();
+    return;
+  }
+
+  if (target.closest?.('#undoBtn')) {
+    event.preventDefault();
+    event.stopPropagation();
+    undoLastAction();
+    return;
+  }
+
+  if (target.closest?.('#detailCloseBtn') || target.id === 'detailModal') {
+    event.preventDefault();
+    event.stopPropagation();
+    closeDetailModal();
+    return;
+  }
+
+  if (target.closest?.('#detailEditBtn')) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!activeDetailId) return;
+    const id = activeDetailId;
+    closeDetailModal();
+    openCommitmentModal('edit', id);
+    return;
+  }
+
+  if (target.closest?.('#detailDeleteBtn')) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!activeDetailId) return;
+    const id = activeDetailId;
+    closeDetailModal();
+    deleteCommitment(id);
+    return;
+  }
+
+  if (target.closest?.('#detailStatusBtn')) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!activeDetailId) return;
+    cycleStatus(activeDetailId);
+    const refreshed = state.commitments.find(i => i.id === activeDetailId);
+    if (refreshed) fillDetailModal(refreshed);
+    return;
+  }
+
+  if (target.closest?.('#resetBtn')) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!confirm('Resetar todos os dados locais?')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    state = structuredClone(initialState);
+    saveState();
+    renderWithContentTransition();
+    return;
+  }
+
+  if (target.closest?.('#saveBalanceBtn')) {
+    event.preventDefault();
+    event.stopPropagation();
+    state.currentBalance = parseMoney($('#balanceInput')?.value) || 0;
+    saveState();
+    renderWithContentTransition();
+    setScreen('home');
+    return;
+  }
+
+  if (target.closest?.('#exportBtn')) {
+    event.preventDefault();
+    event.stopPropagation();
+    exportBackup();
     return;
   }
 }
@@ -562,6 +652,7 @@ function renderHome() {
   renderList($('#lateList'), late);
 
   const current = calc.items.filter(i => i.type === 'expense' && i.status !== 'paid' && !isLate(i));
+  $('#currentListTotal').textContent = `Total: ${money(current.reduce((sum, item) => sum + (Number(item.amount) || 0), 0))}`;
   renderList($('#currentList'), current);
 
   const future = $('#futureMonths');
@@ -619,18 +710,17 @@ function populateContactSelect() {
 function renderContacts() {
   const grid = $('#contactsGrid');
   const list = $('#contactHistoryList');
-  if (!grid || !list) return;
+  const card = $('#contactHistoryCard');
+  if (!grid || !list || !card) return;
 
   grid.innerHTML = '';
 
   const contacts = state.contacts || [];
   if (!contacts.length) {
     grid.innerHTML = '<div class="empty-state">Nenhum contato cadastrado ainda.</div>';
-    list.innerHTML = '<div class="empty-state">Crie um contato para ver o histórico.</div>';
+    card.classList.add('is-hidden');
     return;
   }
-
-  if (!contacts.some(c => c.id === state.selectedContactId)) state.selectedContactId = contacts[0].id;
 
   contacts.forEach(contact => {
     const related = state.commitments.filter(item => item.contactId === contact.id);
@@ -648,7 +738,9 @@ function renderContacts() {
       </div>
       <small>${money(paid)}<br/>pago</small>
     `;
-    button.addEventListener('click', () => {
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
       state.selectedContactId = contact.id;
       saveState();
       renderContacts();
@@ -656,8 +748,20 @@ function renderContacts() {
     grid.appendChild(button);
   });
 
+  if (!state.selectedContactId) {
+    card.classList.add('is-hidden');
+    list.innerHTML = '';
+    return;
+  }
+
   const selected = contactById(state.selectedContactId);
-  $('#contactHistoryTitle').textContent = selected ? selected.name : 'Selecione um contato';
+  if (!selected) {
+    card.classList.add('is-hidden');
+    return;
+  }
+
+  card.classList.remove('is-hidden');
+  $('#contactHistoryTitle').textContent = selected.name;
 
   const history = state.commitments
     .filter(item => item.contactId === state.selectedContactId)
@@ -923,6 +1027,10 @@ function openDetailModal(id) {
 }
 
 function fillDetailModal(item) {
+  const panel = $('#detailModal .modal-panel');
+  panel?.classList.toggle('detail-expense', item.type === 'expense');
+  panel?.classList.toggle('detail-income', item.type === 'income');
+
   $('#detailTitle').textContent = item.description || 'Conta';
   $('#detailAmount').textContent = item.type === 'income' ? `+${money(item.amount)}` : money(item.amount);
   $('#detailStatusText').textContent = statusLabel(item.status);
