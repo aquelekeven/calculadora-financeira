@@ -923,8 +923,9 @@ function attachSwipeToCommitment(article, content) {
   let dragging = false;
   let moved = false;
   const max = 118;
-  const revealThreshold = 34;
-  const confirmThreshold = max * 0.58;
+  const revealThreshold = 28;
+  const openThreshold = 48;
+  const confirmThreshold = max * 0.92;
 
   const action = article.querySelector('.commitment-swipe-action');
   const id = action?.dataset.statusAction;
@@ -932,21 +933,27 @@ function attachSwipeToCommitment(article, content) {
 
   const setTranslate = value => {
     const clamped = Math.min(Math.max(value, 0), max);
+    const progress = clamped / max;
+
     content.style.transform = `translateX(${-clamped}px)`;
-    action.style.opacity = String(0.7 + (clamped / max) * 0.3);
+    article.style.setProperty('--swipe-action-opacity', String(0.55 + progress * 0.45));
+
+    article.classList.toggle('swipe-revealing', clamped >= revealThreshold);
+    article.classList.toggle('swipe-ready', clamped >= confirmThreshold);
+
     currentX = clamped;
   };
 
   const closeOthers = () => {
     document.querySelectorAll('.commitment-item.swipe-open').forEach(card => {
-      if (card !== article) card.classList.remove('swipe-open');
+      if (card !== article) card.classList.remove('swipe-open', 'swipe-revealing', 'swipe-ready');
     });
   };
 
   const autoConfirm = () => {
     if (!id || !status) return;
     closeOthers();
-    article.classList.add('swipe-open', 'auto-confirming');
+    article.classList.add('swipe-open', 'auto-confirming', 'swipe-ready');
     action.classList.add('auto-confirm');
 
     setTimeout(() => {
@@ -959,7 +966,7 @@ function attachSwipeToCommitment(article, content) {
     dragging = false;
     article.classList.remove('swiping');
     content.style.transform = '';
-    action.style.opacity = '';
+    article.style.removeProperty('--swipe-action-opacity');
 
     if (currentX >= confirmThreshold) {
       autoConfirm();
@@ -967,7 +974,14 @@ function attachSwipeToCommitment(article, content) {
     }
 
     closeOthers();
-    article.classList.toggle('swipe-open', currentX >= revealThreshold);
+    const shouldOpen = currentX >= openThreshold;
+    article.classList.toggle('swipe-open', shouldOpen);
+    article.classList.toggle('swipe-revealing', shouldOpen);
+    article.classList.remove('swipe-ready');
+
+    if (!shouldOpen) {
+      article.classList.remove('swipe-revealing');
+    }
   };
 
   content.addEventListener('pointerdown', event => {

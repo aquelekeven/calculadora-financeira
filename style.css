@@ -1690,3 +1690,32 @@ body.fixed-screen .month-selector-card {
   from { transform: scaleX(1); opacity: 1; }
   to { transform: scaleX(0); opacity: .7; }
 }
+
+
+/* Swipe com meio-termo real: revela antes, confirma só no fim */
+.commitment-swipe-action {
+  transform: translateX(100%);
+}
+
+.commitment-item.swipe-revealing .commitment-swipe-action,
+.commitment-item.swiping .commitment-swipe-action,
+.commitment-item.swipe-open .commitment-swipe-action {
+  transform: translateX(0);
+}
+
+.commitment-item.swiping .commitment-swipe-action {
+  opacity: var(--swipe-action-opacity, .72);
+}
+
+.commitment-item.swipe-ready .commitment-swipe-action {
+  filter: brightness(1.08);
+}
+
+.commitment-item.swipe-ready .commitment-swipe-action::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.42);
+  pointer-events: none;
+}
