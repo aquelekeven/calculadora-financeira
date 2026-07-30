@@ -3,111 +3,167 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#f5f7f2" />
+  <meta name="theme-color" content="#efefec" />
   <title>Financeiro Keven</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app-shell">
-    <header class="app-header">
-      <button class="icon-btn" id="menuBtn" title="Abrir menu" type="button" aria-label="Abrir menu lateral">☰</button>
-      <div class="header-title">
-        <span>Controle financeiro</span>
-        <strong>Minha conta</strong>
+    <aside class="side-drawer" id="sideDrawer" aria-hidden="true">
+      <div class="drawer-panel" role="dialog" aria-label="Menu lateral">
+        <div class="drawer-head">
+          <div>
+            <span>financeiro</span>
+            <strong>Keven</strong>
+          </div>
+          <button class="circle-btn ghost" id="closeDrawerBtn" type="button" aria-label="Fechar menu">×</button>
+        </div>
+
+        <nav class="drawer-menu">
+          <button type="button" data-tab="home"><span>⌂</span><div><strong>Início</strong><small>Resumo e atividade</small></div></button>
+          <button type="button" data-tab="months"><span>▤</span><div><strong>Meses</strong><small>Mês atual + próximos 2</small></div></button>
+          <button type="button" data-tab="add"><span>＋</span><div><strong>Lançar</strong><small>Nova entrada ou saída</small></div></button>
+          <button type="button" data-tab="settings"><span>◌</span><div><strong>Ajustes</strong><small>Saldo e backup</small></div></button>
+        </nav>
+
+        <div class="drawer-note">Local/offline por enquanto. Depois a gente pluga Supabase e login sem refazer a interface.</div>
       </div>
-      <button class="icon-btn" id="themeBtn" title="Alternar tema" type="button">☾</button>
-    </header>
+    </aside>
+
+    <div class="overlay-blur" id="globalOverlay" aria-hidden="true"></div>
 
     <main class="screen active" id="screen-home">
-      <section class="balance-card">
-        <div class="account-pill">
-          <span class="card-dot"></span>
-          <span>Local • **** 2026</span>
-          <span>⌄</span>
-        </div>
-        <p>Saldo atual</p>
-        <h1 id="currentBalance">R$ 0,00</h1>
-        <button class="micro-pill" id="healthPill" type="button">Carregando projeção...</button>
-
-        <div class="quick-actions">
-          <button type="button" class="quick-action active" data-tab="add" data-kind="saida"><span>↗</span><small>Saída</small></button>
-          <button type="button" class="quick-action" data-tab="add" data-kind="entrada"><span>↙</span><small>Entrada</small></button>
-          <button type="button" class="quick-action" data-tab="months"><span>≡</span><small>Meses</small></button>
-          <button type="button" class="quick-action" data-tab="settings"><span>⋯</span><small>Mais</small></button>
-        </div>
-      </section>
-
-      <section class="section-block">
-        <div class="section-heading">
+      <section class="hero-card reveal reveal-1">
+        <div class="hero-top">
           <div>
-            <span>próximos vencimentos</span>
-            <h2>Próximas contas</h2>
+            <p class="eyebrow">Oi Keven</p>
+            <h1>Seu financeiro</h1>
           </div>
-          <button class="link-btn" data-tab="months" type="button">Ver tudo ›</button>
+          <div class="hero-actions">
+            <button class="circle-btn" id="themeBtn" type="button" aria-label="Alternar tema">◐</button>
+            <button class="circle-btn" id="menuBtn" type="button" aria-label="Abrir menu lateral">⋯</button>
+          </div>
         </div>
-        <div class="due-list" id="upcomingList"></div>
+
+        <div class="money-chip reveal reveal-2">
+          <span class="chip-dot"></span>
+          <span>Saldo local</span>
+        </div>
+
+        <div class="balance-block reveal reveal-3">
+          <strong id="currentBalance">R$ 0,00</strong>
+          <span id="currentMonthLabel">Julho de 2026</span>
+        </div>
+
+        <button class="trend-pill reveal reveal-4" id="healthPill" type="button">Carregando...</button>
       </section>
 
-      <section class="month-carousel" id="summaryCards"></section>
+      <section class="action-band reveal reveal-5">
+        <button class="action-tile" type="button" data-tab="add" data-kind="entrada">
+          <span>↙</span>
+          <small>Entrada</small>
+        </button>
+        <button class="action-tile center-tile" type="button" data-tab="months">
+          <span>◎</span>
+        </button>
+        <button class="action-tile" type="button" data-tab="add" data-kind="saida">
+          <span>↗</span>
+          <small>Saída</small>
+        </button>
+      </section>
+
+      <section class="dashboard-grid reveal reveal-6">
+        <article class="glass-card months-mini-card">
+          <div class="card-head">
+            <h2>Próximos meses</h2>
+            <button class="mini-link" type="button" data-tab="months">Ver</button>
+          </div>
+          <div class="mini-months" id="summaryCards"></div>
+        </article>
+
+        <article class="glass-card chart-card">
+          <div class="card-head">
+            <h2>Fluxo do mês</h2>
+            <span class="muted">projeção</span>
+          </div>
+          <div class="chart-wrap">
+            <svg id="trendChart" viewBox="0 0 320 140" preserveAspectRatio="none" aria-hidden="true"></svg>
+            <div class="chart-footer">
+              <strong id="monthFlowTotal">R$ 0,00</strong>
+              <span id="monthFlowCaption">saldo previsto</span>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="activity-card reveal reveal-7">
+        <div class="card-head">
+          <h2>Atividade recente</h2>
+          <button class="mini-link" type="button" data-tab="months">Tudo</button>
+        </div>
+        <div class="activity-list" id="upcomingList"></div>
+      </section>
     </main>
 
     <main class="screen" id="screen-months">
-      <section class="section-heading sticky-heading">
-        <div>
-          <span>mês atual + próximos 2</span>
-          <h2>Visão mensal</h2>
+      <section class="panel-page reveal reveal-1">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">mês atual + próximos 2</p>
+            <h2>Visão mensal</h2>
+          </div>
+          <select id="baseMonthSelect" class="month-select" title="Mês base"></select>
         </div>
-        <select id="baseMonthSelect" class="pill-select" title="Mês base"></select>
+        <div id="monthsContainer" class="month-panels"></div>
       </section>
-      <section id="monthsContainer" class="months-container"></section>
     </main>
 
     <main class="screen" id="screen-add">
-      <section class="form-card">
-        <div class="section-heading compact">
+      <section class="panel-page reveal reveal-1">
+        <div class="page-head simple">
           <div>
-            <span>novo lançamento</span>
+            <p class="eyebrow">novo lançamento</p>
             <h2>Adicionar movimentação</h2>
           </div>
         </div>
 
-        <form id="entryForm" class="modern-form">
+        <form id="entryForm" class="entry-card">
           <div class="type-toggle" role="tablist" aria-label="Tipo do lançamento">
-            <button type="button" class="selected" data-entry-type="saida">Saída</button>
             <button type="button" data-entry-type="entrada">Entrada</button>
+            <button type="button" data-entry-type="saida" class="selected">Saída</button>
           </div>
 
-          <label class="amount-field">
+          <label class="field amount-field">
             <span>Valor</span>
             <input id="entryValue" inputmode="decimal" placeholder="0,00" required />
           </label>
 
           <div class="preset-row">
-            <button type="button" data-preset="50">R$50</button>
-            <button type="button" data-preset="100">R$100</button>
-            <button type="button" data-preset="500">R$500</button>
-            <button type="button" data-preset="1000">R$1000</button>
-            <button type="button" data-preset="1500">R$1500</button>
+            <button type="button" data-preset="50">50</button>
+            <button type="button" data-preset="100">100</button>
+            <button type="button" data-preset="500">500</button>
+            <button type="button" data-preset="1000">1000</button>
+            <button type="button" data-preset="1500">1500</button>
           </div>
 
-          <label>
+          <label class="field">
             <span>Descrição</span>
-            <input id="entryDescription" type="text" placeholder="Ex: MR apartamento" required />
+            <input id="entryDescription" type="text" placeholder="Ex: Claro" required />
           </label>
 
           <div class="two-col">
-            <label>
+            <label class="field">
               <span>Mês</span>
               <input id="entryMonth" type="month" required />
             </label>
-            <label>
+            <label class="field">
               <span>Vencimento</span>
               <input id="entryDueDate" type="date" />
             </label>
           </div>
 
           <div class="two-col">
-            <label>
+            <label class="field">
               <span>Categoria</span>
               <select id="entryCategory">
                 <option value="apartamento">Apartamento</option>
@@ -119,7 +175,7 @@
                 <option value="outros">Outros</option>
               </select>
             </label>
-            <label>
+            <label class="field">
               <span>Status</span>
               <select id="entryStatus">
                 <option value="pendente">Pendente</option>
@@ -130,127 +186,77 @@
             </label>
           </div>
 
-          <button class="primary-btn" type="submit">Adicionar lançamento</button>
-        </form>
-      </section>
-
-      <section class="form-card secondary-card">
-        <div class="section-heading compact">
-          <div>
-            <span>recorrente</span>
-            <h2>Adicionar fixo mensal</h2>
-          </div>
-        </div>
-        <form id="fixedForm" class="modern-form smaller">
-          <label>
-            <span>Descrição</span>
-            <input id="fixedDescription" type="text" placeholder="Ex: Internet" required />
-          </label>
-          <div class="two-col">
-            <label>
-              <span>Valor</span>
-              <input id="fixedValue" inputmode="decimal" placeholder="160,00" required />
-            </label>
-            <label>
-              <span>Dia venc.</span>
-              <input id="fixedDay" type="number" min="1" max="31" placeholder="10" />
-            </label>
-          </div>
-          <button class="secondary-btn" type="submit">Salvar fixo</button>
+          <button class="primary-btn" type="submit">Salvar lançamento</button>
         </form>
       </section>
     </main>
 
     <main class="screen" id="screen-settings">
-      <section class="settings-card">
-        <div class="section-heading compact">
+      <section class="panel-page reveal reveal-1">
+        <div class="page-head simple">
           <div>
-            <span>backup e ajustes</span>
-            <h2>Configurações</h2>
+            <p class="eyebrow">configurações</p>
+            <h2>Ajustes locais</h2>
           </div>
         </div>
 
-        <label class="setting-row">
-          <div>
-            <strong>Saldo atual</strong>
-            <span>Atualiza o saldo usado no mês atual</span>
-          </div>
-          <input id="balanceInput" inputmode="decimal" />
-        </label>
-
-        <div class="settings-actions">
-          <button id="saveBalanceBtn" class="primary-btn" type="button">Salvar saldo</button>
-          <button id="exportBtn" class="secondary-btn" type="button">Exportar JSON</button>
-          <label class="secondary-btn file-label">
-            Importar JSON
-            <input id="importInput" type="file" accept="application/json" />
+        <div class="settings-card">
+          <label class="field">
+            <span>Saldo atual</span>
+            <input id="balanceInput" inputmode="decimal" />
           </label>
-          <button id="resetBtn" class="danger-btn" type="button">Resetar base</button>
-        </div>
-      </section>
-
-      <section class="settings-card">
-        <div class="section-heading compact">
-          <div>
-            <span>próxima fase</span>
-            <h2>Supabase depois</h2>
+          <div class="settings-actions">
+            <button id="saveBalanceBtn" class="primary-btn" type="button">Salvar saldo</button>
+            <button id="exportBtn" class="secondary-btn" type="button">Exportar JSON</button>
+            <label class="secondary-btn file-label">Importar JSON<input id="importInput" type="file" accept="application/json" /></label>
+            <button id="resetBtn" class="danger-btn" type="button">Resetar base</button>
           </div>
         </div>
-        <p class="muted-text">Por enquanto os dados ficam no navegador. Quando plugarmos Supabase, essa tela vira login Google + sincronização PC/celular, mantendo as regras pra cada usuário ver só os próprios lançamentos.</p>
       </section>
     </main>
 
-    <aside class="side-drawer" id="sideDrawer" aria-hidden="true">
-      <div class="drawer-panel" role="dialog" aria-label="Menu lateral">
-        <div class="drawer-head">
-          <div>
-            <span>financeiro</span>
-            <strong>Keven</strong>
-          </div>
-          <button class="icon-btn small" id="closeDrawerBtn" type="button" aria-label="Fechar menu">×</button>
-        </div>
-        <nav class="drawer-menu" aria-label="Opções do app">
-          <button type="button" data-tab="home"><span>⌂</span><strong>Início</strong><small>Saldo e próximos vencimentos</small></button>
-          <button type="button" data-tab="months"><span>▤</span><strong>Meses</strong><small>Mês atual + próximos 2</small></button>
-          <button type="button" data-tab="add"><span>＋</span><strong>Novo lançamento</strong><small>Entrada, saída e fixos</small></button>
-          <button type="button" data-tab="settings"><span>◌</span><strong>Ajustes</strong><small>Saldo, backup e tema</small></button>
-        </nav>
-        <div class="drawer-note">Dados locais por enquanto. Depois a gente pluga Supabase sem mudar a cara do app.</div>
-      </div>
-    </aside>
-
     <div class="fab-backdrop" id="fabBackdrop" aria-hidden="true"></div>
-    <nav class="floating-nav" id="floatingNav" aria-label="Ações rápidas">
-      <div class="nav-actions" id="navActions">
-        <button class="fab-action action-home active" data-tab="home" type="button" aria-label="Início"><span>⌂</span><small>Início</small></button>
-        <button class="fab-action action-months" data-tab="months" type="button" aria-label="Meses"><span>▤</span><small>Meses</small></button>
-        <button class="fab-action action-saida" data-tab="add" data-kind="saida" type="button" aria-label="Adicionar saída"><span>−</span><small>Saída</small></button>
-        <button class="fab-action action-settings" data-tab="settings" type="button" aria-label="Ajustes"><span>◌</span><small>Ajustes</small></button>
-      </div>
-      <button class="nav-trigger" id="navTrigger" type="button" aria-expanded="false" aria-label="Abrir ações rápidas">
-        <span class="fab-closed">＋</span>
-        <span class="fab-open">＋ Entrada</span>
+    <div class="floating-menu" id="floatingMenu" aria-label="Ações rápidas">
+      <button class="fab-option option-home" data-tab="home" type="button" aria-label="Início">
+        <span class="fab-icon">⌂</span>
+        <span class="fab-label">Início</span>
       </button>
-    </nav>
+      <button class="fab-option option-months" data-tab="months" type="button" aria-label="Meses">
+        <span class="fab-icon">▤</span>
+        <span class="fab-label">Meses</span>
+      </button>
+      <button class="fab-option option-entry" data-tab="add" data-kind="entrada" type="button" aria-label="Entrada">
+        <span class="fab-icon">↙</span>
+        <span class="fab-label">Entrada</span>
+      </button>
+      <button class="fab-option option-settings" data-tab="settings" type="button" aria-label="Ajustes">
+        <span class="fab-icon">◌</span>
+        <span class="fab-label">Ajustes</span>
+      </button>
+      <button class="fab-trigger" id="fabTrigger" type="button" aria-expanded="false" aria-label="Abrir ações rápidas">
+        <span class="fab-trigger-closed">↗</span>
+        <span class="fab-trigger-open">✕</span>
+      </button>
+    </div>
   </div>
 
   <template id="monthTemplate">
     <article class="month-card">
-      <div class="month-top">
+      <div class="month-header">
         <div>
           <h3></h3>
           <p></p>
         </div>
         <strong class="month-result"></strong>
       </div>
-      <div class="mini-metrics"></div>
+      <div class="month-metrics"></div>
       <div class="transaction-list"></div>
     </article>
   </template>
 
   <template id="transactionTemplate">
     <div class="transaction-item">
-      <div class="transaction-icon"></div>
+      <div class="transaction-avatar"></div>
       <div class="transaction-main">
         <strong></strong>
         <span></span>
