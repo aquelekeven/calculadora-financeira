@@ -787,7 +787,7 @@ function renderFixed() {
       </div>
       <div class="rule-item-actions">
         <strong>${money(rule.amount)}</strong>
-        <button class="rule-edit-btn" type="button" data-edit-rule="${rule.id}">Editar</button>
+        <button class="rule-edit-btn" type="button" data-edit-rule="${rule.id}">${icon('edit')}<span>Editar</span></button>
       </div>
     `;
     list.appendChild(item);
@@ -814,9 +814,9 @@ function renderScenario() {
 
   document.getElementById('scenarioResult').innerHTML = `
     <span>Resultado atual do mês</span>
-    <strong>${money(base)}</strong>
+    <strong class="${base >= 0 ? 'positive' : 'negative'}">${money(base)}</strong>
     <span>Com entrada extra de ${money(extra)}</span>
-    <strong>${simulated >= 0 ? '🟩' : '🟥'} ${money(simulated)}</strong>
+    <strong class="${simulated >= 0 ? 'positive' : 'negative'}">${money(simulated)}</strong>
   `;
 }
 
@@ -1638,6 +1638,10 @@ function syncColorPicker(showOkFeedback = false) {
     ok.textContent = 'ok ✓';
     setTimeout(() => { ok.textContent = 'ok'; }, 800);
   }
+}
+
+function icon(name, cls = '') {
+  return `<svg class="ui-icon ${cls}" aria-hidden="true"><use href="#i-${name}"></use></svg>`;
 }
 
 function randomContactColor() {

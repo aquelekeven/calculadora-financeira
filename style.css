@@ -1719,3 +1719,50 @@ body.fixed-screen .month-selector-card {
   border: 1px solid rgba(255,255,255,.42);
   pointer-events: none;
 }
+
+
+/* --- Repaginação de ícones --- */
+.icon-sprite { position:absolute; width:0; height:0; overflow:hidden; }
+.ui-icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+  flex: none;
+  color: currentColor;
+}
+.ui-icon.sm { width: 16px; height: 16px; }
+.icon-btn, .small-btn, .secondary-btn, .danger-btn, .text-btn, .rule-edit-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.icon-btn .ui-icon { width: 20px; height: 20px; }
+.month-chevron { display:inline-grid; place-items:center; }
+.month-selector-head button .ui-icon,
+.fixed-picker-head button .ui-icon { width: 18px; height: 18px; margin: 0 auto; }
+.btn-icon, .nav-icon, .drawer-icon { display:grid; place-items:center; }
+.quick-grid .btn-icon { width: 28px; height: 28px; color: var(--text); }
+.quick-grid .btn-icon .ui-icon { width: 28px; height: 28px; }
+.quick-grid button { gap: 8px; }
+.bottom-nav .nav-icon { width: 24px; height: 24px; }
+.bottom-nav .nav-icon .ui-icon { width: 24px; height: 24px; }
+.bottom-nav span { display:grid; place-items:center; font-size: 0; line-height: 0; }
+.bottom-nav small { margin-top: 5px; }
+.bottom-nav .add-main .nav-icon .ui-icon { width: 28px; height: 28px; }
+.drawer-menu button > span.drawer-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 16px;
+  background: var(--surface);
+  display:grid;
+  place-items:center;
+}
+.drawer-menu button > span.drawer-icon .ui-icon { width: 22px; height: 22px; }
+.quick-grid span { font-size: 0; line-height: 0; }
+.detail-section-title { display:flex; align-items:center; gap:8px; }
+.detail-actions button .ui-icon { width: 18px; height: 18px; }
+.small-btn .ui-icon, .text-btn .ui-icon, .rule-edit-btn .ui-icon { width: 18px; height: 18px; }
+.rule-edit-btn { white-space: nowrap; }
+.count-pill,
+.status-dot,
+.contact-badge { display:inline-flex; align-items:center; justify-content:center; }
+.status-tabs button, .contact-filter-tabs button { display:inline-flex; align-items:center; justify-content:center; }
+.fixed-picker-actions button { display:inline-flex; align-items:center; justify-content:center; }
+.scenario-result strong.positive { color: var(--green); }
+.scenario-result strong.negative { color: var(--red); }
