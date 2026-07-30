@@ -8,9 +8,9 @@ const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 const uid = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 const baseContacts = [
-  { id: 'sarah', name: 'Sarah', note: 'Contas combinadas/pagas para a Sarah' },
-  { id: 'pacheco', name: 'Pacheco', note: 'Divisões e pagamentos para o Pacheco' },
-  { id: 'julia', name: 'Julia', note: 'Contas e cartão com a Julia' }
+  { id: 'sarah', name: 'Sarah', note: 'Contas combinadas/pagas para a Sarah', color: '#f97393' },
+  { id: 'pacheco', name: 'Pacheco', note: 'Divisões e pagamentos para o Pacheco', color: '#38bdf8' },
+  { id: 'julia', name: 'Julia', note: 'Contas e cartão com a Julia', color: '#a78bfa' }
 ];
 
 const baseCommitments = [
@@ -92,6 +92,9 @@ let modalType = 'expense';
 let activeDetailId = null;
 let pendingUndo = null;
 let undoTimer = null;
+let activeContactId = '';
+let contactHistoryOpen = false;
+let activeAccountGroup = null;
 
 init();
 
@@ -136,7 +139,7 @@ function mergeById(base, existing) {
   const map = new Map();
   [...base, ...existing].forEach(item => {
     if (!item?.id) return;
-    map.set(item.id, { ...map.get(item.id), ...item });
+    map.set(item.id, { color: randomContactColor(), ...map.get(item.id), ...item });
   });
   return [...map.values()];
 }
@@ -278,6 +281,27 @@ function handleClick(event) {
     return;
   }
 
+  if (target.closest('#backToContactsBtn')) {
+    showContactsList();
+    return;
+  }
+
+  if (target.closest('#editContactBtn')) {
+    if (activeContactId) openContactModal(activeContactId);
+    return;
+  }
+
+  if (target.closest('#deleteContactBtn')) {
+    if (activeContactId) deleteContact(activeContactId);
+    return;
+  }
+
+  if (target.closest('#toggleContactHistoryBtn')) {
+    contactHistoryOpen = !contactHistoryOpen;
+    renderContactDetail();
+    return;
+  }
+
   if (target.closest('#detailEditBtn')) {
     if (!activeDetailId) return;
     const id = activeDetailId;
@@ -317,6 +341,9 @@ function setScreen(name, options = {}) {
   document.querySelectorAll('.bottom-nav [data-screen]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.screen === name);
   });
+
+  document.body.classList.toggle('contacts-screen', name === 'contacts');
+  if (name === 'contacts' && !activeContactId) showContactsList();
 
   state.currentScreen = name;
   saveState();
@@ -479,10 +506,12 @@ function renderAgenda() {
 }
 
 function renderContacts() {
-  const grid = document.getElementById('contactsGrid');
-  const historyCard = document.getElementById('contactHistoryCard');
-  const historyList = document.getElementById('contactHistoryList');
+  renderContactsGrid();
+  renderContactDetail();
+}
 
+function renderContactsGrid() {
+  const grid = document.getElementById('contactsGrid');
   grid.innerHTML = '';
 
   state.contacts.forEach(contact => {
@@ -492,7 +521,8 @@ function renderContacts() {
 
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = `contact-card${state.selectedContactId === contact.id ? ' active' : ''}`;
+    btn.className = 'contact-card';
+    btn.style.setProperty('--contact-color', contact.color || '#151515');
     btn.innerHTML = `
       <div class="contact-avatar">${escapeHtml(initials(contact.name))}</div>
       <div>
@@ -501,34 +531,144 @@ function renderContacts() {
       </div>
       <small>${money(sum(paid))}<br>pago</small>
     `;
-    btn.addEventListener('click', () => {
-      state.selectedContactId = contact.id;
-      saveState();
-      renderContacts();
-    });
+    btn.addEventListener('click', () => openContactDetail(contact.id));
     grid.appendChild(btn);
   });
+}
 
-  if (!state.selectedContactId) {
-    historyCard.classList.add('is-hidden');
-    historyList.innerHTML = '';
+function openContactDetail(contactId) {
+  activeContactId = contactId;
+  state.selectedContactId = contactId;
+  contactHistoryOpen = false;
+  saveState();
+  document.getElementById('contactsListView').classList.add('is-hidden');
+  document.getElementById('contactDetailView').classList.remove('is-hidden');
+  renderContactDetail();
+}
+
+function showContactsList() {
+  activeContactId = '';
+  contactHistoryOpen = false;
+  document.getElementById('contactsListView')?.classList.remove('is-hidden');
+  document.getElementById('contactDetailView')?.classList.add('is-hidden');
+}
+
+function renderContactDetail() {
+  const detail = document.getElementById('contactDetailView');
+  if (!detail || detail.classList.contains('is-hidden')) return;
+
+  const contact = contactById(activeContactId || state.selectedContactId);
+  if (!contact) {
+    showContactsList();
     return;
   }
 
-  const contact = contactById(state.selectedContactId);
-  if (!contact) {
+  activeContactId = contact.id;
+  const related = state.commitments.filter(item => item.contactId === contact.id);
+  const paid = related.filter(item => item.status === 'paid');
+  const pending = related.filter(item => item.status !== 'paid');
+
+  document.getElementById('contactProfileAvatar').textContent = initials(contact.name);
+  document.getElementById('contactProfileAvatar').style.setProperty('--contact-color', contact.color || '#151515');
+  document.getElementById('contactProfileName').textContent = contact.name;
+  document.getElementById('contactProfileResume').textContent = `${related.length} conta(s) registradas`;
+  document.getElementById('contactPendingTotal').textContent = money(sum(pending));
+  document.getElementById('contactPaidTotal').textContent = money(sum(paid));
+
+  renderContactAccountGroups(contact, related);
+
+  const historyCard = document.getElementById('contactHistoryCard');
+  const historyBtn = document.getElementById('toggleContactHistoryBtn');
+  historyBtn.textContent = contactHistoryOpen ? 'Esconder histórico completo' : 'Ver histórico completo';
+
+  if (!contactHistoryOpen) {
     historyCard.classList.add('is-hidden');
     return;
   }
 
   historyCard.classList.remove('is-hidden');
-  document.getElementById('contactHistoryTitle').textContent = contact.name;
+  document.getElementById('contactHistoryTitle').textContent = `Histórico — ${contact.name}`;
+  renderList(document.getElementById('contactHistoryList'), related.sort((a, b) => (a.month || '').localeCompare(b.month || '') || (a.dueDate || '').localeCompare(b.dueDate || '')));
+}
 
-  const items = state.commitments
-    .filter(item => item.contactId === contact.id)
-    .sort((a, b) => (a.month || '').localeCompare(b.month || '') || (a.dueDate || '').localeCompare(b.dueDate || ''));
+function renderContactAccountGroups(contact, related) {
+  const grid = document.getElementById('contactAccountsGrid');
+  grid.innerHTML = '';
 
-  renderList(historyList, items);
+  if (!related.length) {
+    grid.innerHTML = '<div class="empty-state">Nenhuma conta registrada com esse contato.</div>';
+    return;
+  }
+
+  const groups = groupContactAccounts(related);
+  groups.forEach(group => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `account-progress-card${group.progress >= 100 ? ' complete' : ''}`;
+    button.style.setProperty('--contact-color', contact.color || '#3478f6');
+    button.innerHTML = `
+      <div class="account-progress-title">
+        <strong>${escapeHtml(group.name)}</strong>
+        <span>${Math.round(group.progress)}%</span>
+      </div>
+      <div class="account-progress-sub">
+        <span>${group.paidCount}/${group.totalCount} pago(s)</span>
+        <strong>${money(group.totalAmount)}</strong>
+      </div>
+      <div class="progress-bar"><i style="width:${Math.min(group.progress, 100)}%"></i></div>
+    `;
+    button.addEventListener('click', () => openAccountGroupModal(group.key));
+    grid.appendChild(button);
+  });
+}
+
+function groupContactAccounts(items) {
+  const map = new Map();
+
+  items.forEach(item => {
+    const key = `${item.description}|${item.installmentTotal || ''}`;
+    if (!map.has(key)) {
+      map.set(key, {
+        key,
+        name: item.description,
+        items: [],
+        totalAmount: 0,
+        paidCount: 0,
+        totalCount: 0,
+        progress: 0
+      });
+    }
+
+    const group = map.get(key);
+    group.items.push(item);
+    group.totalAmount += Number(item.amount) || 0;
+  });
+
+  return [...map.values()].map(group => {
+    const maxInstallment = Math.max(...group.items.map(item => Number(item.installmentTotal) || 0), 0);
+    group.totalCount = maxInstallment || group.items.length;
+    group.paidCount = group.items.filter(item => item.status === 'paid').length;
+    group.progress = group.totalCount ? (group.paidCount / group.totalCount) * 100 : 0;
+    return group;
+  }).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function openAccountGroupModal(key) {
+  const contact = contactById(activeContactId);
+  if (!contact) return;
+
+  const groups = groupContactAccounts(state.commitments.filter(item => item.contactId === contact.id));
+  const group = groups.find(item => item.key === key);
+  if (!group) return;
+
+  activeAccountGroup = key;
+  document.getElementById('accountGroupTitle').textContent = group.name;
+  document.getElementById('accountGroupStatus').textContent = `${Math.round(group.progress)}% completo`;
+  document.getElementById('accountGroupTotal').textContent = money(group.totalAmount);
+  document.getElementById('accountGroupBar').style.width = `${Math.min(group.progress, 100)}%`;
+  document.getElementById('accountGroupBar').style.background = contact.color || '#3478f6';
+  renderList(document.getElementById('accountGroupList'), group.items.sort((a, b) => (a.month || '').localeCompare(b.month || '')));
+  openModal('accountGroupModal');
 }
 
 function renderFixed() {
@@ -729,29 +869,76 @@ function saveFixedRule(event) {
   render();
 }
 
-function openContactModal() {
-  document.getElementById('contactForm').reset();
+function openContactModal(id = '') {
+  const form = document.getElementById('contactForm');
+  form.reset();
+  document.getElementById('contactId').value = '';
+
+  if (id) {
+    const contact = contactById(id);
+    if (!contact) return;
+    document.querySelector('#contactModal .modal-head h2').textContent = 'Editar contato';
+    document.getElementById('contactId').value = contact.id;
+    document.getElementById('contactName').value = contact.name;
+    document.getElementById('contactColor').value = contact.color || randomContactColor();
+    document.getElementById('contactNote').value = contact.note || '';
+  } else {
+    document.querySelector('#contactModal .modal-head h2').textContent = 'Adicionar contato';
+    document.getElementById('contactColor').value = randomContactColor();
+  }
+
   openModal('contactModal');
 }
 
 function saveContact(event) {
   event.preventDefault();
+
+  const id = document.getElementById('contactId').value;
   const name = document.getElementById('contactName').value.trim();
   if (!name) return;
 
-  const baseId = slugify(name) || uid();
-  const id = state.contacts.some(contact => contact.id === baseId) ? `${baseId}-${Date.now()}` : baseId;
+  if (id) {
+    const contact = contactById(id);
+    if (!contact) return;
+    contact.name = name;
+    contact.color = document.getElementById('contactColor').value || contact.color || randomContactColor();
+    contact.note = document.getElementById('contactNote').value.trim();
+    activeContactId = id;
+    state.selectedContactId = id;
+  } else {
+    const baseId = slugify(name) || uid();
+    const newId = state.contacts.some(contact => contact.id === baseId) ? `${baseId}-${Date.now()}` : baseId;
 
-  state.contacts.push({
-    id,
-    name,
-    note: document.getElementById('contactNote').value.trim()
-  });
-  state.selectedContactId = id;
+    state.contacts.push({
+      id: newId,
+      name,
+      color: document.getElementById('contactColor').value || randomContactColor(),
+      note: document.getElementById('contactNote').value.trim()
+    });
+
+    activeContactId = newId;
+    state.selectedContactId = newId;
+  }
+
   saveState();
   closeModal('contactModal');
   render();
   setScreen('contacts');
+  openContactDetail(activeContactId);
+}
+
+function deleteContact(id) {
+  const contact = contactById(id);
+  if (!contact) return;
+
+  if (!confirm(`Excluir o contato "${contact.name}"? As contas já registradas vão continuar salvas.`)) return;
+
+  state.contacts = state.contacts.filter(item => item.id !== id);
+  activeContactId = '';
+  state.selectedContactId = '';
+  saveState();
+  render();
+  showContactsList();
 }
 
 function openDetailModal(id) {
@@ -988,7 +1175,7 @@ function contactById(id) {
 }
 
 function contactName(id) {
-  return contactById(id)?.name || '';
+  return contactById(id)?.name || 'Contato removido';
 }
 
 function initials(name) {
@@ -1016,6 +1203,11 @@ function escapeHtml(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
+}
+
+function randomContactColor() {
+  const colors = ['#f97393', '#38bdf8', '#a78bfa', '#34d399', '#f59e0b', '#fb7185', '#60a5fa', '#c084fc', '#2dd4bf'];
+  return colors[Math.floor(Math.random() * colors.length)];
 }
 
 function applyTheme(theme) {

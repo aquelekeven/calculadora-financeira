@@ -811,3 +811,215 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); }
   .detail-panel { padding: 18px; }
   .detail-hero strong { font-size: 1.45rem; }
 }
+
+
+/* Contatos v2 */
+body.contacts-screen .month-selector-card {
+  display: none;
+}
+
+.contact-detail-view.is-hidden,
+.contacts-list-view.is-hidden {
+  display: none;
+}
+
+.contacts-grid {
+  grid-template-columns: 1fr;
+}
+
+.contact-card {
+  min-height: 78px;
+}
+
+.contact-avatar {
+  background: var(--contact-color, #151515);
+}
+
+.contact-avatar.big {
+  width: 68px;
+  height: 68px;
+  border-radius: 24px;
+  font-size: 1.25rem;
+  background: var(--contact-color, #151515);
+}
+
+.contact-detail-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.contact-detail-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.danger-small {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 10%, var(--surface-soft));
+}
+
+.contact-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 24px;
+  background: var(--surface-soft);
+}
+
+.contact-profile p,
+.contact-profile h2,
+.contact-profile span {
+  display: block;
+  margin: 0;
+}
+
+.contact-profile p {
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+.contact-profile h2 {
+  margin-top: 4px;
+  font-size: 1.7rem;
+  letter-spacing: -.04em;
+}
+
+.contact-profile span {
+  margin-top: 5px;
+  color: var(--muted);
+}
+
+.contact-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.contact-stat-grid article {
+  padding: 14px;
+  border-radius: 20px;
+  background: var(--surface-soft);
+}
+
+.contact-stat-grid span {
+  display: block;
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+.contact-stat-grid strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.1rem;
+}
+
+.contact-section-head {
+  margin-top: 20px;
+}
+
+.contact-accounts-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.account-progress-card {
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  border-radius: 22px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.account-progress-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.account-progress-title strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.account-progress-title span {
+  color: var(--muted);
+  font-size: .82rem;
+  text-align: right;
+}
+
+.account-progress-sub {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+.progress-bar {
+  height: 9px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  margin-top: 12px;
+}
+
+.progress-bar i {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  background: var(--contact-color, var(--blue));
+}
+
+.account-progress-card.complete .account-progress-title strong::after {
+  content: " ✓";
+  color: var(--green);
+}
+
+.history-toggle-btn {
+  margin-top: 16px;
+}
+
+.account-group-progress {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 20px;
+  background: var(--surface-soft);
+}
+
+.progress-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+}
+
+.progress-head strong {
+  color: var(--text);
+}
+
+@media (max-width: 420px) {
+  .contact-detail-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .contact-detail-actions {
+    width: 100%;
+  }
+  .contact-detail-actions button {
+    flex: 1;
+  }
+  .contact-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}

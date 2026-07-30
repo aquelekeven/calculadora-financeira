@@ -146,22 +146,56 @@
       </section>
 
       <section class="screen" id="screen-contacts">
-        <section class="page-card">
+        <section class="page-card contacts-list-view" id="contactsListView">
           <div class="page-head">
             <div>
               <p>contatos</p>
-              <h2>Histórico por pessoa</h2>
+              <h2>Pessoas</h2>
             </div>
             <button class="small-btn" type="button" id="addContactBtn">＋ contato</button>
           </div>
 
           <div class="contacts-grid" id="contactsGrid"></div>
+        </section>
+
+        <section class="page-card contact-detail-view is-hidden" id="contactDetailView">
+          <div class="contact-detail-top">
+            <button class="small-btn" type="button" id="backToContactsBtn">‹ voltar</button>
+            <div class="contact-detail-actions">
+              <button class="small-btn" type="button" id="editContactBtn">editar</button>
+              <button class="small-btn danger-small" type="button" id="deleteContactBtn">excluir</button>
+            </div>
+          </div>
+
+          <div class="contact-profile">
+            <div class="contact-avatar big" id="contactProfileAvatar">S</div>
+            <div>
+              <p>contato</p>
+              <h2 id="contactProfileName">Sarah</h2>
+              <span id="contactProfileResume">0 conta(s)</span>
+            </div>
+          </div>
+
+          <div class="contact-stat-grid">
+            <article><span>Pendente</span><strong id="contactPendingTotal">R$ 0,00</strong></article>
+            <article><span>Pago</span><strong id="contactPaidTotal">R$ 0,00</strong></article>
+          </div>
+
+          <div class="section-head contact-section-head">
+            <div>
+              <p>contas por categoria</p>
+              <h2>Progresso</h2>
+            </div>
+          </div>
+          <div class="contact-accounts-grid" id="contactAccountsGrid"></div>
+
+          <button class="secondary-btn history-toggle-btn" type="button" id="toggleContactHistoryBtn">Ver histórico completo</button>
 
           <div class="contact-history-card is-hidden" id="contactHistoryCard">
             <div class="section-head">
               <div>
-                <p>histórico do contato</p>
-                <h2 id="contactHistoryTitle">Escolha alguém acima</h2>
+                <p>histórico</p>
+                <h2 id="contactHistoryTitle">Extrato do contato</h2>
               </div>
             </div>
             <div class="commitment-list spacious" id="contactHistoryList"></div>
@@ -346,7 +380,9 @@
         </div>
 
         <form id="contactForm">
+          <input type="hidden" id="contactId" />
           <label><span>Nome</span><input id="contactName" placeholder="Ex: Sarah" required /></label>
+          <label><span>Cor do contato</span><input id="contactColor" type="color" value="#3478f6" /></label>
           <label><span>Observação (opcional)</span><textarea id="contactNote" rows="3" placeholder="Ex: contas que pago via pix"></textarea></label>
           <button class="primary-btn" type="submit">Salvar contato</button>
         </form>
@@ -388,6 +424,29 @@
           <button class="secondary-btn" type="button" id="detailEditBtn">✏️ Editar</button>
           <button class="danger-btn" type="button" id="detailDeleteBtn">🗑️ Excluir</button>
         </div>
+      </div>
+    </div>
+
+
+    <div class="modal" id="accountGroupModal" aria-hidden="true">
+      <div class="modal-panel detail-panel">
+        <div class="modal-head detail-head">
+          <div>
+            <p>conta do contato</p>
+            <h2 id="accountGroupTitle">Conta</h2>
+          </div>
+          <button type="button" class="icon-btn" data-close-modal="accountGroupModal">×</button>
+        </div>
+
+        <div class="account-group-progress">
+          <div class="progress-head">
+            <span id="accountGroupStatus">0% completo</span>
+            <strong id="accountGroupTotal">R$ 0,00</strong>
+          </div>
+          <div class="progress-bar"><i id="accountGroupBar"></i></div>
+        </div>
+
+        <div class="commitment-list spacious" id="accountGroupList"></div>
       </div>
     </div>
 
