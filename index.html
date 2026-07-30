@@ -33,22 +33,28 @@
       <button class="icon-btn" id="themeBtn" type="button" aria-label="Alternar tema">◐</button>
     </header>
 
-    <section class="month-rail-card reveal reveal-1">
-      <div class="month-rail-head">
-        <div>
-          <p>Mês global</p>
-          <h2 id="monthRailCurrent">Julho 2026</h2>
-        </div>
-        <div class="month-rail-nav">
+    <section class="month-selector-card reveal reveal-1" id="monthSelectorCard">
+      <button class="month-selector-trigger" id="monthSelectorTrigger" type="button" aria-expanded="false">
+        <span>Mês selecionado</span>
+        <strong id="monthRailCurrent">Julho 2026</strong>
+        <small>⌄</small>
+      </button>
+
+      <div class="month-selector-panel" id="monthSelectorPanel" aria-hidden="true">
+        <div class="month-selector-head">
           <button type="button" id="prevMonthBtn" aria-label="Mês anterior">‹</button>
-          <span id="monthRailLabel">Selecione o mês</span>
+          <span id="monthRailLabel">Julho 2026</span>
           <button type="button" id="nextMonthBtn" aria-label="Próximo mês">›</button>
         </div>
-      </div>
-      <div class="month-pills" id="monthPills"></div>
-    </section>
 
-    <main class="screen active" id="screen-home">
+        <div class="month-pills" id="monthPills"></div>
+
+        <button class="collapse-months-btn" type="button" id="collapseMonthsBtn" aria-label="Esconder seletor de mês">
+          ⌃
+        </button>
+      </div>
+    </section>
+<main class="screen active" id="screen-home">
       <section class="hero-card reveal reveal-2">
         <div class="hero-title"><p>Hoje</p><h1>O que falta pagar?</h1></div>
 <div class="main-numbers">

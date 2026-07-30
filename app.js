@@ -166,6 +166,8 @@ function bindEvents() {
 
   $('#prevMonthBtn').addEventListener('click', () => changeMonth(-1));
   $('#nextMonthBtn').addEventListener('click', () => changeMonth(1));
+  $('#monthSelectorTrigger').addEventListener('click', toggleMonthSelector);
+  $('#collapseMonthsBtn').addEventListener('click', closeMonthSelector);
 
   $('#closeModalBtn').addEventListener('click', closeCommitmentModal);
   $('#commitmentModal').addEventListener('click', e => {
@@ -269,17 +271,18 @@ function renderMonthRail() {
   const pills = $('#monthPills');
   pills.innerHTML = '';
 
-  for (let i = -3; i <= 3; i++) {
+  for (let i = -6; i <= 6; i++) {
     const month = addMonths(state.baseMonth, i);
     const date = new Date(month + '-01T00:00:00');
     const monthNum = String(date.getMonth() + 1).padStart(2, '0');
     const yearShort = String(date.getFullYear()).slice(-2);
     const monthShort = date.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
-    const weekdayLike = date.toLocaleDateString('pt-BR', { month: 'long' });
+    const monthLong = date.toLocaleDateString('pt-BR', { month: 'long' });
 
     const button = document.createElement('button');
     button.type = 'button';
     button.className = `month-pill${month === state.baseMonth ? ' active' : ''}`;
+    button.dataset.month = month;
     button.innerHTML = `
       <div class="month-pill-top">
         <strong>${monthNum}</strong>
@@ -287,16 +290,42 @@ function renderMonthRail() {
       </div>
       <div class="month-pill-bottom">
         <strong>${monthShort}</strong>
-        <small>${weekdayLike}</small>
+        <small>${monthLong}</small>
       </div>
     `;
     button.addEventListener('click', () => {
       state.baseMonth = month;
       saveState();
       render();
+      requestAnimationFrame(centerActiveMonth);
     });
     pills.appendChild(button);
   }
+
+  requestAnimationFrame(centerActiveMonth);
+}
+
+function toggleMonthSelector() {
+  const card = $('#monthSelectorCard');
+  const isOpen = card.classList.toggle('open');
+  $('#monthSelectorTrigger').setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  $('#monthSelectorPanel').setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+  if (isOpen) requestAnimationFrame(centerActiveMonth);
+}
+
+function closeMonthSelector() {
+  $('#monthSelectorCard').classList.remove('open');
+  $('#monthSelectorTrigger').setAttribute('aria-expanded', 'false');
+  $('#monthSelectorPanel').setAttribute('aria-hidden', 'true');
+}
+
+function centerActiveMonth() {
+  const pills = $('#monthPills');
+  const active = pills?.querySelector('.month-pill.active');
+  if (!pills || !active) return;
+
+  const left = active.offsetLeft - (pills.clientWidth / 2) + (active.clientWidth / 2);
+  pills.scrollTo({ left, behavior: 'smooth' });
 }
 
 function renderHome() {
