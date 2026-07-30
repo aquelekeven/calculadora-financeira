@@ -389,9 +389,11 @@ function handleClick(event) {
     return;
   }
 
-  const paidBtn = target.closest('[data-mark-paid]');
-  if (paidBtn) {
-    markAsPaid(paidBtn.dataset.markPaid);
+  const statusAction = target.closest('[data-status-action]');
+  if (statusAction) {
+    const id = statusAction.dataset.statusAction;
+    const status = statusAction.dataset.statusValue;
+    setCommitmentStatus(id, status);
     return;
   }
 
@@ -830,50 +832,137 @@ function renderList(container, items) {
 }
 
 function renderCommitment(item) {
-  const template = document.getElementById('commitmentTemplate');
-  const node = template.content.cloneNode(true);
-  const article = node.querySelector('.commitment-item');
-  const dot = node.querySelector('.status-dot');
-  const title = node.querySelector('.commitment-main strong');
-  const sub = node.querySelector('.commitment-main span');
-  const value = node.querySelector('.commitment-value strong');
-  const status = node.querySelector('.commitment-value span');
+  const article = document.createElement('article');
+  article.className = `commitment-item status-${item.status}`;
+  article.dataset.commitmentId = item.id;
 
-  article.classList.add(`status-${item.status}`);
   const contact = contactById(item.contactId);
   if (contact) {
     article.classList.add('has-contact');
     article.style.setProperty('--contact-color', contact.color || '#151515');
   }
+
+  const isPaid = item.status === 'paid';
+  const actionStatus = isPaid ? 'waiting' : 'paid';
+  const actionText = isPaid ? '↩ Pendente' : '✓ Pago';
+  const actionClass = isPaid ? 'to-pending' : 'to-paid';
+
+  const action = document.createElement('button');
+  action.type = 'button';
+  action.className = `commitment-swipe-action ${actionClass}`;
+  action.dataset.statusAction = item.id;
+  action.dataset.statusValue = actionStatus;
+  action.textContent = actionText;
+
+  const content = document.createElement('div');
+  content.className = 'commitment-swipe-content';
+
+  const dot = document.createElement('button');
+  dot.type = 'button';
+  dot.className = 'status-dot';
   dot.textContent = statusIcon(item.status);
   dot.title = 'Clique para alternar status';
 
+  const main = document.createElement('div');
+  main.className = 'commitment-main';
+
+  const title = document.createElement('strong');
   const parcel = installmentLabel(item);
   title.innerHTML = `${escapeHtml(item.description)}${parcel ? ` <small>parcela ${parcel}</small>` : ''}`;
+
+  const sub = document.createElement('span');
   sub.innerHTML = `${escapeHtml(catLabel(item.category))}${item.contactId ? ` <span class="contact-badge">${escapeHtml(contactName(item.contactId))}</span>` : ''}`;
+
+  main.appendChild(title);
+  main.appendChild(sub);
+
+  const valueBox = document.createElement('div');
+  valueBox.className = 'commitment-value';
+
+  const value = document.createElement('strong');
   value.textContent = item.type === 'income' ? `+${money(item.amount)}` : money(item.amount);
+
+  const status = document.createElement('span');
   status.textContent = statusLabel(item.status);
+
+  valueBox.appendChild(value);
+  valueBox.appendChild(status);
+
+  content.appendChild(dot);
+  content.appendChild(main);
+  content.appendChild(valueBox);
+  article.appendChild(action);
+  article.appendChild(content);
 
   dot.addEventListener('click', event => {
     event.stopPropagation();
     cycleStatus(item.id);
   });
 
-  if (item.type === 'expense' && item.status === 'waiting') {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'mark-paid-btn';
-    button.dataset.markPaid = item.id;
-    button.textContent = '✓ Pago';
-    button.addEventListener('click', event => {
-      event.stopPropagation();
-      markAsPaid(item.id);
-    });
-    article.appendChild(button);
-  }
+  action.addEventListener('click', event => {
+    event.stopPropagation();
+    setCommitmentStatus(item.id, actionStatus);
+  });
 
-  article.addEventListener('click', () => openDetailModal(item.id));
-  return node;
+  content.addEventListener('click', () => {
+    if (article.classList.contains('swipe-open')) {
+      article.classList.remove('swipe-open');
+      return;
+    }
+    openDetailModal(item.id);
+  });
+
+  attachSwipeToCommitment(article, content);
+  return article;
+}
+
+function attachSwipeToCommitment(article, content) {
+  let startX = 0;
+  let startY = 0;
+  let currentX = 0;
+  let dragging = false;
+  const max = 118;
+
+  const setTranslate = value => {
+    content.style.transform = `translateX(${-Math.min(Math.max(value, 0), max)}px)`;
+  };
+
+  const endSwipe = () => {
+    if (!dragging) return;
+    dragging = false;
+    article.classList.remove('swiping');
+    content.style.transform = '';
+
+    const shouldOpen = currentX > 46;
+    document.querySelectorAll('.commitment-item.swipe-open').forEach(card => {
+      if (card !== article) card.classList.remove('swipe-open');
+    });
+    article.classList.toggle('swipe-open', shouldOpen);
+  };
+
+  content.addEventListener('pointerdown', event => {
+    startX = event.clientX;
+    startY = event.clientY;
+    currentX = article.classList.contains('swipe-open') ? max : 0;
+    dragging = true;
+    article.classList.add('swiping');
+  });
+
+  content.addEventListener('pointermove', event => {
+    if (!dragging) return;
+    const dx = startX - event.clientX;
+    const dy = Math.abs(startY - event.clientY);
+
+    if (dy > 18 && Math.abs(dx) < 24) return;
+
+    event.preventDefault();
+    currentX = article.classList.contains('swipe-open') ? max + dx : dx;
+    setTranslate(currentX);
+  });
+
+  content.addEventListener('pointerup', endSwipe);
+  content.addEventListener('pointercancel', endSwipe);
+  content.addEventListener('pointerleave', endSwipe);
 }
 
 function openCommitmentModal(mode = 'bill', id = '') {
@@ -1209,21 +1298,25 @@ function deleteCommitment(id) {
   });
 }
 
-function markAsPaid(id) {
+function setCommitmentStatus(id, status) {
   const item = state.commitments.find(commitment => commitment.id === id);
   if (!item) return;
 
   const previous = { ...item };
-  item.status = 'paid';
+  item.status = status;
 
   saveState();
   render();
 
-  showUndo(`Pago: ${item.description}`, () => {
+  showUndo(`${status === 'paid' ? 'Pago' : 'Pendente'}: ${item.description}`, () => {
     Object.assign(item, previous);
     saveState();
     render();
   });
+}
+
+function markAsPaid(id) {
+  setCommitmentStatus(id, 'paid');
 }
 
 function cycleStatus(id) {

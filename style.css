@@ -1521,3 +1521,76 @@ body.fixed-screen .month-selector-card {
 .mark-paid-btn:active {
   transform: scale(.985);
 }
+
+
+/* Swipe nos cards de conta */
+.commitment-item {
+  overflow: hidden;
+  isolation: isolate;
+  padding: 0;
+  grid-template-columns: 1fr;
+  position: relative;
+}
+
+.commitment-swipe-action {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 118px;
+  display: grid;
+  place-items: center;
+  border-radius: 0 20px 20px 0;
+  color: #fff;
+  font-weight: 900;
+  transform: translateX(100%);
+  transition: transform .18s ease;
+  z-index: 1;
+}
+
+.commitment-swipe-action.to-paid {
+  background: var(--green);
+}
+
+.commitment-swipe-action.to-pending {
+  background: var(--orange);
+}
+
+.commitment-swipe-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  background: color-mix(in srgb, var(--surface) 92%, var(--surface-soft) 8%);
+  border-radius: 20px;
+  transition: transform .18s ease;
+  touch-action: pan-y;
+}
+
+.commitment-item.swipe-open .commitment-swipe-content {
+  transform: translateX(-118px);
+}
+
+.commitment-item.swipe-open .commitment-swipe-action {
+  transform: translateX(0);
+}
+
+.commitment-item.swiping .commitment-swipe-content {
+  transition: none;
+}
+
+.commitment-item.swiping .commitment-swipe-action {
+  transition: none;
+}
+
+.mark-paid-btn {
+  display: none !important;
+}
+
+@media (max-width: 420px) {
+  .commitment-swipe-content {
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+  }
+}
