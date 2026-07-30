@@ -578,13 +578,7 @@ body.fab-open .overlay-blur { opacity: 1; pointer-events: auto; }
   font-weight: 700;
 }
 
-.fab-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  pointer-events: none;
-}
-body.fab-open 
+
 .undo-toast {
   position: fixed;
   left: 50%;
@@ -618,7 +612,13 @@ body.fab-open
   font-weight: 700;
 }
 
-.fab-backdrop { pointer-events: auto; }
+.fab-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+body.fab-open .fab-backdrop { pointer-events: auto; }
 
 .floating-menu {
   position: fixed;
@@ -639,7 +639,7 @@ body.fab-open
   border-radius: 28px;
   background: #3478f6;
   box-shadow: var(--shadow-lg);
-  color: #ffffff;
+  color: #fff;
   display: grid;
   place-items: center;
   font-size: 1.85rem;
@@ -651,10 +651,6 @@ body.fab-open .fab-trigger {
   background: var(--surface-2);
   color: #d94141;
   border: 1px solid var(--line);
-}
-.fab-trigger span {
-  line-height: 1;
-  transition: transform .2s ease, opacity .18s ease;
 }
 .fab-trigger-open { display: none; }
 body.fab-open .fab-trigger-closed { display: none; }
@@ -710,7 +706,6 @@ body.fab-open .fab-option .fab-label {
   transform: translateY(-50%) translateX(0);
 }
 
-/* Menu simples: botões empilhados acima do principal */
 .option-home { bottom: 88px; }
 .option-months { bottom: 158px; }
 .option-entry { bottom: 228px; }
@@ -721,18 +716,6 @@ body.fab-open .option-months { transition-delay: .07s; }
 body.fab-open .option-entry { transition-delay: .11s; }
 body.fab-open .option-settings { transition-delay: .15s; }
 
-@media (max-width: 420px) {
-  .floating-menu {
-    height: 340px;
-    right: max(14px, env(safe-area-inset-right));
-    bottom: max(14px, calc(env(safe-area-inset-bottom) + 14px));
-  }
-  .option-home { bottom: 84px; }
-  .option-months { bottom: 150px; }
-  .option-entry { bottom: 216px; }
-  .option-settings { bottom: 282px; }
-  .fab-label { font-size: .86rem; padding: 9px 12px; }
-}
 .empty-state {
   padding: 22px 16px;
   text-align: center;
@@ -768,12 +751,47 @@ body.fab-open .option-settings { transition-delay: .15s; }
   .delete-chip { width: 28px; height: 28px; }
 }
 
-/* Correção de clique/visibilidade */
+/* Revisão geral de clique/alinhamento */
+[data-nav], .delete-chip, #fabTrigger, .fab-option, #menuBtn, #themeBtn, #closeDrawerBtn,
+#saveBalanceBtn, #exportBtn, #resetBtn, #undoBtn, [data-preset], [data-entry-type] {
+  touch-action: manipulation;
+}
+
+.transaction-item {
+  grid-template-columns: 48px minmax(0, 1fr) auto 32px;
+}
+.transaction-main { min-width: 0; }
+.transaction-main strong,
+.transaction-main span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.transaction-side {
+  min-width: 92px;
+  text-align: right;
+}
 .delete-chip {
   cursor: pointer;
   position: relative;
   z-index: 2;
+  background: transparent;
 }
-.center-tile {
-  cursor: pointer;
+.delete-chip:hover {
+  background: color-mix(in srgb, #d94141 10%, var(--surface-3));
+  color: #d94141;
+}
+
+@media (max-width: 420px) {
+  .floating-menu {
+    height: 340px;
+    right: max(14px, env(safe-area-inset-right));
+    bottom: max(14px, calc(env(safe-area-inset-bottom) + 14px));
+  }
+  .option-home { bottom: 84px; }
+  .option-months { bottom: 150px; }
+  .option-entry { bottom: 216px; }
+  .option-settings { bottom: 282px; }
+  .fab-label { font-size: .86rem; padding: 9px 12px; }
+  .delete-chip { display: block; width: 28px; height: 28px; }
 }

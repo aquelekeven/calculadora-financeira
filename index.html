@@ -20,10 +20,10 @@
         </div>
 
         <nav class="drawer-menu">
-          <button type="button" data-tab="home"><span>⌂</span><div><strong>Início</strong><small>Resumo e atividade</small></div></button>
-          <button type="button" data-tab="months"><span>▤</span><div><strong>Meses</strong><small>Mês atual + próximos 2</small></div></button>
-          <button type="button" data-tab="add"><span>＋</span><div><strong>Lançar</strong><small>Nova entrada ou saída</small></div></button>
-          <button type="button" data-tab="settings"><span>◌</span><div><strong>Ajustes</strong><small>Saldo e backup</small></div></button>
+          <button type="button" data-nav="home"><span>⌂</span><div><strong>Início</strong><small>Resumo e atividade</small></div></button>
+          <button type="button" data-nav="months"><span>▤</span><div><strong>Meses</strong><small>Mês atual + próximos 2</small></div></button>
+          <button type="button" data-nav="add"><span>＋</span><div><strong>Lançar</strong><small>Nova entrada ou saída</small></div></button>
+          <button type="button" data-nav="settings"><span>◌</span><div><strong>Ajustes</strong><small>Saldo e backup</small></div></button>
         </nav>
 
         <div class="drawer-note">Local/offline por enquanto. Depois a gente pluga Supabase e login sem refazer a interface.</div>
@@ -59,14 +59,14 @@
       </section>
 
       <section class="action-band reveal reveal-5">
-        <button class="action-tile" type="button" data-tab="add" data-kind="entrada">
+        <button class="action-tile" type="button" data-nav="add" data-kind="entrada">
           <span>↙</span>
           <small>Entrada</small>
         </button>
-        <button class="action-tile center-tile" type="button" data-tab="months" aria-label="Histórico">
+        <button class="action-tile center-tile" type="button" data-nav="months" aria-label="Histórico">
           <span>▤</span>
         </button>
-        <button class="action-tile" type="button" data-tab="add" data-kind="saida">
+        <button class="action-tile" type="button" data-nav="add" data-kind="saida">
           <span>↗</span>
           <small>Saída</small>
         </button>
@@ -76,7 +76,7 @@
         <article class="glass-card months-mini-card">
           <div class="card-head">
             <h2>Próximos meses</h2>
-            <button class="mini-link" type="button" data-tab="months">Ver</button>
+            <button class="mini-link" type="button" data-nav="months">Ver</button>
           </div>
           <div class="mini-months" id="summaryCards"></div>
         </article>
@@ -99,7 +99,7 @@
       <section class="activity-card reveal reveal-7">
         <div class="card-head">
           <h2>Atividade recente</h2>
-          <button class="mini-link" type="button" data-tab="months">Tudo</button>
+          <button class="mini-link" type="button" data-nav="months">Tudo</button>
         </div>
         <div class="activity-list" id="upcomingList"></div>
       </section>
@@ -222,19 +222,19 @@
 
     <div class="fab-backdrop" id="fabBackdrop" aria-hidden="true"></div>
     <div class="floating-menu" id="floatingMenu" aria-label="Ações rápidas">
-      <button class="fab-option option-home" data-tab="home" type="button" aria-label="Início">
+      <button class="fab-option option-home" data-nav="home" type="button" aria-label="Início">
         <span class="fab-icon">⌂</span>
         <span class="fab-label">Início</span>
       </button>
-      <button class="fab-option option-months" data-tab="months" type="button" aria-label="Meses">
+      <button class="fab-option option-months" data-nav="months" type="button" aria-label="Meses">
         <span class="fab-icon">▤</span>
         <span class="fab-label">Meses</span>
       </button>
-      <button class="fab-option option-entry" data-tab="add" data-kind="entrada" type="button" aria-label="Entrada">
+      <button class="fab-option option-entry" data-nav="add" data-kind="entrada" type="button" aria-label="Entrada">
         <span class="fab-icon">↙</span>
         <span class="fab-label">Entrada</span>
       </button>
-      <button class="fab-option option-settings" data-tab="settings" type="button" aria-label="Ajustes">
+      <button class="fab-option option-settings" data-nav="settings" type="button" aria-label="Ajustes">
         <span class="fab-icon">◌</span>
         <span class="fab-label">Ajustes</span>
       </button>

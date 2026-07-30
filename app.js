@@ -1,7 +1,7 @@
-const STORAGE_KEY = 'financeiro-keven-v14';
+
+const STORAGE_KEY = 'financeiro-keven-revisado';
 const THEME_KEY = 'financeiro-keven-theme';
 const todayBaseMonth = '2026-07';
-let selectedEntryType = 'saida';
 
 const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
@@ -45,14 +45,26 @@ const initialState = {
   ]
 };
 
+let selectedEntryType = 'saida';
 let state = loadState();
 let pendingDelete = null;
 let pendingDeleteTimer = null;
-applyTheme(localStorage.getItem(THEME_KEY) || 'light');
+
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+
+init();
+
+function init() {
+  applyTheme(localStorage.getItem(THEME_KEY) || 'light');
+  bindEvents();
+  render();
+}
 
 function loadState() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (!saved) return structuredClone(initialState);
+
   try {
     const parsed = JSON.parse(saved);
     return { ...structuredClone(initialState), ...parsed };
@@ -70,29 +82,36 @@ function parseMoney(value) {
   const normalized = String(value || '').replace(/\./g, '').replace(',', '.').replace(/[^0-9.-]/g, '');
   return Number(normalized) || 0;
 }
+
 function formatBRL(value) {
   return Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
+
 function monthName(monthKey, long = true) {
   const [year, month] = monthKey.split('-').map(Number);
   const opts = long ? { month: 'long', year: 'numeric' } : { month: 'short', year: '2-digit' };
   return new Date(year, month - 1, 1).toLocaleDateString('pt-BR', opts);
 }
+
 function formatDate(dateString) {
   if (!dateString) return 'sem venc.';
   const [y, m, d] = dateString.split('-');
   return `${d}/${m}`;
 }
+
 function addMonths(monthKey, offset) {
   const [year, month] = monthKey.split('-').map(Number);
   const d = new Date(year, month - 1 + offset, 1);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
+
 function getVisibleMonths() {
   return [0, 1, 2].map(offset => addMonths(state.baseMonth || todayBaseMonth, offset));
 }
+
 function fixedForMonth(monthKey) {
   const julyExclusions = ['Save Car — seguro Escort', 'YouTube Premium com Pacheco'];
+
   return state.fixedMonthly
     .filter(item => item.active)
     .filter(item => !(monthKey === '2026-07' && julyExclusions.includes(item.description)))
@@ -102,13 +121,16 @@ function fixedForMonth(monthKey) {
       id: `${item.id}-${monthKey}`,
       month: monthKey,
       dueDate: item.day ? `${monthKey}-${String(item.day).padStart(2, '0')}` : '',
-      status: 'previsto'
+      status: 'previsto',
+      source: 'fixed'
     }));
 }
+
 function entriesForMonth(monthKey) {
   return [...state.entries.filter(e => e.month === monthKey), ...fixedForMonth(monthKey)]
     .sort((a, b) => (a.dueDate || `${a.month}-99`).localeCompare(b.dueDate || `${b.month}-99`));
 }
+
 function calculateMonth(monthKey) {
   const entries = entriesForMonth(monthKey);
   const entradas = entries.filter(e => e.type === 'entrada').reduce((sum, e) => sum + Number(e.value), 0);
@@ -116,6 +138,7 @@ function calculateMonth(monthKey) {
   const pendente = entries.filter(e => e.type === 'saida' && e.status !== 'pago').reduce((sum, e) => sum + Number(e.value), 0);
   return { entries, entradas, saidas, pendente, result: entradas - saidas };
 }
+
 function calculateCurrentMonth() {
   const month = state.baseMonth || todayBaseMonth;
   const pending = entriesForMonth(month)
@@ -127,18 +150,137 @@ function calculateCurrentMonth() {
 function categoryLabel(category) {
   return ({ apartamento: 'Apartamento', fixo: 'Fixo', cartao: 'Cartão', pessoas: 'Pessoas', emprestimo: 'Empréstimo', renda: 'Renda', outros: 'Outros' })[category] || category;
 }
+
 function statusLabel(status) {
   return ({ pago: 'Pago', pendente: 'Pendente', previsto: 'Previsto', especial: 'Especial' })[status] || status;
 }
+
 function categoryIcon(category) {
   return ({ apartamento: 'AP', fixo: 'FX', cartao: 'CT', pessoas: 'PS', emprestimo: 'EM', renda: 'RD', outros: '•' })[category] || '•';
 }
+
 function categoryColor(category) {
   return ({ apartamento: '#0f766e', fixo: '#4b5563', cartao: '#111827', pessoas: '#7c3aed', emprestimo: '#b45309', renda: '#1f7a45', outros: '#64748b' })[category] || '#64748b';
 }
 
+function bindEvents() {
+  $$('[data-nav]').forEach(button => {
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const tab = button.dataset.nav;
+      const kind = button.dataset.kind;
+
+      if (kind) setEntryType(kind);
+      setTab(tab);
+    });
+  });
+
+  $$('[data-entry-type]').forEach(button => {
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      setEntryType(button.dataset.entryType);
+    });
+  });
+
+  $$('[data-preset]').forEach(button => {
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      $('#entryValue').value = button.dataset.preset;
+    });
+  });
+
+  $('#themeBtn')?.addEventListener('click', () => {
+    const current = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  });
+
+  $('#menuBtn')?.addEventListener('click', openDrawer);
+  $('#closeDrawerBtn')?.addEventListener('click', closeDrawer);
+
+  $('#sideDrawer')?.addEventListener('click', event => {
+    if (event.target.id === 'sideDrawer') closeDrawer();
+  });
+
+  $('#fabTrigger')?.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (document.body.classList.contains('fab-open')) {
+      setEntryType('saida');
+      setTab('add');
+      closeFab();
+      return;
+    }
+
+    openFab();
+  });
+
+  $('#fabBackdrop')?.addEventListener('click', closeFab);
+  $('#globalOverlay')?.addEventListener('click', closeFab);
+
+  $('#baseMonthSelect')?.addEventListener('change', event => {
+    state.baseMonth = event.target.value;
+    saveState();
+    render();
+  });
+
+  $('#entryForm')?.addEventListener('submit', event => {
+    event.preventDefault();
+
+    const entry = {
+      id: makeId(),
+      month: $('#entryMonth').value,
+      type: selectedEntryType,
+      category: $('#entryCategory').value,
+      description: $('#entryDescription').value.trim(),
+      value: parseMoney($('#entryValue').value),
+      dueDate: $('#entryDueDate').value,
+      status: $('#entryStatus').value
+    };
+
+    state.entries.push(entry);
+    saveState();
+
+    event.target.reset();
+    $('#entryMonth').value = state.baseMonth || todayBaseMonth;
+    setEntryType('saida');
+    render();
+    setTab('home');
+  });
+
+  $('#saveBalanceBtn')?.addEventListener('click', () => {
+    state.currentBalance = parseMoney($('#balanceInput').value);
+    saveState();
+    render();
+    setTab('home');
+  });
+
+  $('#exportBtn')?.addEventListener('click', exportBackup);
+
+  $('#importInput')?.addEventListener('change', event => {
+    const file = event.target.files?.[0];
+    if (file) importBackup(file);
+    event.target.value = '';
+  });
+
+  $('#resetBtn')?.addEventListener('click', () => {
+    if (!confirm('Resetar os dados locais e voltar pra base?')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    state = structuredClone(initialState);
+    saveState();
+    render();
+    setTab('home');
+  });
+
+  $('#undoBtn')?.addEventListener('click', undoDeleteEntry);
+}
+
 function generateMonthOptions() {
-  const select = document.getElementById('baseMonthSelect');
+  const select = $('#baseMonthSelect');
+  if (!select) return;
+
   select.innerHTML = '';
   for (let i = -1; i <= 8; i++) {
     const value = addMonths(todayBaseMonth, i);
@@ -152,10 +294,12 @@ function generateMonthOptions() {
 
 function render() {
   generateMonthOptions();
-  document.getElementById('currentBalance').textContent = formatBRL(state.currentBalance);
-  document.getElementById('currentMonthLabel').textContent = monthName(state.baseMonth || todayBaseMonth);
-  document.getElementById('balanceInput').value = String(state.currentBalance).replace('.', ',');
-  document.getElementById('entryMonth').value ||= state.baseMonth || todayBaseMonth;
+
+  if ($('#currentBalance')) $('#currentBalance').textContent = formatBRL(state.currentBalance);
+  if ($('#currentMonthLabel')) $('#currentMonthLabel').textContent = monthName(state.baseMonth || todayBaseMonth);
+  if ($('#balanceInput')) $('#balanceInput').value = String(state.currentBalance).replace('.', ',');
+  if ($('#entryMonth') && !$('#entryMonth').value) $('#entryMonth').value = state.baseMonth || todayBaseMonth;
+
   renderHealth();
   renderSummaryCards();
   renderUpcoming();
@@ -165,21 +309,24 @@ function render() {
 
 function renderHealth() {
   const current = calculateCurrentMonth();
-  const pill = document.getElementById('healthPill');
-  const flowTotal = document.getElementById('monthFlowTotal');
-  const flowCaption = document.getElementById('monthFlowCaption');
-  if (current.result >= 0) {
-    pill.textContent = `Sobra projetada: ${formatBRL(current.result)}`;
-    flowCaption.textContent = 'saldo previsto';
-  } else {
-    pill.textContent = `Falta projetada: ${formatBRL(Math.abs(current.result))}`;
-    flowCaption.textContent = 'falta prevista';
+  const pill = $('#healthPill');
+  const flowTotal = $('#monthFlowTotal');
+  const flowCaption = $('#monthFlowCaption');
+
+  if (pill) {
+    pill.textContent = current.result >= 0
+      ? `Sobra projetada: ${formatBRL(current.result)}`
+      : `Falta projetada: ${formatBRL(Math.abs(current.result))}`;
   }
-  flowTotal.textContent = formatBRL(current.result);
+
+  if (flowTotal) flowTotal.textContent = formatBRL(current.result);
+  if (flowCaption) flowCaption.textContent = current.result >= 0 ? 'saldo previsto' : 'falta prevista';
 }
 
 function renderSummaryCards() {
-  const container = document.getElementById('summaryCards');
+  const container = $('#summaryCards');
+  if (!container) return;
+
   container.innerHTML = '';
   getVisibleMonths().forEach((month, index) => {
     const calc = calculateMonth(month);
@@ -196,10 +343,12 @@ function renderSummaryCards() {
 }
 
 function renderUpcoming() {
-  const list = document.getElementById('upcomingList');
+  const list = $('#upcomingList');
+  if (!list) return;
+
   list.innerHTML = '';
-  const visible = getVisibleMonths().flatMap(month => entriesForMonth(month).map(entry => ({ ...entry })));
-  const entries = visible
+  const entries = getVisibleMonths()
+    .flatMap(month => entriesForMonth(month))
     .filter(e => e.type === 'saida' && e.status !== 'pago')
     .sort((a, b) => (a.dueDate || `${a.month}-99`).localeCompare(b.dueDate || `${b.month}-99`))
     .slice(0, 5);
@@ -208,20 +357,24 @@ function renderUpcoming() {
     list.innerHTML = '<div class="empty-state">Sem pendências nos meses visíveis. Aproveita essa raridade kkkk</div>';
     return;
   }
+
   entries.forEach(entry => list.appendChild(renderTransaction(entry, false)));
 }
 
 function renderMonths() {
-  const container = document.getElementById('monthsContainer');
-  const template = document.getElementById('monthTemplate');
+  const container = $('#monthsContainer');
+  const template = $('#monthTemplate');
+  if (!container || !template) return;
+
   container.innerHTML = '';
 
   const month = state.baseMonth || todayBaseMonth;
   const calc = calculateMonth(month);
-  const current = month === (state.baseMonth || todayBaseMonth) ? calculateCurrentMonth() : null;
+  const isCurrentBase = month === todayBaseMonth;
+  const current = isCurrentBase ? calculateCurrentMonth() : null;
   const resultValue = current ? current.result : calc.result;
-  const node = template.content.cloneNode(true);
 
+  const node = template.content.cloneNode(true);
   node.querySelector('h3').textContent = monthName(month);
   node.querySelector('p').textContent = current
     ? `saldo ${formatBRL(state.currentBalance)} • pendente ${formatBRL(current.pending)}`
@@ -231,8 +384,7 @@ function renderMonths() {
   result.textContent = `${resultValue >= 0 ? '🟩' : '🟥'} ${formatBRL(resultValue)}`;
   result.classList.add(resultValue >= 0 ? 'positive' : 'negative');
 
-  const metrics = node.querySelector('.month-metrics');
-  metrics.innerHTML = `
+  node.querySelector('.month-metrics').innerHTML = `
     <div class="metric-box"><span>Entradas</span><strong>${formatBRL(calc.entradas)}</strong></div>
     <div class="metric-box"><span>Saídas</span><strong>${formatBRL(calc.saidas)}</strong></div>
     <div class="metric-box"><span>Pendente</span><strong>${formatBRL(calc.pendente)}</strong></div>
@@ -249,8 +401,9 @@ function renderMonths() {
 }
 
 function renderTransaction(entry, allowDelete) {
-  const template = document.getElementById('transactionTemplate');
+  const template = $('#transactionTemplate');
   const node = template.content.cloneNode(true);
+
   const item = node.querySelector('.transaction-item');
   const avatar = node.querySelector('.transaction-avatar');
   const title = node.querySelector('.transaction-main strong');
@@ -267,16 +420,26 @@ function renderTransaction(entry, allowDelete) {
   value.classList.add(entry.type);
   side.textContent = monthName(entry.month, false);
 
-  const canDelete = allowDelete && state.entries.some(e => e.id === entry.id);
-  if (canDelete) deleteBtn.dataset.id = entry.id;
-  else deleteBtn.hidden = true;
+  const canDelete = allowDelete && !entry.source && state.entries.some(e => e.id === entry.id);
+  if (canDelete) {
+    deleteBtn.dataset.id = entry.id;
+    deleteBtn.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      requestDeleteEntry(entry.id);
+    });
+  } else {
+    deleteBtn.hidden = true;
+  }
 
   if (entry.status === 'pago') item.style.opacity = '.72';
   return node;
 }
 
 function renderChart() {
-  const chart = document.getElementById('trendChart');
+  const chart = $('#trendChart');
+  if (!chart) return;
+
   const months = getVisibleMonths();
   const values = months.map((month, index) => index === 0 ? calculateCurrentMonth().result : calculateMonth(month).result);
   const width = 320;
@@ -292,13 +455,15 @@ function renderChart() {
   });
 
   const linePath = points.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ');
-  const areaPath = `${linePath} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
+  const areaPath = `${linePath} L ${points.at(-1).x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
   const gridLines = [0.25, 0.5, 0.75].map(r => {
     const y = padding + (height - padding * 2) * r;
     return `<line x1="${padding}" x2="${width - padding}" y1="${y}" y2="${y}" stroke="currentColor" stroke-opacity="0.08"/>`;
   }).join('');
-  const labels = points.map((p, index) => `<text x="${p.x}" y="${height - 2}" font-size="11" text-anchor="middle" fill="currentColor" fill-opacity="0.55">${monthName(months[index], false).split('/')[0]}</text>`).join('');
+
   const dots = points.map(point => `<circle cx="${point.x}" cy="${point.y}" r="4.5" fill="var(--accent)" stroke="var(--surface-2)" stroke-width="3"></circle>`).join('');
+  const labels = points.map((p, index) => `<text x="${p.x}" y="${height - 2}" font-size="11" text-anchor="middle" fill="currentColor" fill-opacity="0.55">${monthName(months[index], false).split('/')[0]}</text>`).join('');
+
   chart.innerHTML = `
     <defs>
       <linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1">
@@ -314,69 +479,48 @@ function renderChart() {
   `;
 }
 
+function setEntryType(type) {
+  selectedEntryType = type;
+  $$('[data-entry-type]').forEach(button => {
+    button.classList.toggle('selected', button.dataset.entryType === type);
+  });
+}
+
 function setTab(tab) {
-  const target = document.getElementById(`screen-${tab}`);
+  const target = $(`#screen-${tab}`);
   if (!target) return;
 
-  document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+  $$('.screen').forEach(screen => screen.classList.remove('active'));
   target.classList.add('active');
 
   closeDrawer();
   closeFab();
-  // Não focar automaticamente para evitar abrir o teclado no mobile.
 }
-function setEntryType(type) {
-  selectedEntryType = type;
-  document.querySelectorAll('[data-entry-type]').forEach(btn => btn.classList.toggle('selected', btn.dataset.entryType === type));
-}
+
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light';
   localStorage.setItem(THEME_KEY, theme === 'dark' ? 'dark' : 'light');
 }
-function exportBackup() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `financeiro-keven-backup-${new Date().toISOString().slice(0,10)}.json`;
-  link.click();
-  URL.revokeObjectURL(link.href);
-}
-function importBackup(file) {
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const data = JSON.parse(reader.result);
-      if (!Array.isArray(data.entries)) throw new Error('Arquivo inválido');
-      state = { ...structuredClone(initialState), ...data };
-      saveState();
-      document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
-
-render();
-      alert('Backup importado com sucesso.');
-    } catch {
-      alert('Não consegui importar esse JSON.');
-    }
-  };
-  reader.readAsText(file);
-}
 
 function openDrawer() {
-  document.getElementById('sideDrawer').classList.add('open');
-  document.getElementById('sideDrawer').setAttribute('aria-hidden', 'false');
-}
-function closeDrawer() {
-  document.getElementById('sideDrawer').classList.remove('open');
-  document.getElementById('sideDrawer').setAttribute('aria-hidden', 'true');
-}
-function toggleFab() {
-  const isOpen = document.body.classList.toggle('fab-open');
-  document.getElementById('fabTrigger').setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-}
-function closeFab() {
-  document.body.classList.remove('fab-open');
-  document.getElementById('fabTrigger').setAttribute('aria-expanded', 'false');
+  $('#sideDrawer')?.classList.add('open');
+  $('#sideDrawer')?.setAttribute('aria-hidden', 'false');
 }
 
+function closeDrawer() {
+  $('#sideDrawer')?.classList.remove('open');
+  $('#sideDrawer')?.setAttribute('aria-hidden', 'true');
+}
+
+function openFab() {
+  document.body.classList.add('fab-open');
+  $('#fabTrigger')?.setAttribute('aria-expanded', 'true');
+}
+
+function closeFab() {
+  document.body.classList.remove('fab-open');
+  $('#fabTrigger')?.setAttribute('aria-expanded', 'false');
+}
 
 function requestDeleteEntry(entryId) {
   const entry = state.entries.find(item => item.id === entryId);
@@ -387,16 +531,14 @@ function requestDeleteEntry(entryId) {
 
   state.entries = state.entries.filter(item => item.id !== entryId);
   saveState();
-  document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
-
-render();
-
+  render();
   showUndoDelete(entry);
 }
 
 function showUndoDelete(entry) {
-  const toast = document.getElementById('undoToast');
-  const text = document.getElementById('undoText');
+  const toast = $('#undoToast');
+  const text = $('#undoText');
+  if (!toast || !text) return;
 
   if (pendingDeleteTimer) clearTimeout(pendingDeleteTimer);
 
@@ -425,132 +567,38 @@ function undoDeleteEntry() {
   pendingDelete = null;
   if (pendingDeleteTimer) clearTimeout(pendingDeleteTimer);
 
-  const toast = document.getElementById('undoToast');
-  toast.classList.remove('show');
-  setTimeout(() => toast.hidden = true, 240);
+  const toast = $('#undoToast');
+  toast?.classList.remove('show');
+  setTimeout(() => {
+    if (toast) toast.hidden = true;
+  }, 240);
 
-  document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
-
-render();
+  render();
 }
 
-// events
+function exportBackup() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `financeiro-keven-backup-${new Date().toISOString().slice(0,10)}.json`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
 
-document.addEventListener('click', event => {
-  const deleteBtn = event.target.closest('.delete-chip');
-  if (deleteBtn?.dataset.id) {
-    event.preventDefault();
-    event.stopPropagation();
-    requestDeleteEntry(deleteBtn.dataset.id);
-    return;
-  }
+function importBackup(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!Array.isArray(data.entries)) throw new Error('Arquivo inválido');
 
-  const preset = event.target.closest('[data-preset]');
-  if (preset) {
-    event.preventDefault();
-    document.getElementById('entryValue').value = preset.dataset.preset;
-    return;
-  }
-
-  const tabTarget = event.target.closest('[data-tab]');
-  if (tabTarget) {
-    event.preventDefault();
-    if (tabTarget.dataset.kind) setEntryType(tabTarget.dataset.kind);
-    setTab(tabTarget.dataset.tab);
-    return;
-  }
-});
-
-document.querySelectorAll('[data-entry-type]').forEach(btn => {
-  btn.addEventListener('click', () => setEntryType(btn.dataset.entryType));
-});
-
-document.getElementById('themeBtn').addEventListener('click', () => {
-  const current = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
-  applyTheme(current === 'dark' ? 'light' : 'dark');
-});
-
-document.getElementById('menuBtn').addEventListener('click', openDrawer);
-document.getElementById('closeDrawerBtn').addEventListener('click', closeDrawer);
-document.getElementById('sideDrawer').addEventListener('click', event => {
-  if (event.target.id === 'sideDrawer') closeDrawer();
-});
-
-document.getElementById('fabTrigger').addEventListener('click', event => {
-  event.stopPropagation();
-
-  // Fechado: abre o menu.
-  // Aberto: o próprio botão vira atalho rápido de SAÍDA.
-  if (document.body.classList.contains('fab-open')) {
-    setEntryType('saida');
-    setTab('add');
-    closeFab();
-    return;
-  }
-
-  toggleFab();
-});
-document.getElementById('fabBackdrop').addEventListener('click', closeFab);
-document.getElementById('globalOverlay').addEventListener('click', closeFab);
-
-document.getElementById('baseMonthSelect').addEventListener('change', event => {
-  state.baseMonth = event.target.value;
-  saveState();
-  document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
-
-render();
-});
-
-document.getElementById('entryForm').addEventListener('submit', event => {
-  event.preventDefault();
-  const entry = {
-    id: makeId(),
-    month: document.getElementById('entryMonth').value,
-    type: selectedEntryType,
-    category: document.getElementById('entryCategory').value,
-    description: document.getElementById('entryDescription').value.trim(),
-    value: parseMoney(document.getElementById('entryValue').value),
-    dueDate: document.getElementById('entryDueDate').value,
-    status: document.getElementById('entryStatus').value
+      state = { ...structuredClone(initialState), ...data };
+      saveState();
+      render();
+      alert('Backup importado com sucesso.');
+    } catch {
+      alert('Não consegui importar esse JSON.');
+    }
   };
-  state.entries.push(entry);
-  saveState();
-  event.target.reset();
-  document.getElementById('entryMonth').value = state.baseMonth || todayBaseMonth;
-  setEntryType('saida');
-  document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
-
-render();
-  setTab('home');
-});
-
-document.getElementById('saveBalanceBtn').addEventListener('click', () => {
-  state.currentBalance = parseMoney(document.getElementById('balanceInput').value);
-  saveState();
-  document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
-
-render();
-  setTab('home');
-});
-
-document.getElementById('exportBtn').addEventListener('click', exportBackup);
-document.getElementById('importInput').addEventListener('change', event => {
-  const file = event.target.files?.[0];
-  if (file) importBackup(file);
-  event.target.value = '';
-});
-
-document.getElementById('resetBtn').addEventListener('click', () => {
-  if (!confirm('Resetar os dados locais e voltar pra base?')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  state = structuredClone(initialState);
-  saveState();
-  document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
-
-render();
-  setTab('home');
-});
-
-document.getElementById('undoBtn').addEventListener('click', undoDeleteEntry);
-
-render();
+  reader.readAsText(file);
+}
