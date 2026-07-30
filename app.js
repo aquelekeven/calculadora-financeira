@@ -403,6 +403,16 @@ document.getElementById('sideDrawer').addEventListener('click', event => {
 
 document.getElementById('fabTrigger').addEventListener('click', event => {
   event.stopPropagation();
+
+  // Fechado: abre o menu.
+  // Aberto: o próprio botão vira atalho rápido de SAÍDA.
+  if (document.body.classList.contains('fab-open')) {
+    setEntryType('saida');
+    setTab('add');
+    closeFab();
+    return;
+  }
+
   toggleFab();
 });
 document.getElementById('fabBackdrop').addEventListener('click', closeFab);
