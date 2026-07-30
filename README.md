@@ -1,18 +1,25 @@
 # Financeiro Keven
 
-App financeiro local/offline para controlar mês atual + próximos 2 meses.
+App financeiro local, mobile first, com dados salvos no navegador via `localStorage`.
 
-## Como usar
+## Como testar
 
 Abra o arquivo `index.html` no navegador.
 
-Os dados ficam salvos no próprio navegador via `localStorage`.
+## O que tem nessa versão
 
-## Backup
+- Layout novo inspirado em app mobile financeiro.
+- Modo claro/escuro.
+- Navegação inferior estilo app.
+- Dashboard com saldo atual, pendências e próximos vencimentos.
+- Visão de mês atual + próximos 2 meses.
+- Cadastro de entradas e saídas.
+- Cadastro de fixos mensais.
+- Exportar/importar backup JSON.
+- Base inicial já com os lançamentos do controle atual.
 
-Use o botão **Exportar backup** para baixar um JSON com seus dados.
-Use **Importar backup** para restaurar.
+## Observação importante
 
-## GitHub
+Os dados ficam somente no navegador/dispositivo. Se abrir em outro celular/PC, os dados não sincronizam ainda.
 
-Pode subir o app no GitHub. O que não deve subir é o arquivo de backup real exportado.
+Próxima fase sugerida: Supabase + login Google + RLS por usuário.

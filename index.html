@@ -2,156 +2,239 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Financeiro Local</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f5f7f2" />
+  <title>Financeiro Keven</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <p class="eyebrow">Controle financeiro local</p>
-      <h1>Financeiro Keven</h1>
-    </div>
-    <div class="top-actions">
-      <button id="exportBtn" class="secondary">Exportar backup</button>
-      <label class="secondary file-label">
-        Importar backup
-        <input id="importInput" type="file" accept="application/json" />
-      </label>
-      <button id="resetBtn" class="danger ghost">Resetar dados</button>
-    </div>
-  </header>
-
-  <main>
-    <section class="hero-card">
-      <div>
-        <span class="badge">Offline • LocalStorage</span>
-        <h2>Mês atual + próximos 2</h2>
-        <p>Os dados ficam só no navegador. Se subir no GitHub, não sobe sua vida financeira junto.</p>
+  <div class="app-shell">
+    <header class="app-header">
+      <button class="icon-btn" id="menuBtn" title="Resumo rápido" type="button">☰</button>
+      <div class="header-title">
+        <span>Controle financeiro</span>
+        <strong>Minha conta</strong>
       </div>
-      <div class="hero-number">
-        <span>Saldo atual</span>
-        <strong id="currentBalance">R$ 0,00</strong>
-      </div>
-    </section>
+      <button class="icon-btn" id="themeBtn" title="Alternar tema" type="button">☾</button>
+    </header>
 
-    <section class="controls-grid">
-      <form id="entryForm" class="panel">
-        <div class="panel-title">
-          <h3>Novo lançamento</h3>
-          <span>entrada/saída avulsa</span>
+    <main class="screen active" id="screen-home">
+      <section class="balance-card">
+        <div class="account-pill">
+          <span class="card-dot"></span>
+          <span>Local • **** 2026</span>
+          <span>⌄</span>
+        </div>
+        <p>Saldo atual</p>
+        <h1 id="currentBalance">R$ 0,00</h1>
+        <button class="micro-pill" id="healthPill" type="button">Carregando projeção...</button>
+
+        <div class="quick-actions">
+          <button type="button" class="quick-action active" data-tab="add" data-kind="saida"><span>↗</span><small>Saída</small></button>
+          <button type="button" class="quick-action" data-tab="add" data-kind="entrada"><span>↙</span><small>Entrada</small></button>
+          <button type="button" class="quick-action" data-tab="months"><span>≡</span><small>Meses</small></button>
+          <button type="button" class="quick-action" data-tab="settings"><span>⋯</span><small>Mais</small></button>
+        </div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-heading">
+          <div>
+            <span>próximos vencimentos</span>
+            <h2>Pra não deixar virar bola de neve</h2>
+          </div>
+          <button class="link-btn" data-tab="months" type="button">Ver tudo ›</button>
+        </div>
+        <div class="due-list" id="upcomingList"></div>
+      </section>
+
+      <section class="month-carousel" id="summaryCards"></section>
+    </main>
+
+    <main class="screen" id="screen-months">
+      <section class="section-heading sticky-heading">
+        <div>
+          <span>mês atual + próximos 2</span>
+          <h2>Visão mensal</h2>
+        </div>
+        <select id="baseMonthSelect" class="pill-select" title="Mês base"></select>
+      </section>
+      <section id="monthsContainer" class="months-container"></section>
+    </main>
+
+    <main class="screen" id="screen-add">
+      <section class="form-card">
+        <div class="section-heading compact">
+          <div>
+            <span>novo lançamento</span>
+            <h2>Adicionar movimentação</h2>
+          </div>
         </div>
 
-        <div class="field-row">
-          <label>
-            Mês
-            <input id="entryMonth" type="month" required />
+        <form id="entryForm" class="modern-form">
+          <div class="type-toggle" role="tablist" aria-label="Tipo do lançamento">
+            <button type="button" class="selected" data-entry-type="saida">Saída</button>
+            <button type="button" data-entry-type="entrada">Entrada</button>
+          </div>
+
+          <label class="amount-field">
+            <span>Valor</span>
+            <input id="entryValue" inputmode="decimal" placeholder="0,00" required />
           </label>
+
+          <div class="preset-row">
+            <button type="button" data-preset="50">R$50</button>
+            <button type="button" data-preset="100">R$100</button>
+            <button type="button" data-preset="500">R$500</button>
+            <button type="button" data-preset="1000">R$1000</button>
+            <button type="button" data-preset="1500">R$1500</button>
+          </div>
+
           <label>
-            Tipo
-            <select id="entryType">
-              <option value="saida">Saída</option>
-              <option value="entrada">Entrada</option>
-            </select>
+            <span>Descrição</span>
+            <input id="entryDescription" type="text" placeholder="Ex: MR apartamento" required />
           </label>
+
+          <div class="two-col">
+            <label>
+              <span>Mês</span>
+              <input id="entryMonth" type="month" required />
+            </label>
+            <label>
+              <span>Vencimento</span>
+              <input id="entryDueDate" type="date" />
+            </label>
+          </div>
+
+          <div class="two-col">
+            <label>
+              <span>Categoria</span>
+              <select id="entryCategory">
+                <option value="apartamento">Apartamento</option>
+                <option value="fixo">Fixo</option>
+                <option value="cartao">Cartão</option>
+                <option value="pessoas">Pessoas</option>
+                <option value="emprestimo">Empréstimo</option>
+                <option value="renda">Renda</option>
+                <option value="outros">Outros</option>
+              </select>
+            </label>
+            <label>
+              <span>Status</span>
+              <select id="entryStatus">
+                <option value="pendente">Pendente</option>
+                <option value="pago">Pago</option>
+                <option value="previsto">Previsto</option>
+                <option value="especial">Especial</option>
+              </select>
+            </label>
+          </div>
+
+          <button class="primary-btn" type="submit">Adicionar lançamento</button>
+        </form>
+      </section>
+
+      <section class="form-card secondary-card">
+        <div class="section-heading compact">
+          <div>
+            <span>recorrente</span>
+            <h2>Adicionar fixo mensal</h2>
+          </div>
+        </div>
+        <form id="fixedForm" class="modern-form smaller">
+          <label>
+            <span>Descrição</span>
+            <input id="fixedDescription" type="text" placeholder="Ex: Internet" required />
+          </label>
+          <div class="two-col">
+            <label>
+              <span>Valor</span>
+              <input id="fixedValue" inputmode="decimal" placeholder="160,00" required />
+            </label>
+            <label>
+              <span>Dia venc.</span>
+              <input id="fixedDay" type="number" min="1" max="31" placeholder="10" />
+            </label>
+          </div>
+          <button class="secondary-btn" type="submit">Salvar fixo</button>
+        </form>
+      </section>
+    </main>
+
+    <main class="screen" id="screen-settings">
+      <section class="settings-card">
+        <div class="section-heading compact">
+          <div>
+            <span>backup e ajustes</span>
+            <h2>Configurações</h2>
+          </div>
         </div>
 
-        <label>
-          Descrição
-          <input id="entryDescription" type="text" placeholder="Ex: MR apartamento" required />
+        <label class="setting-row">
+          <div>
+            <strong>Saldo atual</strong>
+            <span>Atualiza o saldo usado no mês atual</span>
+          </div>
+          <input id="balanceInput" inputmode="decimal" />
         </label>
 
-        <div class="field-row">
-          <label>
-            Valor
-            <input id="entryValue" type="number" step="0.01" min="0" placeholder="0,00" required />
+        <div class="settings-actions">
+          <button id="saveBalanceBtn" class="primary-btn" type="button">Salvar saldo</button>
+          <button id="exportBtn" class="secondary-btn" type="button">Exportar JSON</button>
+          <label class="secondary-btn file-label">
+            Importar JSON
+            <input id="importInput" type="file" accept="application/json" />
           </label>
-          <label>
-            Categoria
-            <select id="entryCategory">
-              <option value="apartamento">Apartamento</option>
-              <option value="fixo">Fixo</option>
-              <option value="cartao">Cartão</option>
-              <option value="pessoas">Pessoas</option>
-              <option value="emprestimo">Empréstimo</option>
-              <option value="renda">Renda</option>
-              <option value="outros">Outros</option>
-            </select>
-          </label>
+          <button id="resetBtn" class="danger-btn" type="button">Resetar base</button>
         </div>
+      </section>
 
-        <div class="field-row">
-          <label>
-            Vencimento
-            <input id="entryDueDate" type="date" />
-          </label>
-          <label>
-            Status
-            <select id="entryStatus">
-              <option value="pendente">Pendente</option>
-              <option value="pago">Pago</option>
-              <option value="previsto">Previsto</option>
-            </select>
-          </label>
+      <section class="settings-card">
+        <div class="section-heading compact">
+          <div>
+            <span>próxima fase</span>
+            <h2>Supabase depois</h2>
+          </div>
         </div>
+        <p class="muted-text">Por enquanto os dados ficam no navegador. Quando plugarmos Supabase, essa tela vira login Google + sincronização PC/celular, mantendo as regras pra cada usuário ver só os próprios lançamentos.</p>
+      </section>
+    </main>
 
-        <button type="submit">Adicionar lançamento</button>
-      </form>
-
-      <form id="fixedForm" class="panel compact-form">
-        <div class="panel-title">
-          <h3>Fixo mensal</h3>
-          <span>repete todo mês</span>
-        </div>
-        <label>
-          Descrição
-          <input id="fixedDescription" type="text" placeholder="Ex: Claro" required />
-        </label>
-        <div class="field-row">
-          <label>
-            Valor
-            <input id="fixedValue" type="number" step="0.01" min="0" required />
-          </label>
-          <label>
-            Dia venc.
-            <input id="fixedDay" type="number" min="1" max="31" placeholder="10" />
-          </label>
-        </div>
-        <button type="submit">Adicionar fixo</button>
-      </form>
-    </section>
-
-    <section class="summary-strip" id="summaryStrip"></section>
-
-    <section id="monthsContainer" class="months-container"></section>
-  </main>
+    <nav class="bottom-nav" aria-label="Navegação principal">
+      <button class="active" data-tab="home" type="button"><span>⌂</span><small>Início</small></button>
+      <button data-tab="months" type="button"><span>▤</span><small>Meses</small></button>
+      <button class="fab" data-tab="add" type="button"><span>＋</span></button>
+      <button data-tab="settings" type="button"><span>◌</span><small>Ajustes</small></button>
+    </nav>
+  </div>
 
   <template id="monthTemplate">
     <article class="month-card">
-      <div class="month-header">
+      <div class="month-top">
         <div>
           <h3></h3>
           <p></p>
         </div>
-        <div class="month-result"></div>
+        <strong class="month-result"></strong>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Status</th>
-              <th>Tipo</th>
-              <th>Valor</th>
-              <th>Venc.</th>
-              <th>Categoria</th>
-              <th>Descrição</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+      <div class="mini-metrics"></div>
+      <div class="transaction-list"></div>
     </article>
+  </template>
+
+  <template id="transactionTemplate">
+    <div class="transaction-item">
+      <div class="transaction-icon"></div>
+      <div class="transaction-main">
+        <strong></strong>
+        <span></span>
+      </div>
+      <div class="transaction-side">
+        <strong></strong>
+        <span></span>
+      </div>
+      <button class="delete-chip" type="button">×</button>
+    </div>
   </template>
 
   <script src="app.js"></script>
