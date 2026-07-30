@@ -293,6 +293,11 @@ function handleClick(event) {
     return;
   }
 
+  if (target.closest('#addFixedCategoryBtn')) {
+    toggleFixedCustomCategory();
+    return;
+  }
+
   if (target.closest('#addContactBtn')) {
     openContactModal();
     return;
@@ -490,15 +495,17 @@ function renderHome() {
     const c = calcMonth(month);
     const card = document.createElement('article');
     card.className = 'future-card';
+    const resultClass = c.result >= 0 ? 'positive' : 'negative';
     card.innerHTML = `
       <div>
         <span>${monthName(month)}</span>
         <strong>${money(c.pending)} pendente</strong>
-        <small>${money(c.income)} entra • ${money(c.expenses)} sai</small>
+        <div class="future-money-line income"><i class="arrow">↑</i><b>${money(c.income)}</b></div>
+        <div class="future-money-line expense"><i class="arrow">↓</i><b>${money(c.expenses)}</b></div>
       </div>
       <div>
         <span>resultado</span>
-        <strong>${money(c.result)}</strong>
+        <strong class="future-result ${resultClass}">${money(c.result)}</strong>
       </div>
     `;
     future.appendChild(card);
@@ -774,6 +781,11 @@ function renderCommitment(item) {
   const status = node.querySelector('.commitment-value span');
 
   article.classList.add(`status-${item.status}`);
+  const contact = contactById(item.contactId);
+  if (contact) {
+    article.classList.add('has-contact');
+    article.style.setProperty('--contact-color', contact.color || '#151515');
+  }
   dot.textContent = statusIcon(item.status);
   dot.title = 'Clique para alternar status';
 
@@ -877,7 +889,15 @@ function saveCommitment(event) {
 function openFixedModal() {
   document.getElementById('fixedForm').reset();
   document.getElementById('fixedStart').value = state.baseMonth;
+  document.getElementById('fixedCustomCategoryWrap')?.classList.add('is-hidden');
+  document.getElementById('fixedCustomCategory').value = '';
   openModal('fixedModal');
+}
+
+function toggleFixedCustomCategory() {
+  const wrap = document.getElementById('fixedCustomCategoryWrap');
+  wrap.classList.toggle('is-hidden');
+  if (!wrap.classList.contains('is-hidden')) document.getElementById('fixedCustomCategory').focus();
 }
 
 function saveFixedRule(event) {
@@ -886,7 +906,7 @@ function saveFixedRule(event) {
   state.rules.push({
     id: uid(),
     type: 'expense',
-    category: document.getElementById('fixedCategory').value,
+    category: document.getElementById('fixedCustomCategory').value.trim() || document.getElementById('fixedCategory').value,
     description: document.getElementById('fixedDescription').value.trim(),
     amount: parseMoney(document.getElementById('fixedAmount').value) || 0,
     day: Number(document.getElementById('fixedDay').value) || null,
@@ -984,8 +1004,16 @@ function openDetailModal(id) {
 
 function fillDetailModal(item) {
   const panel = document.querySelector('#detailModal .modal-panel');
+  const contact = contactById(item.contactId);
   panel.classList.toggle('detail-expense', item.type === 'expense');
   panel.classList.toggle('detail-income', item.type === 'income');
+  if (contact) {
+    panel.dataset.contactColor = contact.color || '#151515';
+    panel.style.setProperty('--detail-contact-color', contact.color || '#151515');
+  } else {
+    delete panel.dataset.contactColor;
+    panel.style.removeProperty('--detail-contact-color');
+  }
 
   document.getElementById('detailTitle').textContent = item.description || 'Conta';
   document.getElementById('detailAmount').textContent = item.type === 'income' ? `+${money(item.amount)}` : money(item.amount);
@@ -1188,6 +1216,11 @@ function catLabel(category) {
   return {
     apartamento: 'Apartamento',
     fixo: 'Fixo',
+    casa: 'Casa',
+    internet: 'Internet/celular',
+    seguro: 'Seguro',
+    assinatura: 'Assinatura',
+    transporte: 'Transporte',
     pessoas: 'Pessoas',
     cartao: 'Cartão',
     emprestimo: 'Empréstimo',

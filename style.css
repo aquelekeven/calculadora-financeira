@@ -1169,3 +1169,120 @@ body.contacts-screen .month-selector-card {
 .account-progress-card.is-filtered-out {
   display: none;
 }
+
+
+/* Identidade visual por contato */
+.contact-badge {
+  background: color-mix(in srgb, var(--contact-color, var(--surface-soft)) 16%, var(--surface));
+  border-color: color-mix(in srgb, var(--contact-color, var(--line)) 34%, var(--line));
+  color: var(--contact-color, var(--muted));
+}
+
+.commitment-item.has-contact {
+  border-left: 4px solid var(--contact-color, var(--line));
+}
+
+.commitment-item.has-contact .status-dot {
+  background: color-mix(in srgb, var(--contact-color, var(--surface-soft)) 12%, var(--surface-soft));
+  border-color: color-mix(in srgb, var(--contact-color, var(--line)) 28%, var(--line));
+}
+
+.detail-panel[data-contact-color] .detail-grid article,
+.detail-panel[data-contact-color] .detail-description {
+  border-color: color-mix(in srgb, var(--detail-contact-color, var(--line)) 22%, var(--line));
+}
+
+/* Visão rápida com entrada/saída/resultado */
+.future-money-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: .86rem;
+}
+
+.future-money-line.income {
+  color: var(--green);
+}
+
+.future-money-line.expense {
+  color: var(--red);
+}
+
+.future-money-line .arrow {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  font-size: .7rem;
+  background: currentColor;
+  color: var(--surface);
+}
+
+.future-result.positive {
+  color: var(--green);
+}
+
+.future-result.negative {
+  color: var(--red);
+}
+
+/* Fixo mais moderno */
+.add-category-btn {
+  margin-top: 12px;
+  font-weight: 800;
+}
+
+.is-hidden {
+  display: none !important;
+}
+
+.modern-date-box {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 22px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+}
+
+.modern-date-box > span {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-weight: 800;
+  font-size: .88rem;
+}
+
+.modern-date-box label {
+  margin-top: 0;
+  padding: 10px;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.modern-date-box label small {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.modern-date-box input[type="month"] {
+  border: 0;
+  padding: 6px 0 2px;
+  background: transparent;
+  border-radius: 0;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.modern-date-box input[type="month"]::-webkit-calendar-picker-indicator {
+  opacity: .85;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+}

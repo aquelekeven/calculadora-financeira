@@ -351,18 +351,27 @@
 
           <div class="two-col">
             <label><span>Categoria</span><select id="fixedCategory">
-              <option value="fixo">Fixo</option>
-              <option value="apartamento">Apartamento</option>
+              <option value="casa">Casa</option>
+              <option value="internet">Internet/celular</option>
+              <option value="seguro">Seguro</option>
+              <option value="assinatura">Assinatura</option>
+              <option value="transporte">Transporte</option>
               <option value="emprestimo">Empréstimo</option>
-              <option value="pessoas">Pessoas</option>
-              <option value="cartao">Cartão</option>
+              <option value="apartamento">Apartamento</option>
+              <option value="outros">Outros</option>
             </select></label>
             <label><span>Dia venc.</span><input id="fixedDay" type="number" min="1" max="31" placeholder="10" /></label>
           </div>
 
-          <div class="two-col">
-            <label><span>Início</span><input id="fixedStart" type="month" /></label>
-            <label><span>Fim</span><input id="fixedEnd" type="month" /></label>
+          <button class="text-btn add-category-btn" type="button" id="addFixedCategoryBtn">＋ adicionar categoria</button>
+          <label class="is-hidden" id="fixedCustomCategoryWrap"><span>Nova categoria</span><input id="fixedCustomCategory" placeholder="Ex: Faculdade" /></label>
+
+          <div class="modern-date-box">
+            <span>Período do fixo</span>
+            <div class="two-col">
+              <label><small>Começa em</small><input id="fixedStart" type="month" /></label>
+              <label><small>Termina em</small><input id="fixedEnd" type="month" /></label>
+            </div>
           </div>
 
           <button class="primary-btn" type="submit">Salvar fixo</button>
