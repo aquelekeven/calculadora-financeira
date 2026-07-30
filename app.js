@@ -11,6 +11,12 @@ const initialState = {
   currentBalance: 186.48,
   baseMonth: '2026-07',
   filter: 'all',
+  selectedContactId: 'sarah',
+  contacts: [
+    { id: 'sarah', name: 'Sarah', note: 'Contas combinadas/pagas para a Sarah' },
+    { id: 'pacheco', name: 'Pacheco', note: 'Divisões e pagamentos para o Pacheco' },
+    { id: 'julia', name: 'Julia', note: 'Contas e cartão com a Julia' }
+  ],
   commitments: [
     { id: uid(), month: '2026-07', type: 'expense', category: 'apartamento', description: 'Apartamento — Abril/2026', amount: 1425.57, dueDate: '2026-04-25', status: 'paid' },
     { id: uid(), month: '2026-07', type: 'expense', category: 'apartamento', description: 'Apartamento — Maio/2026 — Encargos CEF', amount: 1639.40, dueDate: '2026-05-20', status: 'paid' },
@@ -18,28 +24,44 @@ const initialState = {
     { id: uid(), month: '2026-07', type: 'expense', category: 'apartamento', description: 'Apartamento — Junho/2026', amount: 1398.85, dueDate: '2026-06-25', status: 'paid' },
     { id: uid(), month: '2026-07', type: 'expense', category: 'apartamento', description: 'Apartamento — DB Encargos CEF', amount: 1593.35, dueDate: '2026-07-06', status: 'paid' },
     { id: uid(), month: '2026-07', type: 'expense', category: 'emprestimo', description: 'Cheque especial CAIXA', amount: 1498.48, status: 'paid' },
-    { id: uid(), month: '2026-07', type: 'expense', category: 'cartao', description: 'Julia', amount: 1500, status: 'paid' },
-    { id: uid(), month: '2026-07', type: 'expense', category: 'outros', description: 'Sarah — aniversário Ygor', amount: 50, status: 'paid' },
+    { id: uid(), month: '2026-07', type: 'expense', category: 'cartao', description: 'Julia', amount: 1500, status: 'paid', contactId: 'julia' },
+    { id: uid(), month: '2026-07', type: 'expense', category: 'pessoas', description: 'Aliança', amount: 239.99, status: 'paid', contactId: 'sarah', installmentCurrent: 1, installmentTotal: 3, note: 'Parcela da aliança paga para a Sarah.' },
+    { id: uid(), month: '2026-07', type: 'expense', category: 'pessoas', description: 'Chalé', amount: 223.21, status: 'paid', contactId: 'sarah', installmentCurrent: 1, installmentTotal: 10, note: 'Parcela do chalé paga para a Sarah.' },
+    { id: uid(), month: '2026-07', type: 'expense', category: 'outros', description: 'Sarah — aniversário Ygor', amount: 50, status: 'paid', contactId: 'sarah' },
     { id: uid(), month: '2026-07', type: 'expense', category: 'fixo', description: 'Claro — internet/celular', amount: 160, status: 'waiting' },
-    { id: uid(), month: '2026-07', type: 'expense', category: 'outros', description: 'Pacheco — almoço jogo do Brasil', amount: 75, status: 'waiting' },
+    { id: uid(), month: '2026-07', type: 'expense', category: 'outros', description: 'Pacheco — almoço jogo do Brasil', amount: 75, contactId: 'pacheco', status: 'waiting' },
     { id: uid(), month: '2026-07', type: 'expense', category: 'cartao', description: 'Nubank — cartão/assinaturas', amount: 219.56, status: 'paid' },
 
     { id: uid(), month: '2026-08', type: 'income', category: 'renda', description: 'Salário', amount: 4000, status: 'estimated' },
-    { id: uid(), month: '2026-08', type: 'expense', category: 'pessoas', description: 'Sarah — parcelas 2/3 + 2/10', amount: 463.20, status: 'waiting' },
-    { id: uid(), month: '2026-08', type: 'expense', category: 'cartao', description: 'Cartão com a Julia', amount: 1200, status: 'waiting' },
+    { id: uid(), month: '2026-08', type: 'expense', category: 'pessoas', description: 'Aliança', amount: 239.99, status: 'waiting', contactId: 'sarah', installmentCurrent: 2, installmentTotal: 3, note: 'Parcela da aliança paga para a Sarah.' },
+    { id: uid(), month: '2026-08', type: 'expense', category: 'pessoas', description: 'Chalé', amount: 223.21, status: 'waiting', contactId: 'sarah', installmentCurrent: 2, installmentTotal: 10, note: 'Parcela do chalé paga para a Sarah.' },
+    { id: uid(), month: '2026-08', type: 'expense', category: 'cartao', description: 'Cartão com a Julia', amount: 1200, contactId: 'julia', status: 'waiting' },
     { id: uid(), month: '2026-08', type: 'expense', category: 'apartamento', description: 'Taxa R', amount: 221.16, dueDate: '2026-08-08', status: 'waiting' },
     { id: uid(), month: '2026-08', type: 'expense', category: 'apartamento', description: 'MR — mensalidade', amount: 1095.64, dueDate: '2026-08-25', status: 'waiting' },
 
     { id: uid(), month: '2026-09', type: 'income', category: 'renda', description: 'Salário', amount: 4000, status: 'estimated' },
-    { id: uid(), month: '2026-09', type: 'expense', category: 'pessoas', description: 'Sarah — parcelas 3/3 + 3/10', amount: 463.20, status: 'waiting' },
+    { id: uid(), month: '2026-09', type: 'expense', category: 'pessoas', description: 'Aliança', amount: 239.99, status: 'waiting', contactId: 'sarah', installmentCurrent: 3, installmentTotal: 3, note: 'Parcela da aliança paga para a Sarah.' },
+    { id: uid(), month: '2026-09', type: 'expense', category: 'pessoas', description: 'Chalé', amount: 223.21, status: 'waiting', contactId: 'sarah', installmentCurrent: 3, installmentTotal: 10, note: 'Parcela do chalé paga para a Sarah.' },
     { id: uid(), month: '2026-09', type: 'expense', category: 'apartamento', description: 'MR — mensalidade', amount: 1095.64, dueDate: '2026-09-25', status: 'waiting' },
     { id: uid(), month: '2026-09', type: 'expense', category: 'apartamento', description: 'SR — anual', amount: 5600, dueDate: '2026-09-30', status: 'special', note: 'Época de PLR' },
 
     { id: uid(), month: '2026-10', type: 'income', category: 'renda', description: 'Salário', amount: 4000, status: 'estimated' },
-    { id: uid(), month: '2026-10', type: 'expense', category: 'pessoas', description: 'Sarah — parcela 4/10', amount: 223.21, status: 'waiting' },
-    { id: uid(), month: '2026-10', type: 'expense', category: 'cartao', description: 'Cartão com a Julia', amount: 650, status: 'waiting' },
+    { id: uid(), month: '2026-10', type: 'expense', category: 'pessoas', description: 'Chalé', amount: 223.21, status: 'waiting', contactId: 'sarah', installmentCurrent: 4, installmentTotal: 10, note: 'Parcela do chalé paga para a Sarah.' },
+    { id: uid(), month: '2026-10', type: 'expense', category: 'cartao', description: 'Cartão com a Julia', amount: 650, contactId: 'julia', status: 'waiting' },
     { id: uid(), month: '2026-10', type: 'expense', category: 'apartamento', description: 'MR — mensalidade', amount: 1095.64, dueDate: '2026-10-25', status: 'waiting' },
-    { id: uid(), month: '2026-10', type: 'expense', category: 'emprestimo', description: 'Empréstimo Nubank consignado — 1/24', amount: 799.55, status: 'waiting' }
+    { id: uid(), month: '2026-10', type: 'expense', category: 'emprestimo', description: 'Empréstimo Nubank consignado — 1/24', amount: 799.55, status: 'waiting' },
+{ id: uid(), month: '2026-11', type: 'income', category: 'renda', description: 'Salário', amount: 4000, status: 'estimated' },
+    { id: uid(), month: '2026-11', type: 'expense', category: 'pessoas', description: 'Chalé', amount: 223.21, status: 'waiting', contactId: 'sarah', installmentCurrent: 5, installmentTotal: 10, note: 'Parcela do chalé paga para a Sarah.' },
+    { id: uid(), month: '2026-12', type: 'income', category: 'renda', description: 'Salário', amount: 4000, status: 'estimated' },
+    { id: uid(), month: '2026-12', type: 'expense', category: 'pessoas', description: 'Chalé', amount: 223.21, status: 'waiting', contactId: 'sarah', installmentCurrent: 6, installmentTotal: 10, note: 'Parcela do chalé paga para a Sarah.' },
+    { id: uid(), month: '2027-01', type: 'income', category: 'renda', description: 'Salário', amount: 4000, status: 'estimated' },
+    { id: uid(), month: '2027-01', type: 'expense', category: 'pessoas', description: 'Chalé', amount: 223.21, status: 'waiting', contactId: 'sarah', installmentCurrent: 7, installmentTotal: 10, note: 'Parcela do chalé paga para a Sarah.' },
+    { id: uid(), month: '2027-02', type: 'income', category: 'renda', description: 'Salário', amount: 4000, status: 'estimated' },
+    { id: uid(), month: '2027-02', type: 'expense', category: 'pessoas', description: 'Chalé', amount: 223.21, status: 'waiting', contactId: 'sarah', installmentCurrent: 8, installmentTotal: 10, note: 'Parcela do chalé paga para a Sarah.' },
+    { id: uid(), month: '2027-03', type: 'income', category: 'renda', description: 'Salário', amount: 4000, status: 'estimated' },
+    { id: uid(), month: '2027-03', type: 'expense', category: 'pessoas', description: 'Chalé', amount: 223.21, status: 'waiting', contactId: 'sarah', installmentCurrent: 9, installmentTotal: 10, note: 'Parcela do chalé paga para a Sarah.' },
+    { id: uid(), month: '2027-04', type: 'income', category: 'renda', description: 'Salário', amount: 4000, status: 'estimated' },
+    { id: uid(), month: '2027-04', type: 'expense', category: 'pessoas', description: 'Chalé', amount: 223.21, status: 'waiting', contactId: 'sarah', installmentCurrent: 10, installmentTotal: 10, note: 'Parcela do chalé paga para a Sarah.' }
   ],
   rules: [
     { id: uid(), type: 'income', category: 'renda', description: 'Salário', amount: 4000, startMonth: '2026-08', endMonth: '', day: null, active: true },
@@ -67,11 +89,56 @@ function init() {
 function loadState() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return structuredClone(initialState);
+
   try {
-    return { ...structuredClone(initialState), ...JSON.parse(raw) };
+    const loaded = { ...structuredClone(initialState), ...JSON.parse(raw) };
+    return migrateState(loaded);
   } catch {
     return structuredClone(initialState);
   }
+}
+
+function migrateState(loaded) {
+  loaded.contacts = loaded.contacts?.length ? loaded.contacts : structuredClone(initialState.contacts);
+  loaded.selectedContactId = loaded.selectedContactId || loaded.contacts[0]?.id || 'sarah';
+  loaded.commitments = migrateSarahCommitments(loaded.commitments || []);
+  return loaded;
+}
+
+function migrateSarahCommitments(commitments) {
+  const hasSplit = commitments.some(item => item.contactId === 'sarah' && ['Aliança', 'Chalé'].includes(item.description));
+  if (hasSplit) return commitments;
+
+  const replacements = {
+    '2026-07': [
+      { month: '2026-07', status: 'paid', currentA: 1, currentC: 1 }
+    ],
+    '2026-08': [
+      { month: '2026-08', status: 'waiting', currentA: 2, currentC: 2 }
+    ],
+    '2026-09': [
+      { month: '2026-09', status: 'waiting', currentA: 3, currentC: 3 }
+    ]
+  };
+
+  let result = commitments.filter(item => !/Sarah — parcelas|Sarah — parcela/.test(item.description || ''));
+
+  Object.values(replacements).flat().forEach(row => {
+    result.push({ id: uid(), month: row.month, type: 'expense', category: 'pessoas', description: 'Aliança', amount: 239.99, status: row.status, contactId: 'sarah', installmentCurrent: row.currentA, installmentTotal: 3, note: 'Parcela da aliança paga para a Sarah.' });
+    result.push({ id: uid(), month: row.month, type: 'expense', category: 'pessoas', description: 'Chalé', amount: 223.21, status: row.status, contactId: 'sarah', installmentCurrent: row.currentC, installmentTotal: 10, note: 'Parcela do chalé paga para a Sarah.' });
+  });
+
+  for (let i = 4; i <= 10; i++) {
+    const month = addMonths('2026-10', i - 4);
+    result.push({ id: uid(), month, type: 'expense', category: 'pessoas', description: 'Chalé', amount: 223.21, status: 'waiting', contactId: 'sarah', installmentCurrent: i, installmentTotal: 10, note: 'Parcela do chalé paga para a Sarah.' });
+  }
+
+  return result.map(item => {
+    if ((item.description || '').includes('Julia')) item.contactId = item.contactId || 'julia';
+    if ((item.description || '').includes('Pacheco')) item.contactId = item.contactId || 'pacheco';
+    if ((item.description || '').includes('Sarah')) item.contactId = item.contactId || 'sarah';
+    return item;
+  });
 }
 
 function saveState() {
@@ -127,6 +194,18 @@ function escapeHtml(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
+}
+
+function contactById(id) {
+  return state.contacts?.find(contact => contact.id === id) || null;
+}
+
+function contactName(id) {
+  return contactById(id)?.name || '';
+}
+
+function initials(name) {
+  return String(name || '?').trim().split(/\s+/).slice(0,2).map(p => p[0]?.toUpperCase()).join('') || '?';
 }
 
 function normalizeCommitment(item) {
@@ -238,6 +317,13 @@ function bindEvents() {
 
   $('#undoBtn')?.addEventListener('click', undoLastAction);
 
+  $('#addContactBtn')?.addEventListener('click', openContactModal);
+  $('#closeContactModalBtn')?.addEventListener('click', closeContactModal);
+  $('#contactModal')?.addEventListener('click', e => {
+    if (e.target.id === 'contactModal') closeContactModal();
+  });
+  $('#contactForm')?.addEventListener('submit', saveContact);
+
   $('#detailCloseBtn')?.addEventListener('click', closeDetailModal);
   $('#detailModal')?.addEventListener('click', e => {
     if (e.target.id === 'detailModal') closeDetailModal();
@@ -332,9 +418,11 @@ function render() {
 
   renderHome();
   renderAgenda();
+  renderContacts();
   renderFixed();
   renderApartment();
   renderScenario();
+  populateContactSelect();
 }
 
 function renderMonthRail() {
@@ -512,6 +600,107 @@ function renderAgenda() {
   $$('#statusTabs [data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === state.filter));
 }
 
+
+function populateContactSelect() {
+  const select = $('#commitmentContact');
+  if (!select) return;
+
+  const current = select.value;
+  select.innerHTML = '<option value="">Sem contato</option>';
+  (state.contacts || []).forEach(contact => {
+    const option = document.createElement('option');
+    option.value = contact.id;
+    option.textContent = contact.name;
+    select.appendChild(option);
+  });
+  if ([...select.options].some(option => option.value === current)) select.value = current;
+}
+
+function renderContacts() {
+  const grid = $('#contactsGrid');
+  const list = $('#contactHistoryList');
+  if (!grid || !list) return;
+
+  grid.innerHTML = '';
+
+  const contacts = state.contacts || [];
+  if (!contacts.length) {
+    grid.innerHTML = '<div class="empty-state">Nenhum contato cadastrado ainda.</div>';
+    list.innerHTML = '<div class="empty-state">Crie um contato para ver o histórico.</div>';
+    return;
+  }
+
+  if (!contacts.some(c => c.id === state.selectedContactId)) state.selectedContactId = contacts[0].id;
+
+  contacts.forEach(contact => {
+    const related = state.commitments.filter(item => item.contactId === contact.id);
+    const paid = related.filter(item => item.status === 'paid').reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    const pending = related.filter(item => item.status !== 'paid').reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `contact-card${contact.id === state.selectedContactId ? ' active' : ''}`;
+    button.innerHTML = `
+      <div class="contact-avatar">${escapeHtml(initials(contact.name))}</div>
+      <div>
+        <strong>${escapeHtml(contact.name)}</strong>
+        <span>${related.length} conta(s) • ${money(pending)} pendente</span>
+      </div>
+      <small>${money(paid)}<br/>pago</small>
+    `;
+    button.addEventListener('click', () => {
+      state.selectedContactId = contact.id;
+      saveState();
+      renderContacts();
+    });
+    grid.appendChild(button);
+  });
+
+  const selected = contactById(state.selectedContactId);
+  $('#contactHistoryTitle').textContent = selected ? selected.name : 'Selecione um contato';
+
+  const history = state.commitments
+    .filter(item => item.contactId === state.selectedContactId)
+    .sort((a, b) => (a.month || '').localeCompare(b.month || '') || (a.dueDate || '99').localeCompare(b.dueDate || '99'));
+
+  renderList(list, history);
+}
+
+function openContactModal() {
+  $('#contactForm').reset();
+  $('#contactModal').classList.add('open');
+  $('#contactModal').setAttribute('aria-hidden', 'false');
+}
+
+function closeContactModal() {
+  $('#contactModal').classList.remove('open');
+  $('#contactModal').setAttribute('aria-hidden', 'true');
+}
+
+function saveContact(event) {
+  event.preventDefault();
+  const name = $('#contactName').value.trim();
+  if (!name) return;
+
+  const id = name.toLowerCase()
+    .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '') || uid();
+
+  const uniqueId = state.contacts.some(c => c.id === id) ? `${id}-${Date.now()}` : id;
+
+  state.contacts.push({
+    id: uniqueId,
+    name,
+    note: $('#contactNote').value.trim()
+  });
+  state.selectedContactId = uniqueId;
+  saveState();
+  closeContactModal();
+  render();
+  setScreen('contacts');
+}
+
 function renderFixed() {
   const list = $('#fixedList');
   list.innerHTML = '';
@@ -592,7 +781,7 @@ function renderCommitment(item) {
 
   const parcel = installmentLabel(item);
   title.innerHTML = `${escapeHtml(item.description)}${parcel ? ` <small>parcela ${parcel}</small>` : ''}`;
-  sub.textContent = `${catLabel(item.category)}`;
+  sub.innerHTML = `${escapeHtml(catLabel(item.category))}${item.contactId ? ` <span class="contact-badge">${escapeHtml(contactName(item.contactId))}</span>` : ''}`;
   value.textContent = item.type === 'income' ? `+${money(item.amount)}` : money(item.amount);
   status.textContent = statusLabel(item.status);
 
@@ -659,12 +848,14 @@ function openCommitmentModal(mode = 'bill', id = '') {
     $('#commitmentDue').value = item.dueDate || '';
     $('#commitmentCategory').value = item.category;
     $('#commitmentStatus').value = item.status;
+    $('#commitmentContact').value = item.contactId || '';
     $('#commitmentNote').value = item.note || '';
     $('#commitmentInstallmentCurrent').value = item.installmentCurrent || '';
     $('#commitmentInstallmentTotal').value = item.installmentTotal || '';
   } else {
     $('#commitmentMonth').value = state.baseMonth;
     $('#commitmentStatus').value = type === 'income' ? 'estimated' : 'waiting';
+    $('#commitmentContact').value = '';
   }
 
   setModalType(type);
@@ -700,6 +891,7 @@ function saveCommitment(event) {
     dueDate: $('#commitmentDue').value,
     status: $('#commitmentStatus').value,
     note: $('#commitmentNote').value.trim(),
+    contactId: $('#commitmentContact').value || '',
     installmentCurrent,
     installmentTotal
   };
@@ -734,7 +926,7 @@ function fillDetailModal(item) {
   $('#detailTitle').textContent = item.description || 'Conta';
   $('#detailAmount').textContent = item.type === 'income' ? `+${money(item.amount)}` : money(item.amount);
   $('#detailStatusText').textContent = statusLabel(item.status);
-  $('#detailCategory').textContent = catLabel(item.category);
+  $('#detailCategory').textContent = item.contactId ? `${catLabel(item.category)} • ${contactName(item.contactId)}` : catLabel(item.category);
   $('#detailDueDate').textContent = dateLabel(item.dueDate);
   $('#detailInstallment').textContent = installmentLabel(item) ? `Parcela ${installmentLabel(item)}` : 'Não parcelado';
   $('#detailMonth').textContent = monthName(item.month);

@@ -18,6 +18,7 @@
         <nav class="drawer-menu">
           <button type="button" data-nav="home"><span>⌂</span><div><strong>Hoje</strong><small>O que falta pagar</small></div></button>
           <button type="button" data-nav="agenda"><span>▤</span><div><strong>Agenda</strong><small>Mês selecionado</small></div></button>
+          <button type="button" data-nav="contacts"><span>☻</span><div><strong>Contatos</strong><small>Histórico por pessoa</small></div></button>
           <button type="button" data-nav="fixed"><span>↻</span><div><strong>Fixos</strong><small>Recorrentes e parcelas</small></div></button>
           <button type="button" data-nav="apartment"><span>⌑</span><div><strong>Apartamento</strong><small>MR, SR e Caixa</small></div></button>
           <button type="button" data-nav="scenario"><span>◇</span><div><strong>Cenários</strong><small>Freela, PLR e simulações</small></div></button>
@@ -95,6 +96,28 @@
         </div>
         <div class="agenda-summary" id="agendaSummary"></div>
         <div class="commitment-list spacious" id="agendaList"></div>
+      </section>
+    </main>
+
+
+    <main class="screen" id="screen-contacts">
+      <section class="page-card">
+        <div class="page-head">
+          <div><p>contatos</p><h2>Histórico por pessoa</h2></div>
+          <button class="small-btn" type="button" id="addContactBtn">＋ contato</button>
+        </div>
+
+        <div class="contacts-grid" id="contactsGrid"></div>
+
+        <div class="contact-history-card" id="contactHistoryCard">
+          <div class="section-head">
+            <div>
+              <p>histórico</p>
+              <h2 id="contactHistoryTitle">Selecione um contato</h2>
+            </div>
+          </div>
+          <div class="commitment-list spacious" id="contactHistoryList"></div>
+        </div>
       </section>
     </main>
 
@@ -183,6 +206,7 @@
               <option value="waiting">Aguardando</option><option value="paid">Pago</option><option value="unpaid">Não pago</option><option value="estimated">Previsto</option><option value="special">Especial</option><option value="waiting_value">Aguardando valor</option>
             </select></label>
           </div>
+          <label><span>Pagar para / contato (opcional)</span><select id="commitmentContact"></select></label>
           <label><span>Descrição detalhada (opcional)</span><textarea id="commitmentNote" rows="3" placeholder="Mais detalhes sobre essa conta"></textarea></label>
           <button class="primary-btn" type="submit">Salvar</button>
         </form>
@@ -208,6 +232,22 @@
       </div>
     </div>
 
+
+
+    <div class="modal" id="contactModal" aria-hidden="true">
+      <div class="modal-panel">
+        <div class="modal-head">
+          <div><p>novo contato</p><h2>Adicionar contato</h2></div>
+          <button type="button" class="icon-btn" id="closeContactModalBtn">×</button>
+        </div>
+
+        <form id="contactForm">
+          <label><span>Nome</span><input id="contactName" placeholder="Ex: Sarah" required /></label>
+          <label><span>Observação (opcional)</span><textarea id="contactNote" rows="3" placeholder="Ex: contas que pago via pix"></textarea></label>
+          <button class="primary-btn" type="submit">Salvar contato</button>
+        </form>
+      </div>
+    </div>
 
     <div class="undo-toast" id="undoToast" hidden><span id="undoText">Item alterado.</span><button id="undoBtn" type="button">Desfazer</button></div>
 
