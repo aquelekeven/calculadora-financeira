@@ -10,7 +10,7 @@
 <body>
   <div class="app-shell">
     <header class="app-header">
-      <button class="icon-btn" id="menuBtn" title="Resumo rápido" type="button">☰</button>
+      <button class="icon-btn" id="menuBtn" title="Abrir menu" type="button" aria-label="Abrir menu lateral">☰</button>
       <div class="header-title">
         <span>Controle financeiro</span>
         <strong>Minha conta</strong>
@@ -41,7 +41,7 @@
         <div class="section-heading">
           <div>
             <span>próximos vencimentos</span>
-            <h2>Pra não deixar virar bola de neve</h2>
+            <h2>Próximas contas</h2>
           </div>
           <button class="link-btn" data-tab="months" type="button">Ver tudo ›</button>
         </div>
@@ -200,11 +200,33 @@
       </section>
     </main>
 
-    <nav class="bottom-nav" aria-label="Navegação principal">
-      <button class="active" data-tab="home" type="button"><span>⌂</span><small>Início</small></button>
-      <button data-tab="months" type="button"><span>▤</span><small>Meses</small></button>
-      <button class="fab" data-tab="add" type="button"><span>＋</span></button>
-      <button data-tab="settings" type="button"><span>◌</span><small>Ajustes</small></button>
+    <aside class="side-drawer" id="sideDrawer" aria-hidden="true">
+      <div class="drawer-panel" role="dialog" aria-label="Menu lateral">
+        <div class="drawer-head">
+          <div>
+            <span>financeiro</span>
+            <strong>Keven</strong>
+          </div>
+          <button class="icon-btn small" id="closeDrawerBtn" type="button" aria-label="Fechar menu">×</button>
+        </div>
+        <nav class="drawer-menu" aria-label="Opções do app">
+          <button type="button" data-tab="home"><span>⌂</span><strong>Início</strong><small>Saldo e próximos vencimentos</small></button>
+          <button type="button" data-tab="months"><span>▤</span><strong>Meses</strong><small>Mês atual + próximos 2</small></button>
+          <button type="button" data-tab="add"><span>＋</span><strong>Novo lançamento</strong><small>Entrada, saída e fixos</small></button>
+          <button type="button" data-tab="settings"><span>◌</span><strong>Ajustes</strong><small>Saldo, backup e tema</small></button>
+        </nav>
+        <div class="drawer-note">Dados locais por enquanto. Depois a gente pluga Supabase sem mudar a cara do app.</div>
+      </div>
+    </aside>
+
+    <nav class="floating-nav" id="floatingNav" aria-label="Navegação principal">
+      <div class="nav-actions" id="navActions">
+        <button class="dock-action active" data-tab="home" type="button" aria-label="Início"><span>⌂</span><small>Início</small></button>
+        <button class="dock-action" data-tab="months" type="button" aria-label="Meses"><span>▤</span><small>Meses</small></button>
+        <button class="dock-action" data-tab="settings" type="button" aria-label="Ajustes"><span>◌</span><small>Ajustes</small></button>
+      </div>
+      <button class="nav-trigger" id="navTrigger" type="button" aria-expanded="false" aria-label="Abrir navegação"><span>＋</span></button>
+      <button class="nav-add" data-tab="add" type="button" aria-label="Adicionar lançamento"><span>↗</span></button>
     </nav>
   </div>
 

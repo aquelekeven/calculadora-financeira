@@ -309,7 +309,9 @@ function renderTransaction(entry, allowDelete) {
 function setTab(tab) {
   document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
   document.getElementById(`screen-${tab}`).classList.add('active');
-  document.querySelectorAll('.bottom-nav button').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+  document.querySelectorAll('.dock-action').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+  closeDrawer();
+  closeFloatingNav();
   if (tab === 'add') document.getElementById('entryDescription').focus({ preventScroll: true });
 }
 
@@ -370,6 +372,8 @@ document.addEventListener('click', event => {
 
   const preset = event.target.closest('[data-preset]');
   if (preset) document.getElementById('entryValue').value = preset.dataset.preset;
+
+  if (!event.target.closest('#floatingNav')) closeFloatingNav();
 });
 
 document.querySelectorAll('[data-entry-type]').forEach(btn => {
@@ -381,9 +385,42 @@ document.getElementById('themeBtn').addEventListener('click', () => {
   applyTheme(current === 'dark' ? 'light' : 'dark');
 });
 
-document.getElementById('menuBtn').addEventListener('click', () => {
-  const current = calculateCurrentMonth();
-  alert(`Resumo rápido\n\nSaldo atual: ${formatBRL(state.currentBalance)}\nPendências do mês: ${formatBRL(current.pending)}\nResultado projetado: ${formatBRL(current.result)}`);
+function openDrawer() {
+  const drawer = document.getElementById('sideDrawer');
+  drawer.classList.add('open');
+  drawer.setAttribute('aria-hidden', 'false');
+}
+
+function closeDrawer() {
+  const drawer = document.getElementById('sideDrawer');
+  if (!drawer) return;
+  drawer.classList.remove('open');
+  drawer.setAttribute('aria-hidden', 'true');
+}
+
+function toggleFloatingNav() {
+  const nav = document.getElementById('floatingNav');
+  const trigger = document.getElementById('navTrigger');
+  nav.classList.toggle('open');
+  trigger.setAttribute('aria-expanded', nav.classList.contains('open') ? 'true' : 'false');
+}
+
+function closeFloatingNav() {
+  const nav = document.getElementById('floatingNav');
+  const trigger = document.getElementById('navTrigger');
+  if (!nav || !trigger) return;
+  nav.classList.remove('open');
+  trigger.setAttribute('aria-expanded', 'false');
+}
+
+document.getElementById('menuBtn').addEventListener('click', openDrawer);
+document.getElementById('closeDrawerBtn').addEventListener('click', closeDrawer);
+document.getElementById('sideDrawer').addEventListener('click', event => {
+  if (event.target.id === 'sideDrawer') closeDrawer();
+});
+document.getElementById('navTrigger').addEventListener('click', event => {
+  event.stopPropagation();
+  toggleFloatingNav();
 });
 
 document.getElementById('baseMonthSelect').addEventListener('change', event => {

@@ -1,25 +1,20 @@
-# Financeiro Keven
+# Financeiro Keven — v1.2
 
 App financeiro local, mobile first, com dados salvos no navegador via `localStorage`.
 
-## Como testar
+## Como usar
 
 Abra o arquivo `index.html` no navegador.
 
-## O que tem nessa versão
+## O que entrou na v1.2
 
-- Layout novo inspirado em app mobile financeiro.
-- Modo claro/escuro.
-- Navegação inferior estilo app.
-- Dashboard com saldo atual, pendências e próximos vencimentos.
-- Visão de mês atual + próximos 2 meses.
-- Cadastro de entradas e saídas.
-- Cadastro de fixos mensais.
-- Exportar/importar backup JSON.
-- Base inicial já com os lançamentos do controle atual.
+- Visual mais clean, estilo Notion / preto e branco.
+- Removido o texto “Pra não deixar virar bola de neve”.
+- Menu hambúrguer agora abre um menu lateral.
+- Navegação inferior virou botão flutuante expansível.
+- Modo claro/escuro mantido.
+- Estrutura continua local/offline, pronta para futura integração com Supabase.
 
-## Observação importante
+## Privacidade
 
 Os dados ficam somente no navegador/dispositivo. Se abrir em outro celular/PC, os dados não sincronizam ainda.
-
-Próxima fase sugerida: Supabase + login Google + RLS por usuário.
