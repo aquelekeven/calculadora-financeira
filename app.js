@@ -301,7 +301,7 @@ function handleClick(event) {
     return;
   }
 
-  if (target.closest('.js-close-drawer') || target.id === 'drawerBackdrop') {
+  if (target.closest('.js-close-drawer') || target.id === 'drawerBackdrop' || target.id === 'sideDrawer') {
     closeDrawer();
     return;
   }
@@ -795,16 +795,31 @@ function renderFixed() {
 }
 
 function renderApartment() {
-  const items = commitmentsForMonth(state.baseMonth).filter(item => item.category === 'apartamento');
-  const mr = items.find(item => item.description.toLowerCase().includes('mr'));
-  const sr = items.find(item => item.description.toLowerCase().includes('sr'));
-  const caixa = items.find(item => item.description.toLowerCase().includes('caixa') || item.description.toLowerCase().includes('evolução'));
+  const apartmentItems = state.commitments
+    .filter(item => item.category === 'apartamento')
+    .sort((a, b) => (a.dueDate || a.month || '').localeCompare(b.dueDate || b.month || ''));
+
+  const monthItems = commitmentsForMonth(state.baseMonth).filter(item => item.category === 'apartamento');
+  const mr = monthItems.find(item => item.description.toLowerCase().includes('mr'));
+  const sr = monthItems.find(item => item.description.toLowerCase().includes('sr'));
+  const caixa = monthItems.find(item => item.description.toLowerCase().includes('caixa') || item.description.toLowerCase().includes('evolução'));
 
   document.getElementById('aptMR').textContent = mr ? money(mr.amount) : 'não lançado';
   document.getElementById('aptSR').textContent = sr ? money(sr.amount) : 'não lançado';
   document.getElementById('aptCaixa').textContent = caixa ? money(caixa.amount) : 'aguardando';
 
-  renderList(document.getElementById('apartmentList'), items);
+  const paidSoFar = apartmentItems.filter(item => item.status === 'paid');
+  document.getElementById('aptPaidTotal').textContent = money(sum(paidSoFar));
+  document.getElementById('aptPaidResume').textContent = `${paidSoFar.length} lançamento(s) pagos`;
+
+  const upcoming = apartmentItems
+    .filter(item => item.status !== 'paid' && (item.month >= state.baseMonth || !item.month))
+    .sort((a, b) => (a.dueDate || a.month || '').localeCompare(b.dueDate || b.month || ''));
+  renderList(document.getElementById('apartmentUpcomingList'), upcoming);
+
+  const history = [...apartmentItems]
+    .sort((a, b) => (b.dueDate || b.month || '').localeCompare(a.dueDate || a.month || ''));
+  renderList(document.getElementById('apartmentHistoryList'), history);
 }
 
 function renderScenario() {
@@ -1045,6 +1060,13 @@ function openCommitmentModal(mode = 'bill', id = '') {
     document.getElementById('commitmentCategory').value = 'apartamento';
   }
 
+  if (mode === 'apartmentPast') {
+    type = 'expense';
+    title = 'Adicionar pagamento anterior';
+    document.getElementById('commitmentCategory').value = 'apartamento';
+    document.getElementById('commitmentStatus').value = 'paid';
+  }
+
   if (mode === 'edit') {
     const item = state.commitments.find(commitment => commitment.id === id);
     if (!item) return;
@@ -1064,7 +1086,7 @@ function openCommitmentModal(mode = 'bill', id = '') {
     document.getElementById('commitmentNote').value = item.note || '';
   } else {
     document.getElementById('commitmentMonth').value = state.baseMonth;
-    document.getElementById('commitmentStatus').value = type === 'income' ? 'estimated' : 'waiting';
+    document.getElementById('commitmentStatus').value = (mode === 'apartmentPast') ? 'paid' : (type === 'income' ? 'estimated' : 'waiting');
     document.getElementById('commitmentContact').value = '';
   }
 
@@ -1649,7 +1671,18 @@ function randomContactColor() {
   return colors[Math.floor(Math.random() * colors.length)];
 }
 
+function syncThemeButton(theme) {
+  const btn = document.getElementById('themeBtn');
+  if (!btn) return;
+  const resolved = theme === 'dark' ? 'dark' : 'light';
+  const iconName = resolved === 'dark' ? 'sun' : 'moon';
+  btn.innerHTML = icon(iconName);
+  btn.setAttribute('aria-label', resolved === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro');
+}
+
 function applyTheme(theme) {
-  document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light';
-  localStorage.setItem(THEME_KEY, theme === 'dark' ? 'dark' : 'light');
+  const resolved = theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.dataset.theme = resolved;
+  localStorage.setItem(THEME_KEY, resolved);
+  syncThemeButton(resolved);
 }
