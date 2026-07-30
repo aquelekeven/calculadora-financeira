@@ -1,4 +1,4 @@
-# Financeiro Keven — v1.4
+# Financeiro Keven — v1.5
 
 Versão local/offline do app financeiro pessoal.
 
