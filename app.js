@@ -146,30 +146,24 @@ function isLate(item) {
 }
 
 function bindEvents() {
-  $$('[data-nav]').forEach(btn => {
-    btn.addEventListener('click', () => setScreen(btn.dataset.nav));
-  });
+  document.addEventListener('click', handleGlobalClick);
 
-  $$('[data-open-create]').forEach(btn => {
-    btn.addEventListener('click', () => openCommitmentModal(btn.dataset.openCreate));
-  });
+  $('#menuBtn')?.addEventListener('click', openDrawer);
+  $('#closeDrawerBtn')?.addEventListener('click', closeDrawer);
+  $('#drawerBackdrop')?.addEventListener('click', closeDrawer);
 
-  $('[data-open-fixed]')?.addEventListener('click', openFixedModal);
-
-  $('#menuBtn').addEventListener('click', openDrawer);
-  $('#closeDrawerBtn').addEventListener('click', closeDrawer);
-  $('#drawerBackdrop').addEventListener('click', closeDrawer);
-
-  $('#themeBtn').addEventListener('click', () => {
+  $('#themeBtn')?.addEventListener('click', () => {
     applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
   });
 
-  $('#prevMonthBtn').addEventListener('click', () => changeMonth(-1));
-  $('#nextMonthBtn').addEventListener('click', () => changeMonth(1));
-  $('#monthSelectorTrigger').addEventListener('click', toggleMonthSelector);
+  $('#prevMonthBtn')?.addEventListener('click', () => changeMonth(-1));
+  $('#nextMonthBtn')?.addEventListener('click', () => changeMonth(1));
+  $('#currentMonthBtn')?.addEventListener('click', () => selectMonth(TODAY_MONTH));
 
-  $('#closeModalBtn').addEventListener('click', closeCommitmentModal);
-  $('#commitmentModal').addEventListener('click', e => {
+  $('#monthSelectorTrigger')?.addEventListener('click', toggleMonthSelector);
+
+  $('#closeModalBtn')?.addEventListener('click', closeCommitmentModal);
+  $('#commitmentModal')?.addEventListener('click', e => {
     if (e.target.id === 'commitmentModal') closeCommitmentModal();
   });
 
@@ -177,13 +171,13 @@ function bindEvents() {
     btn.addEventListener('click', () => setModalType(btn.dataset.modalType));
   });
 
-  $('#commitmentForm').addEventListener('submit', saveCommitment);
+  $('#commitmentForm')?.addEventListener('submit', saveCommitment);
 
-  $('#closeFixedModalBtn').addEventListener('click', closeFixedModal);
-  $('#fixedModal').addEventListener('click', e => {
+  $('#closeFixedModalBtn')?.addEventListener('click', closeFixedModal);
+  $('#fixedModal')?.addEventListener('click', e => {
     if (e.target.id === 'fixedModal') closeFixedModal();
   });
-  $('#fixedForm').addEventListener('submit', saveFixedRule);
+  $('#fixedForm')?.addEventListener('submit', saveFixedRule);
 
   $$('#statusTabs [data-filter]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -199,35 +193,73 @@ function bindEvents() {
       renderScenario();
     });
   });
-  $('#scenarioValue').addEventListener('input', renderScenario);
+  $('#scenarioValue')?.addEventListener('input', renderScenario);
 
-  $('#saveBalanceBtn').addEventListener('click', () => {
+  $('#saveBalanceBtn')?.addEventListener('click', () => {
     state.currentBalance = parseMoney($('#balanceInput').value) || 0;
     saveState();
-    render();
+    renderWithContentTransition();
     setScreen('home');
   });
 
-  $('#exportBtn').addEventListener('click', exportBackup);
-  $('#importInput').addEventListener('change', e => {
+  $('#exportBtn')?.addEventListener('click', exportBackup);
+  $('#importInput')?.addEventListener('change', e => {
     const file = e.target.files?.[0];
     if (file) importBackup(file);
     e.target.value = '';
   });
-  $('#resetBtn').addEventListener('click', () => {
+  $('#resetBtn')?.addEventListener('click', () => {
     if (!confirm('Resetar todos os dados locais?')) return;
     localStorage.removeItem(STORAGE_KEY);
     state = structuredClone(initialState);
     saveState();
-    render();
+    renderWithContentTransition();
   });
 
-  $('#undoBtn').addEventListener('click', undoLastAction);
+  $('#undoBtn')?.addEventListener('click', undoLastAction);
+}
+
+function handleGlobalClick(event) {
+  const navButton = event.target.closest('[data-nav]');
+  if (navButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    setScreen(navButton.dataset.nav);
+    return;
+  }
+
+  const createButton = event.target.closest('[data-open-create]');
+  if (createButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    openCommitmentModal(createButton.dataset.openCreate);
+    return;
+  }
+
+  const fixedButton = event.target.closest('[data-open-fixed]');
+  if (fixedButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    openFixedModal();
+    return;
+  }
 }
 
 function setScreen(name) {
-  $$('.screen').forEach(s => s.classList.remove('active'));
-  $(`#screen-${name}`)?.classList.add('active');
+  const target = $(`#screen-${name}`);
+  if (!target) return;
+
+  $$('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.style.opacity = '';
+    s.style.transform = '';
+    s.style.transition = '';
+  });
+
+  target.classList.add('active');
+  target.classList.add('content-transition');
+  setTimeout(() => target.classList.remove('content-transition'), 260);
+
   $$('.bottom-nav [data-nav]').forEach(btn => btn.classList.toggle('active', btn.dataset.nav === name));
   closeDrawer();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -306,19 +338,41 @@ function selectMonth(month, button) {
 
   button?.classList.add('selecting');
 
+  const activeScreen = document.querySelector('.screen.active');
+  if (activeScreen) {
+    activeScreen.style.opacity = '0';
+    activeScreen.style.transform = 'translateY(8px)';
+    activeScreen.style.transition = 'opacity .16s ease, transform .16s ease';
+  }
+
   setTimeout(() => {
     state.baseMonth = month;
     saveState();
+
     render();
 
-    document.querySelectorAll('.screen.active, .month-selector-card').forEach(el => {
-      el.classList.remove('month-fade');
-      void el.offsetWidth;
-      el.classList.add('month-fade');
-    });
+    const pills = $('#monthPills');
+    pills?.classList.remove('sliding');
+    void pills?.offsetWidth;
+    pills?.classList.add('sliding');
 
-    requestAnimationFrame(centerActiveMonth);
-  }, 120);
+    requestAnimationFrame(() => {
+      centerActiveMonth();
+
+      const currentScreen = document.querySelector('.screen.active');
+      if (currentScreen) {
+        currentScreen.style.transition = 'none';
+        currentScreen.style.opacity = '0';
+        currentScreen.style.transform = 'translateY(8px)';
+
+        requestAnimationFrame(() => {
+          currentScreen.style.transition = 'opacity .22s ease, transform .22s ease';
+          currentScreen.style.opacity = '1';
+          currentScreen.style.transform = 'translateY(0)';
+        });
+      }
+    });
+  }, 150);
 }
 
 function toggleMonthSelector() {
@@ -342,6 +396,24 @@ function centerActiveMonth() {
 
   const left = active.offsetLeft - (pills.clientWidth / 2) + (active.clientWidth / 2);
   pills.scrollTo({ left, behavior: 'smooth' });
+}
+
+function renderWithContentTransition() {
+  const activeScreen = document.querySelector('.screen.active');
+  if (!activeScreen) {
+    render();
+    return;
+  }
+
+  activeScreen.style.opacity = '0';
+  activeScreen.style.transform = 'translateY(8px)';
+  activeScreen.style.transition = 'opacity .16s ease, transform .16s ease';
+
+  setTimeout(() => {
+    render();
+    activeScreen.style.opacity = '1';
+    activeScreen.style.transform = 'translateY(0)';
+  }, 160);
 }
 
 function renderHome() {

@@ -508,3 +508,55 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); }
     min-height: 100px;
   }
 }
+
+
+/* Correções de fluxo e animação */
+.current-month-btn {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+
+.quick-grid button {
+  min-height: 82px;
+  align-content: center;
+}
+
+.quick-grid button small {
+  display: none !important;
+}
+
+.month-pills.sliding {
+  animation: monthRailSlide .22s ease both;
+}
+
+@keyframes monthRailSlide {
+  from { transform: translateX(10px); opacity: .72; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.content-transition {
+  animation: contentFade .24s ease both;
+}
+
+@keyframes contentFade {
+  0% { opacity: .25; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* neutraliza animação antiga que piscava tela */
+.month-fade {
+  animation: none !important;
+}
+
+[data-nav], [data-open-create], [data-open-fixed],
+#menuBtn, #closeDrawerBtn, #drawerBackdrop, #themeBtn,
+#prevMonthBtn, #nextMonthBtn, #currentMonthBtn,
+#monthSelectorTrigger, .month-pill, .status-dot,
+.item-actions button, .bottom-nav button {
+  touch-action: manipulation;
+}
