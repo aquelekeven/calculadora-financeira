@@ -20,12 +20,8 @@
         </div>
 
         <nav class="drawer-menu">
-          <button type="button" data-screen="home"><span>⌂</span><div><strong>Hoje</strong><small>O que falta pagar</small></div></button>
-          <button type="button" data-screen="agenda"><span>▤</span><div><strong>Agenda</strong><small>Mês selecionado</small></div></button>
           <button type="button" data-screen="contacts"><span>☻</span><div><strong>Contatos</strong><small>Histórico por pessoa</small></div></button>
           <button type="button" data-screen="fixed"><span>↻</span><div><strong>Fixos</strong><small>Recorrentes e parcelas</small></div></button>
-          <button type="button" data-screen="apartment"><span>⌑</span><div><strong>Apartamento</strong><small>MR, SR e Caixa</small></div></button>
-          <button type="button" data-screen="scenario"><span>◇</span><div><strong>Cenários</strong><small>Freela, PLR e simulações</small></div></button>
         </nav>
       </div>
     </aside>
@@ -186,6 +182,11 @@
               <p>contas por categoria</p>
               <h2>Progresso</h2>
             </div>
+          </div>
+          <div class="contact-filter-tabs" id="contactFilterTabs">
+            <button type="button" data-contact-filter="all" class="active">Todos</button>
+            <button type="button" data-contact-filter="pending">Pendentes</button>
+            <button type="button" data-contact-filter="paid">Pagos</button>
           </div>
           <div class="contact-accounts-grid" id="contactAccountsGrid"></div>
 
@@ -382,7 +383,14 @@
         <form id="contactForm">
           <input type="hidden" id="contactId" />
           <label><span>Nome</span><input id="contactName" placeholder="Ex: Sarah" required /></label>
-          <label><span>Cor do contato</span><input id="contactColor" type="color" value="#3478f6" /></label>
+          <label class="color-field">
+            <span>Cor do contato</span>
+            <div class="color-picker-row" id="colorPickerRow">
+              <input id="contactColor" type="color" value="#3478f6" />
+              <strong id="contactColorText">#3478f6</strong>
+              <button type="button" id="confirmColorBtn">ok</button>
+            </div>
+          </label>
           <label><span>Observação (opcional)</span><textarea id="contactNote" rows="3" placeholder="Ex: contas que pago via pix"></textarea></label>
           <button class="primary-btn" type="submit">Salvar contato</button>
         </form>

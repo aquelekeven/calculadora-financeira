@@ -95,6 +95,7 @@ let undoTimer = null;
 let activeContactId = '';
 let contactHistoryOpen = false;
 let activeAccountGroup = null;
+let activeContactFilter = 'all';
 
 init();
 
@@ -181,6 +182,8 @@ function bindEvents() {
   document.getElementById('fixedForm').addEventListener('submit', saveFixedRule);
   document.getElementById('contactForm').addEventListener('submit', saveContact);
   document.getElementById('scenarioValue').addEventListener('input', renderScenario);
+  document.getElementById('contactColor')?.addEventListener('input', () => syncColorPicker(false));
+  document.getElementById('contactColor')?.addEventListener('change', () => syncColorPicker(true));
 }
 
 function handleClick(event) {
@@ -225,6 +228,20 @@ function handleClick(event) {
     state.filter = filterBtn.dataset.filter;
     saveState();
     renderAgenda();
+    return;
+  }
+
+  const contactFilterBtn = target.closest('[data-contact-filter]');
+  if (contactFilterBtn) {
+    event.preventDefault();
+    activeContactFilter = contactFilterBtn.dataset.contactFilter;
+    renderContactDetail();
+    return;
+  }
+
+  if (target.closest('#confirmColorBtn')) {
+    event.preventDefault();
+    syncColorPicker(true);
     return;
   }
 
@@ -540,6 +557,7 @@ function openContactDetail(contactId) {
   activeContactId = contactId;
   state.selectedContactId = contactId;
   contactHistoryOpen = false;
+  activeContactFilter = 'all';
   saveState();
   document.getElementById('contactsListView').classList.add('is-hidden');
   document.getElementById('contactDetailView').classList.remove('is-hidden');
@@ -549,6 +567,7 @@ function openContactDetail(contactId) {
 function showContactsList() {
   activeContactId = '';
   contactHistoryOpen = false;
+  activeContactFilter = 'all';
   document.getElementById('contactsListView')?.classList.remove('is-hidden');
   document.getElementById('contactDetailView')?.classList.add('is-hidden');
 }
@@ -575,6 +594,10 @@ function renderContactDetail() {
   document.getElementById('contactPendingTotal').textContent = money(sum(pending));
   document.getElementById('contactPaidTotal').textContent = money(sum(paid));
 
+  document.querySelectorAll('[data-contact-filter]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.contactFilter === activeContactFilter);
+  });
+
   renderContactAccountGroups(contact, related);
 
   const historyCard = document.getElementById('contactHistoryCard');
@@ -600,7 +623,15 @@ function renderContactAccountGroups(contact, related) {
     return;
   }
 
-  const groups = groupContactAccounts(related);
+  let groups = groupContactAccounts(related);
+  if (activeContactFilter === 'pending') groups = groups.filter(group => group.progress < 100);
+  if (activeContactFilter === 'paid') groups = groups.filter(group => group.progress >= 100);
+
+  if (!groups.length) {
+    grid.innerHTML = `<div class="empty-state">Nenhuma conta ${activeContactFilter === 'paid' ? 'paga' : activeContactFilter === 'pending' ? 'pendente' : ''} por aqui.</div>`;
+    return;
+  }
+
   groups.forEach(group => {
     const button = document.createElement('button');
     button.type = 'button';
@@ -887,6 +918,7 @@ function openContactModal(id = '') {
     document.getElementById('contactColor').value = randomContactColor();
   }
 
+  syncColorPicker(false);
   openModal('contactModal');
 }
 
@@ -1203,6 +1235,23 @@ function escapeHtml(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
+}
+
+function syncColorPicker(showOkFeedback = false) {
+  const input = document.getElementById('contactColor');
+  const row = document.getElementById('colorPickerRow');
+  const text = document.getElementById('contactColorText');
+  const ok = document.getElementById('confirmColorBtn');
+  if (!input || !row || !text) return;
+
+  const color = input.value || '#3478f6';
+  row.style.setProperty('--selected-contact-color', color);
+  text.textContent = color.toUpperCase();
+
+  if (showOkFeedback && ok) {
+    ok.textContent = 'ok ✓';
+    setTimeout(() => { ok.textContent = 'ok'; }, 800);
+  }
 }
 
 function randomContactColor() {

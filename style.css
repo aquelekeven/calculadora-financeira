@@ -1023,3 +1023,149 @@ body.contacts-screen .month-selector-card {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Polimento geral e animações */
+.screen.active .hero-card,
+.screen.active .quick-grid,
+.screen.active .section-card,
+.screen.active .page-card {
+  animation: cardEnter .24s ease both;
+}
+
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(10px) scale(.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.commitment-item,
+.contact-card,
+.account-progress-card,
+.future-card,
+.rule-item,
+.apartment-grid article,
+.agenda-summary div,
+.contact-stat-grid article {
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.commitment-item:active,
+.contact-card:active,
+.account-progress-card:active,
+.quick-grid button:active,
+.bottom-nav button:active,
+.drawer-menu button:active {
+  transform: scale(.985);
+}
+
+.modal.open .modal-panel {
+  animation: modalRise .24s cubic-bezier(.2,.8,.2,1) both;
+}
+
+@keyframes modalRise {
+  from { opacity: 0; transform: translateY(18px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.drawer-backdrop.show {
+  animation: fadeInSoft .2s ease both;
+}
+
+.side-drawer.open .drawer-panel {
+  animation: drawerIn .22s cubic-bezier(.2,.8,.2,1) both;
+}
+
+@keyframes drawerIn {
+  from { transform: translateX(-105%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes fadeInSoft {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.month-selector-card.open .month-pill {
+  animation: pillPop .22s ease both;
+}
+
+.month-selector-card.open .month-pill:nth-child(2) { animation-delay: .015s; }
+.month-selector-card.open .month-pill:nth-child(3) { animation-delay: .03s; }
+.month-selector-card.open .month-pill:nth-child(4) { animation-delay: .045s; }
+.month-selector-card.open .month-pill:nth-child(5) { animation-delay: .06s; }
+.month-selector-card.open .month-pill:nth-child(6) { animation-delay: .075s; }
+
+@keyframes pillPop {
+  from { opacity: 0; transform: translateY(8px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Filtros do contato */
+.contact-filter-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-top: 12px;
+  padding-bottom: 4px;
+}
+
+.contact-filter-tabs button {
+  min-height: 38px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.contact-filter-tabs button.active {
+  background: #151515;
+  color: #fff;
+}
+
+[data-theme="dark"] .contact-filter-tabs button.active {
+  background: #fff;
+  color: #151515;
+}
+
+/* Cor do contato */
+.color-field .color-picker-row {
+  display: grid;
+  grid-template-columns: 54px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 18px;
+  background: var(--selected-contact-color, var(--surface-soft));
+  border: 1px solid var(--line);
+  transition: background .18s ease, border-color .18s ease;
+}
+
+.color-picker-row input[type="color"] {
+  width: 54px;
+  height: 44px;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.color-picker-row strong {
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(0,0,0,.25);
+  font-size: .9rem;
+}
+
+.color-picker-row button {
+  min-height: 36px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #fff 88%, transparent);
+  color: #151515;
+  font-weight: 800;
+}
+
+.account-progress-card.is-filtered-out {
+  display: none;
+}
