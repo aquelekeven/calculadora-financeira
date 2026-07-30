@@ -767,3 +767,13 @@ body.fab-open .option-settings { transition-delay: .15s; }
   .transaction-item { grid-template-columns: 44px 1fr auto; }
   .delete-chip { width: 28px; height: 28px; }
 }
+
+/* Correção de clique/visibilidade */
+.delete-chip {
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+}
+.center-tile {
+  cursor: pointer;
+}

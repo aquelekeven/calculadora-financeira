@@ -218,7 +218,7 @@ function renderMonths() {
 
   const month = state.baseMonth || todayBaseMonth;
   const calc = calculateMonth(month);
-  const current = month === todayBaseMonth ? calculateCurrentMonth() : null;
+  const current = month === (state.baseMonth || todayBaseMonth) ? calculateCurrentMonth() : null;
   const resultValue = current ? current.result : calc.result;
   const node = template.content.cloneNode(true);
 
@@ -315,8 +315,12 @@ function renderChart() {
 }
 
 function setTab(tab) {
+  const target = document.getElementById(`screen-${tab}`);
+  if (!target) return;
+
   document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
-  document.getElementById(`screen-${tab}`).classList.add('active');
+  target.classList.add('active');
+
   closeDrawer();
   closeFab();
   // Não focar automaticamente para evitar abrir o teclado no mobile.
@@ -433,18 +437,27 @@ render();
 // events
 
 document.addEventListener('click', event => {
-  const tabTarget = event.target.closest('[data-tab]');
-  if (tabTarget) {
-    if (tabTarget.dataset.kind) setEntryType(tabTarget.dataset.kind);
-    setTab(tabTarget.dataset.tab);
+  const deleteBtn = event.target.closest('.delete-chip');
+  if (deleteBtn?.dataset.id) {
+    event.preventDefault();
+    event.stopPropagation();
+    requestDeleteEntry(deleteBtn.dataset.id);
+    return;
   }
 
   const preset = event.target.closest('[data-preset]');
-  if (preset) document.getElementById('entryValue').value = preset.dataset.preset;
+  if (preset) {
+    event.preventDefault();
+    document.getElementById('entryValue').value = preset.dataset.preset;
+    return;
+  }
 
-  const deleteBtn = event.target.closest('.delete-chip');
-  if (deleteBtn?.dataset.id) {
-    requestDeleteEntry(deleteBtn.dataset.id);
+  const tabTarget = event.target.closest('[data-tab]');
+  if (tabTarget) {
+    event.preventDefault();
+    if (tabTarget.dataset.kind) setEntryType(tabTarget.dataset.kind);
+    setTab(tabTarget.dataset.tab);
+    return;
   }
 });
 
